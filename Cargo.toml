@@ -1,0 +1,9 @@
+[workspace]
+members = ["core", "cli"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+authors = ["David Pires<dev@davidpires.pt>"]
+license = "MIT"
+repository = "https://github.com/Davidblkx/dsot"
