@@ -1,5 +1,3 @@
-
-
 fn main() {
-    println!("Hello, world!");
+    dsot_core::setup();
 }

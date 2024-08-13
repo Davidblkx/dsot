@@ -1,16 +1,4 @@
-mod entity_key;
-mod relations;
+mod connect;
+pub mod schema;
 
-pub mod read_entity;
-pub mod set_entity;
-pub mod list_entity;
-
-pub use entity_key::EntityKey;
-
-// ---
-
-mod dsot_db;
-mod table;
-
-pub use dsot_db::DsotDB;
-pub use table::{Table, TableKey};
+pub use connect::connect_db;
