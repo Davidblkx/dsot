@@ -12,11 +12,17 @@ pub enum DsotError {
     DatabaseStorageError(#[from] redb::StorageError),
     #[error("Failed to lock database")]
     DatabaseLockError,
-    #[error("Failed to commit transaction")]
+    #[error("Failed to commit transaction: {0}")]
     DatabaseCommitError(#[from] redb::CommitError),
 
-    #[error("Failed to decode/encode native model")]
+    #[error("Failed to decode/encode native model: {0}")]
     NativeModelError(#[from] native_model::Error),
+
+    #[error("IO Error: {0}")]
+    IOError(#[from] std::io::Error),
+
+    #[error("Invalid UUID length")]
+    InvalidUuidLength,
 
     #[error("Unknown DSOT error")]
     Unknown,
