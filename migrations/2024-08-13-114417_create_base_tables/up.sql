@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS releases (
     id BLOB NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
     album_id BLOB NOT NULL REFERENCES albums(id) ON DELETE CASCADE,
-    date INTEGER NOT NULL,
-    year INTEGER NOT NULL,
+    date BIGINT NOT NULL,
+    year BIGINT NOT NULL,
     tracks BLOB NOT NULL,
     mbid BLOB
 );

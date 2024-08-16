@@ -44,3 +44,54 @@ impl File {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_file_with_path() {
+        let f = File::new("test.txt");
+
+        assert_eq!(f.path, "test.txt");
+        assert_eq!(f.get_path(), Path::new("test.txt"));
+    }
+
+    #[test]
+    fn has_uuid() {
+        let f = File::new("test.txt");
+
+        f.get_id_uuid().expect("Failed to get UUID");
+    }
+
+    #[test]
+    fn move_file() {
+        let mut f = File::new("test.txt");
+
+
+        std::fs::File::create("test.txt").expect("Failed to create file");
+        f.move_to("test2.txt").expect("Failed to move file");
+
+        assert_eq!(f.path, "test2.txt");
+        assert_eq!(f.get_path(), Path::new("test2.txt"));
+        assert!(!Path::new("test.txt").exists());
+
+        std::fs::remove_file("test2.txt").expect("Failed to remove file");
+    }
+
+    #[test]
+    fn copy_file() {
+        let f = File::new("test_copy.txt");
+
+        std::fs::File::create("test_copy.txt").expect("Failed to create file");
+        let f2 = f.copy_to("test_copy2.txt").expect("Failed to copy file");
+
+        assert_eq!(f2.path, "test_copy2.txt");
+        assert_eq!(f2.get_path(), Path::new("test_copy2.txt"));
+        assert!(Path::new("test_copy.txt").exists());
+        assert!(Path::new("test_copy2.txt").exists());
+
+        std::fs::remove_file("test_copy.txt").expect("Failed to remove file");
+        std::fs::remove_file("test_copy2.txt").expect("Failed to remove file");
+    }
+}

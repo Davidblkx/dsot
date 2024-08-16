@@ -3,6 +3,10 @@ macro_rules! impl_hashset_str_field {
         paste::paste! {
             impl $name {
                 pub fn [<get_ $field>](&self) -> crate::error::Result<std::collections::HashSet<String>> {
+                    if self.$field.is_empty() {
+                        return Ok(std::collections::HashSet::new());
+                    }
+
                     let owned = self.$field.clone();
                     let set = crate::entities::utils::HashSetString::from_binary(owned)?;
                     Ok(set.values)

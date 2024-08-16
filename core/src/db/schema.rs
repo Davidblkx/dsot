@@ -86,8 +86,8 @@ diesel::table! {
         id -> Binary,
         name -> Text,
         album_id -> Binary,
-        date -> Integer,
-        year -> Integer,
+        date -> BigInt,
+        year -> BigInt,
         tracks -> Binary,
         mbid -> Nullable<Binary>,
     }
