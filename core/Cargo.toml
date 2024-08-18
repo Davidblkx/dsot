@@ -8,13 +8,12 @@ repository.workspace = true
 
 [dependencies]
 diesel = { version = "2.2", features = ["sqlite", "chrono"] }
+diesel_migrations = { version = "2.2", features = ["sqlite"] }
 libsqlite3-sys = { workspace = true, features = ["bundled"] }
 native_model = "0.4.19"
-redb = "2.1.1"
 serde = { version = "1.0.204", features = ["derive"] }
 thiserror = "1.0.63"
 uuid7 = { version = "1.0.0", features = ["serde", "uuid", "global_gen"] }
 uuid = "1.10.0"
-dotenvy = "0.15.7"
 paste = "1.0.15"
 chrono = "0.4.38"

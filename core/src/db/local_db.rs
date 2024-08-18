@@ -13,7 +13,7 @@ pub struct LocalDB {
 
 pub struct ConnectionGuard<'a> {
     db: &'a LocalDB,
-    connection: SqliteConnection,
+    pub connection: SqliteConnection,
 }
 
 impl LocalDB {
@@ -50,12 +50,6 @@ impl LocalDB {
     }
 }
 
-impl<'a> ConnectionGuard<'a> {
-    pub fn get_conn(&'a self) -> &'a SqliteConnection {
-        &self.connection
-    }
-}
-
 impl Drop for ConnectionGuard<'_> {
     fn drop(&mut self) {
         self.db.locked.store(false, Release);
@@ -64,6 +58,8 @@ impl Drop for ConnectionGuard<'_> {
 
 #[cfg(test)]
 mod tests {
+    use std::borrow::BorrowMut;
+
     use super::*;
 
     #[test]
@@ -82,8 +78,8 @@ mod tests {
             });
         });
 
-        let g = db.lock().unwrap();
-        let _c = g.get_conn();
+        let mut g = db.lock().unwrap();
+        let _c = g.connection.borrow_mut();
         drop(g);
         std::fs::remove_file(path).unwrap();
     }

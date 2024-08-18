@@ -1,7 +1,11 @@
-use std::{collections::HashMap, path::{Path, PathBuf}, sync::Mutex};
+use std::{borrow::BorrowMut, collections::HashMap, path::{Path, PathBuf}, sync::Mutex};
+
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 use crate::error::{Result, DsotError};
 use super::{local_db::ConnectionGuard, LocalDB};
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 pub struct LocalDBManager {
     path: PathBuf,
@@ -18,15 +22,17 @@ impl LocalDBManager {
         }
     }
 
-    pub fn get_path<'a>(&'a self) -> &'a PathBuf {
-        &self.path
+    pub fn get_path(&self, name: &str) -> PathBuf {
+        let mut p = self.path.clone();
+        p.push(format!("{}.db3", name));
+        p
     }
 
     fn build_db_path(&self, name: &str) -> Result<String> {
-        let mut p = self.path.clone();
-        p.push(format!("{}.db3", name));
-
-        p.into_os_string().to_str().map(|s| s.to_string())
+        self.get_path(name)
+            .into_os_string()
+            .to_str()
+            .map(|s| s.to_string())
             .ok_or(DsotError::InvalidOSString)
     }
 
@@ -45,7 +51,7 @@ impl LocalDBManager {
         Ok(db)
     }
 
-    pub fn create(&mut self, name: &str) -> Result<()> {
+    pub fn create_or_update(&mut self, name: &str) -> Result<()> {
         let lock = match self.locked.lock() {
             Ok(e) => e,
             Err(p) => p.into_inner()
@@ -53,12 +59,21 @@ impl LocalDBManager {
         let db_path = self.build_db_path(name)?;
 
         if self.cache.contains_key(name) {
-            return Err(DsotError::DuplicatedInitialization(name.to_string()));
+            return Err(DsotError::DatabaseDuplicatedInit(name.to_string()));
         }
 
         let db = LocalDB::new(&db_path);
 
-        // TODO: apply migrations and what not
+        let mut guard = db.lock()?;
+        match guard.connection.borrow_mut().run_pending_migrations(MIGRATIONS) {
+            Ok(_) => {},
+            Err(e) => {
+                drop(guard);
+                let message = format!("Migration failed: {}", e);
+                return Err(DsotError::DatabaseMigrationError(message));
+            }
+        }
+        drop(guard);
 
         self.cache.insert(name.to_string(), db);
 
@@ -80,7 +95,7 @@ mod tests {
 
         std::thread::scope(|s| {
             s.spawn(|| {
-                manager.create(&name).unwrap()
+                manager.create_or_update(&name).unwrap()
             });
         });
 
@@ -108,16 +123,16 @@ mod tests {
         let mut manager = LocalDBManager::new(Path::new("./"));
         let name = "fail_when_duplicated".to_string();
 
-        assert!(manager.create(&name).is_ok());
+        assert!(manager.create_or_update(&name).is_ok());
 
-        match manager.create(&name) {
+        match manager.create_or_update(&name) {
             Ok(_) => assert!(false),
             Err(e) => match e {
-                DsotError::DuplicatedInitialization(err_name) => assert_eq!(err_name, name),
+                DsotError::DatabaseDuplicatedInit(err_name) => assert_eq!(err_name, name),
                 _ => assert!(false)
             },
         }
 
-        // std::fs::remove_file(format!("./{}.db3", &name)).unwrap();
+        std::fs::remove_file(format!("./{}.db3", &name)).unwrap();
     }
 }
