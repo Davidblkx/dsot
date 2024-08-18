@@ -42,10 +42,7 @@ CREATE TABLE IF NOT EXISTS releases (
 CREATE TABLE IF NOT EXISTS tracks (
     id BLOB NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
-    media_index INTEGER NOT NULL,
-    track_index INTEGER NOT NULL,
-    file_id BLOB REFERENCES files(id) ON DELETE SET NULL,
-    mbid BLOB
+    file_id BLOB REFERENCES files(id) ON DELETE SET NULL
 );
 -- End entities
 
@@ -80,9 +77,16 @@ CREATE TABLE IF NOT EXISTS artist_albums (
     album_id BLOB NOT NULL REFERENCES albums(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS artist_tracks (
+    artist_id BLOB NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    track_id BLOB NOT NULL REFERENCES tracks(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS release_tracks (
     release_id BLOB NOT NULL REFERENCES releases(id) ON DELETE CASCADE,
-    track_id BLOB NOT NULL REFERENCES tracks(id) ON DELETE CASCADE
+    track_id BLOB NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    media_index BIGINT NOT NULL,
+    track_index BIGINT NOT NULL
 );
 -- End relations
 
@@ -93,7 +97,6 @@ CREATE INDEX IF NOT EXISTS albums_mbid ON albums(mbid);
 CREATE INDEX IF NOT EXISTS releases_mbid ON releases(mbid);
 CREATE INDEX IF NOT EXISTS releases_album_id ON releases(album_id);
 CREATE INDEX IF NOT EXISTS tracks_file_id ON tracks(file_id);
-CREATE INDEX IF NOT EXISTS tracks_mbid ON tracks(mbid);
 
 CREATE INDEX IF NOT EXISTS file_tags_file_id ON file_tags(file_id);
 CREATE INDEX IF NOT EXISTS file_tags_tag_id ON file_tags(tag_id);
@@ -109,4 +112,10 @@ CREATE INDEX IF NOT EXISTS artist_albums_album_id ON artist_albums(album_id);
 
 CREATE INDEX IF NOT EXISTS release_tracks_release_id ON release_tracks(release_id);
 CREATE INDEX IF NOT EXISTS release_tracks_track_id ON release_tracks(track_id);
+
+CREATE INDEX IF NOT EXISTS track_tags_track_id ON track_tags(track_id);
+CREATE INDEX IF NOT EXISTS track_tags_tag_id ON track_tags(tag_id);
+
+CREATE INDEX IF NOT EXISTS artist_tracks_artist_id ON artist_tracks(artist_id);
+CREATE INDEX IF NOT EXISTS artist_tracks_track_id ON artist_tracks(track_id);
 -- End indexes

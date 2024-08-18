@@ -4,7 +4,6 @@ DROP INDEX IF EXISTS albums_mbid;
 DROP INDEX IF EXISTS releases_mbid;
 DROP INDEX IF EXISTS releases_album_id;
 DROP INDEX IF EXISTS tracks_file_id;
-DROP INDEX IF EXISTS tracks_mbid;
 DROP INDEX IF EXISTS file_tags_file_id;
 DROP INDEX IF EXISTS file_tags_tag_id;
 DROP INDEX IF EXISTS artist_tags_artist_id;
@@ -24,6 +23,7 @@ DROP TABLE IF EXISTS release_tags;
 DROP TABLE IF EXISTS track_tags;
 DROP TABLE IF EXISTS artist_albums;
 DROP TABLE IF EXISTS release_tracks;
+DROP TABLE IF EXISTS artist_tracks;
 
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS releases;

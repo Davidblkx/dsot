@@ -34,19 +34,19 @@ diesel::table! {
 }
 
 diesel::table! {
+    artist_tracks (rowid) {
+        rowid -> Integer,
+        artist_id -> Binary,
+        track_id -> Binary,
+    }
+}
+
+diesel::table! {
     artists (id) {
         id -> Binary,
         name -> Text,
         aliases -> Binary,
         mbid -> Nullable<Binary>,
-    }
-}
-
-diesel::table! {
-    file_data (rowid) {
-        rowid -> Integer,
-        file_id -> Binary,
-        data -> Binary,
     }
 }
 
@@ -78,6 +78,8 @@ diesel::table! {
         rowid -> Integer,
         release_id -> Binary,
         track_id -> Binary,
+        media_index -> BigInt,
+        track_index -> BigInt,
     }
 }
 
@@ -120,10 +122,7 @@ diesel::table! {
     tracks (id) {
         id -> Binary,
         name -> Text,
-        media_index -> Integer,
-        track_index -> Integer,
         file_id -> Nullable<Binary>,
-        mbid -> Nullable<Binary>,
     }
 }
 
@@ -133,7 +132,8 @@ diesel::joinable!(artist_albums -> albums (album_id));
 diesel::joinable!(artist_albums -> artists (artist_id));
 diesel::joinable!(artist_tags -> artists (artist_id));
 diesel::joinable!(artist_tags -> tags (tag_id));
-diesel::joinable!(file_data -> files (file_id));
+diesel::joinable!(artist_tracks -> artists (artist_id));
+diesel::joinable!(artist_tracks -> tracks (track_id));
 diesel::joinable!(file_tags -> files (file_id));
 diesel::joinable!(file_tags -> tags (tag_id));
 diesel::joinable!(release_tags -> releases (release_id));
@@ -151,8 +151,8 @@ diesel::allow_tables_to_appear_in_same_query!(
     albums,
     artist_albums,
     artist_tags,
+    artist_tracks,
     artists,
-    file_data,
     file_tags,
     files,
     release_tags,

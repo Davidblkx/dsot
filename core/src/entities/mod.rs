@@ -7,6 +7,7 @@ pub mod tag_type;
 pub mod tag;
 pub mod album;
 pub mod release;
+pub mod track;
 
 pub use album::Album;
 pub use artist::Artist;
