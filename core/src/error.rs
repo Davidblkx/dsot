@@ -12,6 +12,8 @@ pub enum DsotError {
     DatabaseNotFound(String),
     #[error("Database migration failed: {0}")]
     DatabaseMigrationError(String),
+    #[error("Database query error: {0}")]
+    DatabaseQueryError(#[from] diesel::result::Error),
 
     #[error("Failed to decode/encode native model: {0}")]
     NativeModelError(#[from] native_model::Error),
