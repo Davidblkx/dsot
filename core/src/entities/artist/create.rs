@@ -4,28 +4,28 @@ use diesel::prelude::*;
 
 use crate::error::Result;
 
-pub fn create_new_album(
+pub fn create_new_artist(
     db: &mut SqliteConnection,
     name: &str,
     mbid: Option<uuid::Uuid>,
     aliases: Option<Vec<String>>,
 ) -> Result<Vec<u8>> {
-    let mut album = super::Album::new(&name);
+    let mut artist = super::Artist::new(&name);
 
-    let id = album.id.clone();
+    let id = artist.id.clone();
 
     if mbid.is_some() {
-        album.set_mbid_uuid(mbid);
+        artist.set_mbid_uuid(mbid);
     }
 
     // If aliases are provided, create HashSet and set it
     if let Some(aliases) = aliases {
         let set: HashSet<String> = aliases.into_iter().collect();
-        album.set_aliases(set)?;
+        artist.set_aliases(set)?;
     }
 
-    diesel::insert_into(crate::db::schema::albums::table)
-        .values(&album)
+    diesel::insert_into(crate::db::schema::artists::table)
+        .values(&artist)
         .execute(db)?;
 
     Ok(id)

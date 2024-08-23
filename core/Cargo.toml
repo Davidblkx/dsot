@@ -17,3 +17,4 @@ uuid7 = { version = "1.0.0", features = ["serde", "uuid", "global_gen"] }
 uuid = "1.10.0"
 paste = "1.0.15"
 chrono = "0.4.38"
+log = "0.4"

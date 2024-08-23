@@ -43,6 +43,7 @@ impl LocalDBManager {
         };
 
         if !self.cache.contains_key(name) {
+            log::warn!("Database not found: {}", name);
             return Err(DsotError::DatabaseNotFound(name.to_string()));
         }
 
@@ -59,17 +60,23 @@ impl LocalDBManager {
         let db_path = self.build_db_path(name)?;
 
         if self.cache.contains_key(name) {
+            log::warn!("Database already initialized: {}", name);
             return Err(DsotError::DatabaseDuplicatedInit(name.to_string()));
         }
 
         let db = LocalDB::new(&db_path);
 
         let mut guard = db.lock()?;
+
+        log::trace!("Running migrations for: {}", name);
         match guard.connection.borrow_mut().run_pending_migrations(MIGRATIONS) {
-            Ok(_) => {},
+            Ok(_) => {
+                log::trace!("Migrations completed for: {}", name);
+            },
             Err(e) => {
                 drop(guard);
                 let message = format!("Migration failed: {}", e);
+                log::warn!("{}", message);
                 return Err(DsotError::DatabaseMigrationError(message));
             }
         }

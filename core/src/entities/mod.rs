@@ -8,6 +8,7 @@ pub mod tag;
 pub mod album;
 pub mod release;
 pub mod track;
+pub mod rel;
 
 pub use album::Album;
 pub use artist::Artist;

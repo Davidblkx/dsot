@@ -9,6 +9,7 @@ use crate::db::LocalDBManager;
 
 pub fn setup(config: SetupConfig) -> Result<DSOTInstance> {
     if !config.local_data.exists() {
+        log::trace!("Creating local data directory: {:?}", config.local_data);
         std::fs::create_dir_all(&config.local_data)?;
     }
 
@@ -17,9 +18,10 @@ pub fn setup(config: SetupConfig) -> Result<DSOTInstance> {
     db_manager.create_or_update(&config.lib.name)?;
 
     let p = db_manager.get_path(&config.lib.name);
-    println!("Database path: {:?}", p);
+    log::trace!("Loading database from: {:?}", p);
 
     Ok(DSOTInstance {
         db_manager,
+        library: config.lib.name,
     })
 }

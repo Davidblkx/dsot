@@ -17,7 +17,7 @@ impl_hashset_str_field!(Artist, aliases);
 impl Artist {
     pub fn new(name: &str) -> Artist {
         let mut a = Artist {
-            id: super::utils::new_uuid(),
+            id: crate::entities::utils::new_uuid(),
             name: name.to_string(),
             aliases: Vec::new(),
             mbid: None,
