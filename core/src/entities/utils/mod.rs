@@ -5,8 +5,6 @@ mod collections;
 pub mod uuid_macros;
 #[macro_use]
 pub mod hashset_macros;
-#[macro_use]
-pub mod vec_macros;
 
 pub use uuidents::*;
 pub use collections::*;

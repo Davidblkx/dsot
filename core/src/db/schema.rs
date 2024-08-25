@@ -38,6 +38,7 @@ diesel::table! {
         rowid -> Integer,
         artist_id -> Binary,
         track_id -> Binary,
+        job_type -> Integer,
     }
 }
 

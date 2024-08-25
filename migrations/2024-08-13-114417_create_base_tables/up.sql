@@ -79,7 +79,8 @@ CREATE TABLE IF NOT EXISTS artist_albums (
 
 CREATE TABLE IF NOT EXISTS artist_tracks (
     artist_id BLOB NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
-    track_id BLOB NOT NULL REFERENCES tracks(id) ON DELETE CASCADE
+    track_id BLOB NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    job_type Integer NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS release_tracks (
