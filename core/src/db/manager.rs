@@ -24,7 +24,7 @@ impl LocalDBManager {
 
     pub fn get_path(&self, name: &str) -> PathBuf {
         let mut p = self.path.clone();
-        p.push(format!("{}.db3", name));
+        p.push(format!("dsot_lib_{}.db3", name));
         p
     }
 
@@ -108,7 +108,7 @@ mod tests {
 
         let db = manager.get(&name).unwrap();
         drop(db);
-        std::fs::remove_file(format!("./{}.db3", &name)).unwrap();
+        std::fs::remove_file(format!("./dsot_lib_{}.db3", &name)).unwrap();
     }
 
     #[test]
@@ -140,6 +140,6 @@ mod tests {
             },
         }
 
-        std::fs::remove_file(format!("./{}.db3", &name)).unwrap();
+        std::fs::remove_file(format!("./dsot_lib_{}.db3", &name)).unwrap();
     }
 }

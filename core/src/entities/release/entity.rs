@@ -71,7 +71,7 @@ mod tests {
         let mut r = Release::new("test", crate::entities::utils::new_uuid());
 
         assert!(r.get_mbid_uuid().unwrap().is_none());
-        r.set_mbid_uuid(Some(uuid7::new_v7()));
+        r.set_mbid_uuid(Some(uuid::Uuid::now_v7()));
         assert!(r.get_mbid_uuid().unwrap().is_some());
     }
 

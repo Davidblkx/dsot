@@ -30,6 +30,9 @@ pub enum DsotError {
     #[error("Invalid data folder: {0}")]
     InvalidDataFolder(String),
 
+    #[error("Unsupported client version: {0}")]
+    UnsupportedClientVersion(u8),
+
     #[error("Unknown DSOT error")]
     Unknown,
 }

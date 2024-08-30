@@ -67,7 +67,7 @@ mod tests {
         let mut a = Artist::new("Test Artist");
 
         assert!(a.get_mbid_uuid().unwrap().is_none());
-        a.set_mbid_uuid(Some(uuid7::new_v7()));
+        a.set_mbid_uuid(Some(uuid::Uuid::now_v7()));
         assert!(a.get_mbid_uuid().unwrap().is_some());
     }
 }
