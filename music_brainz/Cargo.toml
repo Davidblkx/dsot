@@ -1,5 +1,5 @@
 [package]
-name = "dsot_backend"
+name = "music_brainz"
 version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
@@ -7,7 +7,9 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-dsot_core = { path = "../core" }
-log = "0.4"
-musicbrainz_rs = "0.5.0"
-serde = { version = "1.0.209", features = ["derive"] }
+chrono = "0.4.38"
+log = "0.4.22"
+paste = "1.0.15"
+reqwest = "0.12.7"
+serde = "1.0.209"
+serde_json = "1.0.127"
