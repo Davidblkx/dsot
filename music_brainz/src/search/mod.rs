@@ -1,4 +1,8 @@
 #[macro_use]
 mod macros;
+mod search_query;
+mod search;
 
-pub mod artist;
+pub mod entities;
+
+pub use search_query::SearchQuery;
