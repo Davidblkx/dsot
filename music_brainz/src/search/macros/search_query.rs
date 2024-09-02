@@ -9,9 +9,9 @@ macro_rules! search_query {
             }
 
             impl [< $name Query>] {
-                pub fn for_query(value: String) -> Self {
+                pub fn for_query(value: &str) -> Self {
                     Self {
-                        value,
+                        value: value.to_string(),
                         limit: 25,
                         offset: 0,
                     }
@@ -33,6 +33,16 @@ macro_rules! search_query {
 
                 fn offset(&self) -> u32 {
                     self.offset
+                }
+
+                fn build_url(&self) -> crate::error::Result<url::Url> {
+                    crate::search::get_search_url(self)
+                }
+
+                async fn execute(&self) -> crate::error::Result<serde_json::Value> {
+                    let json_src: String = crate::search::execute_search(self).await?.text().await?;
+                    let json: serde_json::Value = serde_json::from_str(&json_src)?;
+                    Ok(json)
                 }
             }
 
@@ -74,7 +84,7 @@ macro_rules! search_query {
                 }
 
                 pub fn build(&self) -> [< $name Query>] {
-                    [< $name Query>]::for_query(self.parts.join(""))
+                    [< $name Query>]::for_query(&self.parts.join(""))
                 }
 
                 // Escape special characters not allowed in lucene query
