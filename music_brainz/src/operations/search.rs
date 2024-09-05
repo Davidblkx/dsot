@@ -1,14 +1,16 @@
 use reqwest::header::USER_AGENT;
-
-use super::SearchQuery;
 use crate::error::Result;
 
+/// Trait for search queries, used to build search queries for the MusicBrainz API.
+pub trait SearchQuery {
+    fn target(&self) -> &'static str;
+    fn query_value(&self) -> &str;
+    fn limit(&self) -> u32;
+    fn offset(&self) -> u32;
+}
+
 /// Get the search URL for a given query.
-///
-/// # Arguments
-///
-/// * `query` - The search query.
-pub fn get_search_url<T: SearchQuery>(query: &T) -> Result<url::Url> {
+pub fn build_url<T: SearchQuery>(query: &T) -> Result<url::Url> {
     let query_value = urlencoding::encode(query.query_value());
 
     let url_str = format!(
@@ -23,18 +25,13 @@ pub fn get_search_url<T: SearchQuery>(query: &T) -> Result<url::Url> {
     Ok(url)
 }
 
-/// Search for entities based on a search query.
-///
-/// # Arguments
-///
-/// * `query` - The search query.
-pub async fn execute_search<T: SearchQuery>(query: &T) -> Result<reqwest::Response> {
-    let url = query.build_url()?;
+pub async fn execute_search<T: SearchQuery>(query: &T) -> Result<String> {
+    let url = build_url(query)?;
     let client = reqwest::Client::new();
     let res = client
         .get(url)
         .header(USER_AGENT, "music_brainz_rs/0.1.0 (dev@davidpires.pt)")
-        .send().await?;
+        .send().await?.text().await?;
 
     Ok(res)
 }

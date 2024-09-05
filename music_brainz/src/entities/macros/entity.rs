@@ -1,6 +1,35 @@
-macro_rules! search_query {
-    ($name:ident [$target:expr] {$($prop:ident: $comment:expr),*}) => {
+macro_rules! entity {
+    (
+        $name:ident {
+            inc: [$($inc:ident$(=$($inc_value:expr)?)?),*],
+            search [$search_result:ident]: {$($prop_search:ident: $comment_search:expr),*},
+            schema [$schema_name:ident]: {$(
+                [$comment:expr]
+                $prop:ident $($json_prop:literal)?: $prop_type:ty
+            ),*}
+        }
+    ) => {
         paste::paste! {
+            #[derive(Clone, Debug, serde::Deserialize)]
+            pub struct $name {
+                #[doc = "The MusicBrainz Identifier (MBID) of the entity."]
+                pub id: String,
+
+                $(
+                    $(#[serde(alias = $json_prop)])?
+                    #[doc = $comment]
+                    pub $prop: $prop_type,
+                )*
+            }
+
+            #[derive(Clone, Debug, serde::Deserialize)]
+            pub struct [< $name QueryResult>] {
+                pub created: String,
+                pub count: u32,
+                pub offset: u32,
+                pub $search_result: Vec<$name>,
+            }
+
             #[derive(Clone, Debug)]
             pub struct [< $name Query>] {
                 pub value: String,
@@ -16,11 +45,17 @@ macro_rules! search_query {
                         offset: 0,
                     }
                 }
+
+                pub async fn execute(&self) -> crate::error::Result<[< $name QueryResult>]> {
+                    let json_src: String = crate::operations::search::execute_search(self).await?;
+                    let json: [< $name QueryResult>] = serde_json::from_str(&json_src)?;
+                    Ok(json)
+                }
             }
 
-            impl crate::search::SearchQuery for [< $name Query>] {
+            impl crate::operations::search::SearchQuery for [< $name Query>] {
                 fn target(&self) -> &'static str {
-                    $target
+                    stringify!($schema_name)
                 }
 
                 fn query_value(&self) -> &str {
@@ -33,16 +68,6 @@ macro_rules! search_query {
 
                 fn offset(&self) -> u32 {
                     self.offset
-                }
-
-                fn build_url(&self) -> crate::error::Result<url::Url> {
-                    crate::search::get_search_url(self)
-                }
-
-                async fn execute(&self) -> crate::error::Result<serde_json::Value> {
-                    let json_src: String = crate::search::execute_search(self).await?.text().await?;
-                    let json: serde_json::Value = serde_json::from_str(&json_src)?;
-                    Ok(json)
                 }
             }
 
@@ -87,34 +112,10 @@ macro_rules! search_query {
                     [< $name Query>]::for_query(&self.parts.join(""))
                 }
 
-                // Escape special characters not allowed in lucene query
-                fn escape_value(&self, value: &str) -> String {
-                    value
-                        .replace("+", "\\+")
-                        .replace("-", "\\-")
-                        .replace("&&", "\\&&")
-                        .replace("||", "\\||")
-                        .replace("!", "\\!")
-                        .replace("(", "\\(")
-                        .replace(")", "\\)")
-                        .replace("{", "\\{")
-                        .replace("}", "\\}")
-                        .replace("[", "\\[")
-                        .replace("]", "\\]")
-                        .replace("^", "\\^")
-                        .replace("\"", "\\\"")
-                        .replace("~", "\\~")
-                        .replace("*", "\\*")
-                        .replace("?", "\\?")
-                        .replace(":", "\\:")
-                        .replace("\\", "\\\\")
-                        .replace("/", "\\/")
-                }
-
                 $(
                     #[doc = $comment]
                     pub fn $prop(&mut self, $prop: &str) -> &mut Self {
-                        let prop_value = self.escape_value($prop);
+                        let prop_value = crate::utils::lucene::escape_value($prop);
                         let value = format!("{}:{}", stringify!($prop), prop_value);
                         self.parts.push(value);
                         self
