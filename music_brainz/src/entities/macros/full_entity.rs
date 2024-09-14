@@ -23,7 +23,7 @@ macro_rules! entity {
             }
 
             #[derive(Clone, Debug, serde::Deserialize)]
-            pub struct [< $name QueryResult>] {
+            pub struct [< $name SearchResult>] {
                 pub created: String,
                 pub count: u32,
                 pub offset: u32,
@@ -31,13 +31,13 @@ macro_rules! entity {
             }
 
             #[derive(Clone, Debug)]
-            pub struct [< $name Query>] {
+            pub struct [< $name Search>] {
                 pub value: String,
                 pub limit: u32,
                 pub offset: u32,
             }
 
-            impl [< $name Query>] {
+            impl [< $name Search>] {
                 pub fn for_query(value: &str) -> Self {
                     Self {
                         value: value.to_string(),
@@ -46,14 +46,14 @@ macro_rules! entity {
                     }
                 }
 
-                pub async fn execute(&self) -> crate::error::Result<[< $name QueryResult>]> {
+                pub async fn execute(&self) -> crate::error::Result<[< $name SearchResult>]> {
                     let json_src: String = crate::operations::search::execute_search(self).await?;
-                    let json: [< $name QueryResult>] = serde_json::from_str(&json_src)?;
+                    let json: [< $name SearchResult>] = serde_json::from_str(&json_src)?;
                     Ok(json)
                 }
             }
 
-            impl crate::operations::search::SearchQuery for [< $name Query>] {
+            impl crate::operations::search::SearchQuery for [< $name Search>] {
                 fn target(&self) -> &'static str {
                     stringify!($schema_name)
                 }
@@ -72,11 +72,11 @@ macro_rules! entity {
             }
 
             #[derive(Clone, Debug)]
-            pub struct [< $name Query Builder>] {
+            pub struct [< $name Search Builder>] {
                 parts: Vec<String>,
             }
 
-            impl [< $name Query Builder>] {
+            impl [< $name Search Builder>] {
                 pub fn new() -> Self {
                     Self {
                         parts: Vec::new(),
@@ -108,8 +108,8 @@ macro_rules! entity {
                     self
                 }
 
-                pub fn build(&self) -> [< $name Query>] {
-                    [< $name Query>]::for_query(&self.parts.join(""))
+                pub fn build(&self) -> [< $name Search>] {
+                    [< $name Search>]::for_query(&self.parts.join(""))
                 }
 
                 $(

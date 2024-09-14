@@ -1,2 +1,2 @@
 #[macro_use]
-pub mod entity;
+pub mod full_entity;

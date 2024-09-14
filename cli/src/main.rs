@@ -1,10 +1,10 @@
-use music_brainz::entities::artist::ArtistQueryBuilder;
+use music_brainz::entities::artist::ArtistSearchBuilder;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
 
-    let query = ArtistQueryBuilder::new().name("Pink Floyd").build();
+    let query = ArtistSearchBuilder::new().name("Pink Floyd").build();
     let res = query.execute().await;
 
     match res {
