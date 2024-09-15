@@ -26,12 +26,15 @@ pub fn build_url<T: SearchQuery>(query: &T) -> Result<url::Url> {
 }
 
 pub async fn execute_search<T: SearchQuery>(query: &T) -> Result<String> {
+    log::trace!("Executing search query: {:?}", query.target());
     let url = build_url(query)?;
+    log::debug!("Search URL: {}", url);
     let client = reqwest::Client::new();
     let res = client
         .get(url)
         .header(USER_AGENT, "music_brainz_rs/0.1.0 (dev@davidpires.pt)")
         .send().await?.text().await?;
+    log::trace!("Search completed successfully");
 
     Ok(res)
 }
