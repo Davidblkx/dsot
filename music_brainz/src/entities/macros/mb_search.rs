@@ -57,6 +57,7 @@ macro_rules! mb_search {
             #[derive(Clone, Debug)]
             pub struct [< $name Search Builder>] {
                 parts: Vec<String>,
+                limit: u32,
             }
 
             impl $name {
@@ -69,6 +70,7 @@ macro_rules! mb_search {
                 pub fn new() -> Self {
                     Self {
                         parts: Vec::new(),
+                        limit: 25,
                     }
                 }
 
@@ -94,6 +96,11 @@ macro_rules! mb_search {
 
                 pub fn not(&mut self) -> &mut Self {
                     self.parts.push(" NOT ".to_string());
+                    self
+                }
+
+                pub fn limit(&mut self, limit: u32) -> &mut Self {
+                    self.limit = limit;
                     self
                 }
 

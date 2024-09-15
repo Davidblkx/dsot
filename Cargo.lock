@@ -1055,12 +1055,14 @@ name = "music_brainz"
 version = "0.1.0"
 dependencies = [
  "chrono",
+ "env_logger",
  "log",
  "paste",
  "reqwest 0.12.7",
  "serde",
  "serde_json",
  "thiserror",
+ "tokio",
  "url",
  "urlencoding",
 ]

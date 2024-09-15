@@ -1,5 +1,5 @@
 entity!(Artist{
-    inc: [aliases],
+    inc: [aliases, recordings, releases, release_group="release-group", works],
     search [artists]: {
         alias: "Part of any alias attached to the artist (diacritics are ignored)",
         primary_alias: "Part of any primary alias attached to the artist (diacritics are ignored)",
