@@ -5,12 +5,11 @@ async fn main() {
     env_logger::init();
     music_brainz::init_user_agent("example_mb", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
-    let query = Area::search()
+    let result = Area::search()
         .area("Portugal")
         .limit(5)
-        .build();
-
-    let result = query.execute().await;
+        .build()
+        .execute().await;
 
     match result {
         Ok(a) => {

@@ -1,7 +1,7 @@
 use crate::model::{LifeSpan, area::{AreaType, AreaAlias}};
 
 entity!(Area {
-    inc: [aliases, desembiguations],
+    inc: [aliases, area_rels="area-rels"],
     search [areas]: {
         alias: "Part of any alias attached to the artist (diacritics are ignored)",
         area: "Part of the area's name (diacritics are ignored)",

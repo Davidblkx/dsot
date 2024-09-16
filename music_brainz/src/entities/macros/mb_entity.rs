@@ -15,6 +15,15 @@ macro_rules! mb_entity {
                 #[doc = $comment]
                 pub $prop: $prop_type,
             )*
+
+            #[doc = "Tags for the entity."]
+            pub tags: Option<Vec<crate::model::Tag>>,
+
+            #[doc = "Annotation for the entity."]
+            pub annotation: Option<String>,
+
+            #[doc = "Genres for the entity."]
+            pub genres: Option<Vec<String>>,
         }
     };
 }
