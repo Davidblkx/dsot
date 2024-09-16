@@ -27,12 +27,14 @@ pub fn build_url<T: SearchQuery>(query: &T) -> Result<url::Url> {
 
 pub async fn execute_search<T: SearchQuery>(query: &T) -> Result<String> {
     log::trace!("Executing search query: {:?}", query.target());
+    let user_agent = crate::utils::user_agent::get_user_agent()?;
+    log::trace!("User agent: {}", user_agent);
     let url = build_url(query)?;
     log::debug!("Search URL: {}", url);
     let client = reqwest::Client::new();
     let res = client
         .get(url)
-        .header(USER_AGENT, "music_brainz_rs/0.1.0 (dev@davidpires.pt)")
+        .header(USER_AGENT, user_agent)
         .send().await?.text().await?;
     log::trace!("Search completed successfully");
 

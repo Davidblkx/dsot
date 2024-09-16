@@ -10,6 +10,11 @@ pub enum MusicBrainzError {
 
     #[error("Failed to parse JSON: {0}")]
     JSONParseError(#[from] serde_json::Error),
+
+    #[error("User agent not initialized, call `init_user_agent` first")]
+    UserAgentNotInitialized,
+    #[error("User agent already initialized")]
+    UserAgentAlreadyInitialized,
 }
 
 pub type Result<T> = std::result::Result<T, MusicBrainzError>;
