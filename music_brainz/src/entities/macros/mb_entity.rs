@@ -12,6 +12,7 @@ macro_rules! mb_entity {
 
             $(
                 $(#[serde(alias = $json_prop)])?
+                #[serde(default)]
                 #[doc = $comment]
                 pub $prop: $prop_type,
             )*

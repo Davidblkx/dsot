@@ -1,5 +1,7 @@
+use crate::model::artist::ArtistType;
+
 entity!(Artist{
-    inc: [aliases, recordings, releases, release_group="release-group", works],
+    inc: [aliases, recordings, releases, release_group="release-group", works, various_artists="various-artists"],
     search [artists]: {
         alias: "Part of any alias attached to the artist (diacritics are ignored)",
         primary_alias: "Part of any primary alias attached to the artist (diacritics are ignored)",
@@ -25,6 +27,10 @@ entity!(Artist{
         ["The official name of an artist, be it a person or a band."]
         name: String,
         ["The sort name is a variant of the artist's name which would be used when sorting artists by name."]
-        sort_name "sort-name": Option<String>
+        sort_name "sort-name": Option<String>,
+        ["The type is used to state whether an artist is a person, a group, or something else."]
+        r#type: ArtistType,
+        ["The gender is used to explicitly state whether a person or character identifies as male, female or neither. Groups do not have genders."]
+        gender: Option<String>
     }
 });

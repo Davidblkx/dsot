@@ -9,7 +9,8 @@ pub enum AreaType {
     Municipality,
     City,
     District,
-    Island
+    Island,
+    Unknown,
 }
 
 impl fmt::Display for AreaType {
@@ -21,7 +22,14 @@ impl fmt::Display for AreaType {
             AreaType::Municipality => write!(f, "Municipality"),
             AreaType::City => write!(f, "City"),
             AreaType::District => write!(f, "District"),
-            AreaType::Island => write!(f, "Island")
+            AreaType::Island => write!(f, "Island"),
+            AreaType::Unknown => write!(f, "Unknown"),
         }
+    }
+}
+
+impl Default for AreaType {
+    fn default() -> Self {
+        AreaType::Unknown
     }
 }
