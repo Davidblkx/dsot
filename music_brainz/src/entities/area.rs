@@ -22,7 +22,7 @@ entity!(Area {
         ["An area is a geographic region or settlement. Areas are distinct from places, which are more specific and may contain areas."]
         name: String,
         ["The type of area."]
-        r#type: AreaType,
+        r#type: Option<AreaType>,
         ["The sort name is a variant of the area's name which would be used when sorting areas by name."]
         sort_name "sort-name": Option<String>,
         ["The area's life span."]
@@ -34,6 +34,8 @@ entity!(Area {
         ["iso-3166-3-codes for the area."]
         iso_3166_3_codes "iso-3166-3-codes": Option<Vec<String>>,
         ["The area's aliases."]
-        aliases: Option<Vec<AreaAlias>>
+        aliases: Option<Vec<AreaAlias>>,
+        ["The area's disambiguation comment."]
+        disambiguation: Option<String>
     }
 });

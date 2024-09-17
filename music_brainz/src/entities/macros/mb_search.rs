@@ -49,7 +49,7 @@ macro_rules! mb_search {
 
                 pub async fn execute(&self) -> crate::error::Result<[< $name SearchResult>]> {
                     let json_src: String = crate::operations::search::execute_search(self).await?;
-                    let json: [< $name SearchResult>] = serde_json::from_str(&json_src)?;
+                    let json: [< $name SearchResult>] = crate::utils::safe_parse_json::parse(json_src)?;
                     Ok(json)
                 }
             }
@@ -105,7 +105,9 @@ macro_rules! mb_search {
                 }
 
                 pub fn build(&self) -> [< $name Search>] {
-                    [< $name Search>]::for_query(&self.parts.join(""))
+                    let mut query = [< $name Search>]::for_query(&self.parts.join(""));
+                    query.limit = self.limit;
+                    query
                 }
 
                 $(

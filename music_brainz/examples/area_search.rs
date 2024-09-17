@@ -15,7 +15,7 @@ async fn main() {
         Ok(a) => {
             println!("count: {}", a.count);
             for area in a.areas {
-                println!("{}: {}({})", area.id, area.name, area.r#type);
+                println!("{}: {}({})", area.id, area.name, area.r#type.unwrap_or_default());
             }
         }
         Err(e) => {

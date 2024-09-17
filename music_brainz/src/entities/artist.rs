@@ -1,4 +1,5 @@
-use crate::model::artist::ArtistType;
+use crate::model::{LifeSpan, Alias, artist::ArtistType};
+use super::Area;
 
 entity!(Artist{
     inc: [aliases, recordings, releases, release_group="release-group", works, various_artists="various-artists"],
@@ -29,8 +30,26 @@ entity!(Artist{
         ["The sort name is a variant of the artist's name which would be used when sorting artists by name."]
         sort_name "sort-name": Option<String>,
         ["The type is used to state whether an artist is a person, a group, or something else."]
-        r#type: ArtistType,
+        r#type: Option<ArtistType>,
         ["The gender is used to explicitly state whether a person or character identifies as male, female or neither. Groups do not have genders."]
-        gender: Option<String>
+        gender: Option<String>,
+        ["The gender identifier"]
+        gender_id: Option<String>,
+        ["The artist area, as the name suggests, indicates the area with which an artist is primarily identified with. It is often, but not always, its birth/formation country. "]
+        area: Option<Area>,
+        ["The begin and end dates indicate when an artist started and ended its existence."]
+        life_span "life-span": Option<LifeSpan>,
+        ["An IPI (interested party information) code is an identifying number assigned by the CISAC database for musical rights management."]
+        ipis: Option<Vec<String>>,
+        ["The International Standard Name Identifier for the artist"]
+        isnis: Option<Vec<String>>,
+        ["The artist's aliases."]
+        aliases: Option<Vec<Alias>>,
+        ["The artist's disambiguation comment."]
+        disambiguation: Option<String>,
+        ["Where the artist was born or formed."]
+        begin_area "begin-area": Option<Area>,
+        ["Where the artist died or was dissolved."]
+        end_area "end-area": Option<Area>
     }
 });

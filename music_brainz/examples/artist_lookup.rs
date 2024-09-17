@@ -1,11 +1,11 @@
-use music_brainz::entities::Area;
+use music_brainz::entities::Artist;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     music_brainz::init_user_agent("example_mb", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
-    let result = Area::lookup("781b0c54-3d54-362d-a941-8a617def4992")
+    let result = Artist::lookup("5b11f4ce-a62d-471e-81fc-a69a8278c7da")
         .inc_aliases()
         .inc_tags()
         .inc_annotation()
@@ -33,7 +33,7 @@ async fn main() {
 
             if let Some(genres) = a.genres {
                 for genre in genres {
-                    println!("Genre: {}", genre);
+                    println!("Genre: {}", genre.name);
                 }
             }
         }

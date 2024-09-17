@@ -9,7 +9,14 @@ pub enum MusicBrainzError {
     RequestFailed(#[from] reqwest::Error),
 
     #[error("Failed to parse JSON: {0}")]
-    JSONParseError(#[from] serde_json::Error),
+    JsonError(#[from] serde_json::Error),
+    #[error("Failed to map JSON at line {line:?}, column {column:?}: {span:?} ({error:?})")]
+    JsonMappingError {
+        span: String,
+        line: usize,
+        column: usize,
+        error: String,
+    },
 
     #[error("User agent not initialized, call `init_user_agent` first")]
     UserAgentNotInitialized,

@@ -40,7 +40,7 @@ macro_rules! mb_lookup {
 
                 pub async fn execute(&self) -> crate::error::Result<$name> {
                     let json_src: String = crate::operations::lookup::execute_lookup(self).await?;
-                    let json: $name = serde_json::from_str(&json_src)?;
+                    let json: $name = crate::utils::safe_parse_json::parse(json_src)?;
                     Ok(json)
                 }
 

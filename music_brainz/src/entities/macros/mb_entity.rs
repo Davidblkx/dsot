@@ -24,7 +24,7 @@ macro_rules! mb_entity {
             pub annotation: Option<String>,
 
             #[doc = "Genres for the entity."]
-            pub genres: Option<Vec<String>>,
+            pub genres: Option<Vec<crate::model::Genre>>,
         }
     };
 }
