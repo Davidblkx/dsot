@@ -1,7 +1,8 @@
 macro_rules! mb_search {
     ($name:ident {
-        name = $schema_name:ident,
+        name = $schema_name:expr,
         search_name = $search_result:ident,
+        $(search_alias = $search_alias:expr,)?
         props = {$($prop_search:ident: $comment_search:expr),*}
     }) => {
         paste::paste! {
@@ -10,6 +11,7 @@ macro_rules! mb_search {
                 pub created: String,
                 pub count: u32,
                 pub offset: u32,
+                $(#[serde(alias = $search_alias)])?
                 pub $search_result: Vec<$name>,
             }
 
@@ -22,7 +24,7 @@ macro_rules! mb_search {
 
             impl crate::operations::search::SearchQuery for [< $name Search>] {
                 fn target(&self) -> &'static str {
-                    stringify!($schema_name)
+                    $schema_name
                 }
 
                 fn query_value(&self) -> &str {

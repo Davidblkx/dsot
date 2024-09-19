@@ -18,7 +18,7 @@ entity!(Area {
         tag: "Part of a tag attached to the area",
         r#type: "The area's type"
     },
-    schema [area]: {
+    schema ["area"]: {
         ["An area is a geographic region or settlement. Areas are distinct from places, which are more specific and may contain areas."]
         name: String,
         ["The type of area."]

@@ -1,12 +1,12 @@
-use music_brainz::entities::Area;
+use music_brainz::entities::ReleaseGroup;
 
 #[tokio::main]
 async fn main() {
     env_logger::init();
     music_brainz::init_user_agent("example_mb", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
-    let result = Area::lookup("781b0c54-3d54-362d-a941-8a617def4992")
-        .inc_aliases()
+    let result = ReleaseGroup::lookup("51c88244-97b3-4ae5-9ffa-3a4530bb6343")
+        .inc_artists()
         .inc_tags()
         .inc_annotation()
         .inc_genres()
@@ -14,10 +14,10 @@ async fn main() {
 
     match result {
         Ok(a) => {
-            println!("{}: {}({})", a.id, a.name, a.r#type.unwrap_or_default());
-            if let Some(aliases) = a.aliases {
+            println!("{}: {}({})", a.id, a.title, a.primary_type.unwrap_or_default());
+            if let Some(aliases) = a.artists {
                 for alias in aliases {
-                    println!("Alias: {}", alias.name);
+                    println!("Artist: {}", alias.name);
                 }
             }
 
@@ -34,6 +34,12 @@ async fn main() {
             if let Some(genres) = a.genres {
                 for genre in genres {
                     println!("Genre: {}", genre.name);
+                }
+            }
+
+            if let Some(aliases) = a.secondary_types {
+                for alias in aliases {
+                    println!("Secondary Type: {}", alias);
                 }
             }
         }

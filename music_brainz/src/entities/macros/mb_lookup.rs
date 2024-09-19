@@ -1,6 +1,6 @@
 macro_rules! mb_lookup {
     ($name:ident {
-        target = $target:ident,
+        target = $target:expr,
         inc = $($inc:ident$(=$inc_value:expr)?),*
     }) => {
         paste::paste! {
@@ -18,7 +18,7 @@ macro_rules! mb_lookup {
 
             impl crate::operations::lookup::EntityLookup for [< $name Lookup >] {
                 fn target(&self) -> &'static str {
-                    stringify!($target)
+                    $target
                 }
 
                 fn mbid(&self) -> &str {

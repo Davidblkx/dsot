@@ -24,7 +24,7 @@ entity!(Artist{
         tag: "Part of a tag attached to the artist",
         r#type: "The artist's type (e.g. 'Person', 'Group', ...)"
     },
-    schema [artist]: {
+    schema ["artist"]: {
         ["The official name of an artist, be it a person or a band."]
         name: String,
         ["The sort name is a variant of the artist's name which would be used when sorting artists by name."]
