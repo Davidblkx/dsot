@@ -1,6 +1,6 @@
 # Working now
 
-- Rename EntityQuery to EntitySearch and create a EntityQuery for fetching a single entity
+- Implement musicbrainz API
 
 # Planned
 
