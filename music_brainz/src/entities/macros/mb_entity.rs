@@ -17,6 +17,9 @@ macro_rules! mb_entity {
                 pub $prop: $prop_type,
             )*
 
+            #[doc = "The entity's search score, only available when searching."]
+            pub score: Option<u32>,
+
             #[doc = "Tags for the entity."]
             pub tags: Option<Vec<crate::model::Tag>>,
 
