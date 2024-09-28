@@ -4,16 +4,12 @@ use thiserror::Error;
 pub enum DsotError {
     #[error("Failed to lock database")]
     DatabaseLockError,
-    #[error("Database connection error: {0}")]
-    DatabaseConnectionError(#[from] diesel::ConnectionError),
     #[error("Duplicated database initialization: {0}")]
     DatabaseDuplicatedInit(String),
     #[error("Database not initialized: {0}")]
     DatabaseNotFound(String),
     #[error("Database migration failed: {0}")]
     DatabaseMigrationError(String),
-    #[error("Database query error: {0}")]
-    DatabaseQueryError(#[from] diesel::result::Error),
 
     #[error("Failed to decode/encode native model: {0}")]
     NativeModelError(#[from] native_model::Error),

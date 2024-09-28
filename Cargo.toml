@@ -7,6 +7,3 @@ edition = "2021"
 authors = ["David Pires<dev@davidpires.pt>"]
 license = "MIT"
 repository = "https://github.com/Davidblkx/dsot"
-
-[workspace.dependencies]
-libsqlite3-sys = "0.29"
