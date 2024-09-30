@@ -2,17 +2,20 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum DsotError {
-    #[error("Failed to lock database")]
-    DatabaseLockError,
-    #[error("Duplicated database initialization: {0}")]
-    DatabaseDuplicatedInit(String),
-    #[error("Database not initialized: {0}")]
-    DatabaseNotFound(String),
-    #[error("Database migration failed: {0}")]
-    DatabaseMigrationError(String),
+    #[error("Data is for a different version of the application")]
+    DataVersionMismatch,
 
-    #[error("Failed to decode/encode native model: {0}")]
-    NativeModelError(#[from] native_model::Error),
+    #[error("Error while deserializing data: {0}")]
+    DeserializationError(bincode1::Error),
+
+    #[error("Error while serializing data: {0}")]
+    SerializationError(bincode1::Error),
+
+    #[error("Error opening database: {0} - {1}")]
+    OpenDatabaseError(String, String),
+
+    #[error("Error handling table: {0} - {1}: {2}")]
+    TableTransactionError(String, String, String),
 
     #[error("IO Error: {0}")]
     IOError(#[from] std::io::Error),
