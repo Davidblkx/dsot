@@ -14,8 +14,12 @@ pub enum DsotError {
     #[error("Error opening database: {0} - {1}")]
     OpenDatabaseError(String, String),
 
-    #[error("Error handling table: {0} - {1}: {2}")]
-    TableTransactionError(String, String, String),
+    #[error("Error handling table: {table} - {operation}: {error}")]
+    TableTransactionError{
+        table: &'static str,
+        operation: &'static str,
+        error: String,
+    },
 
     #[error("IO Error: {0}")]
     IOError(#[from] std::io::Error),
