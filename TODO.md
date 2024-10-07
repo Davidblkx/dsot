@@ -1,13 +1,15 @@
 # Working now
 
-- Add redb as database
+- Create core model for app
 
 # Planned
 
 - Allow to navigate between pages in search results
-- Move DB logic to backend
 - Think of generic pagination for search/db queries
+- Have both read and write access to DB
 
 # Done
 
 - Add music brainz API
+- Add redb as database
+- Move DB logic to backend

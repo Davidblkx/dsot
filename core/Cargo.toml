@@ -14,4 +14,3 @@ uuid = { version = "1.10.0", features = ["serde", "v7"] }
 paste = "1.0.15"
 chrono = "0.4.38"
 log = "0.4"
-redb = "2.1.3"
