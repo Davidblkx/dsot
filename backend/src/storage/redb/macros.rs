@@ -1,3 +1,4 @@
+/// Creates a new table definition for a redb table
 macro_rules! create_table_def {
     ($name: expr) => {
         {
@@ -7,6 +8,7 @@ macro_rules! create_table_def {
     };
 }
 
+/// Creates an error Result for a table transaction error
 macro_rules! to_trx_err {
     ($table_name: expr, $err:expr) => {
         |e| DsotError::TableTransactionError {

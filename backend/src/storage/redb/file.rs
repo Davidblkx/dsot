@@ -2,7 +2,7 @@ use std::path::Path;
 use dsot_core::{storage::StorageProvider, error::{DsotError, Result}};
 use super::RedbStorage;
 
-
+/// Storage provider for Redb databases stored in a file.
 pub struct RedbFileProvider;
 
 impl RedbFileProvider {
@@ -10,6 +10,7 @@ impl RedbFileProvider {
         Self
     }
 
+    /// Create a new Redb database stored in a file.
     pub fn create(path: impl AsRef<Path>) -> Result<RedbStorage> {
         Self::new().open(path)
     }
@@ -18,6 +19,13 @@ impl RedbFileProvider {
 impl StorageProvider for RedbFileProvider {
     type T = RedbStorage;
 
+    /// Open a Redb database stored in a file.
+    ///
+    /// If the file does not exist, it will be created.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path to the file.
     fn open(&self, path: impl AsRef<Path>) -> Result<Self::T> {
         let err_path = path.as_ref().to_str().unwrap_or("[unknown_path]").to_string();
         let db = redb::Database::create(path)

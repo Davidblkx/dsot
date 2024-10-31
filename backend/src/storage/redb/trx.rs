@@ -82,3 +82,68 @@ impl TableTransaction for RedbTransaction {
         true
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use dsot_core::storage::Storage;
+
+    use crate::storage::redb::RedbInMemoryProvider;
+
+    static TABLE_NAME : &'static str = "TEST_TABLE";
+
+    #[test]
+    fn set_value() {
+        let storage = RedbInMemoryProvider::create().unwrap();
+
+        let mut trx = storage.open_table(TABLE_NAME).unwrap();
+        trx.set(b"key", b"value").unwrap();
+        trx.commit().unwrap();
+
+        let trx = storage.open_table(TABLE_NAME).unwrap();
+        let value = trx.get(b"key").unwrap().unwrap();
+        trx.close().unwrap();
+        assert_eq!(value, b"value");
+
+        let mut trx = storage.open_table(TABLE_NAME).unwrap();
+        trx.set(b"key", b"new_value").unwrap();
+        trx.commit().unwrap();
+
+        let trx = storage.open_table(TABLE_NAME).unwrap();
+        let value = trx.get(b"key").unwrap().unwrap();
+        trx.close().unwrap();
+        assert_eq!(value, b"new_value");
+    }
+
+    #[test]
+    fn check_for_key() {
+        let storage = RedbInMemoryProvider::create().unwrap();
+        let mut trx = storage.open_table(TABLE_NAME).unwrap();
+
+        assert!(!trx.has(b"key").unwrap());
+
+        trx.set(b"key", b"value").unwrap();
+        trx.commit().unwrap();
+
+        let trx = storage.open_table(TABLE_NAME).unwrap();
+        assert!(trx.has(b"key").unwrap());
+    }
+
+    #[test]
+    fn rollback_transaction() {
+        let storage = RedbInMemoryProvider::create().unwrap();
+        let mut trx = storage.open_table(TABLE_NAME).unwrap();
+
+        trx.set(b"key", b"value").unwrap();
+        trx.commit().unwrap();
+
+        let mut trx = storage.open_table(TABLE_NAME).unwrap();
+        trx.set(b"key", b"new_value").unwrap();
+        trx.rollback().unwrap();
+
+        let trx = storage.open_table(TABLE_NAME).unwrap();
+        let value = trx.get(b"key").unwrap().unwrap();
+        assert_eq!(value, b"value");
+    }
+}

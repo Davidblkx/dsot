@@ -4,6 +4,7 @@ use super::RedbStorage;
 
 static NAME : &'static str = "[IN MEMORY]";
 
+/// Storage provider for Redb databases stored in memory.
 pub struct RedbInMemoryProvider;
 
 impl RedbInMemoryProvider {

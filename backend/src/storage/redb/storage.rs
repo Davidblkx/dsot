@@ -1,8 +1,8 @@
 use dsot_core::{storage::Storage, error::{DsotError, Result}};
 use super::RedbTransaction;
 
-static TABLE_NAME : &'static str = "table_versions";
-static TABLE_VERSIONS_DEF: redb::TableDefinition<&str, u64> = redb::TableDefinition::new(TABLE_NAME);
+static TABLE_VERSIONS_NAME : &'static str = "table_versions";
+static TABLE_VERSIONS_DEF: redb::TableDefinition<&str, u64> = redb::TableDefinition::new(TABLE_VERSIONS_NAME);
 
 /// Wrapper around the redb::Database struct
 ///
@@ -20,29 +20,46 @@ impl RedbStorage {
 impl Storage for RedbStorage {
     type T = RedbTransaction;
 
+    /// Get the version of a table.
+    ///
+    /// If the table does not exist, it returns 0.
     fn get_table_version(&self, table_name: &str) -> Result<u64> {
-        let version = self.db.begin_read()
-            .map_err(to_trx_err!(TABLE_NAME, "Create read transaction"))?
-            .open_table(TABLE_VERSIONS_DEF)
-            .map_err(to_trx_err!(TABLE_NAME, "Open table"))?
-            .get(table_name)
-            .map_err(to_trx_err!(TABLE_NAME, "Read table version"))?
-            .map(|v| v.value())
-            .unwrap_or(0);
-        Ok(version)
+        let open_table_result = self.db.begin_read()
+            .map_err(to_trx_err!(TABLE_VERSIONS_NAME, "Create read transaction"))?
+            .open_table(TABLE_VERSIONS_DEF);
+
+        match open_table_result {
+            Ok(table) =>
+                table
+                    // Get the table version for the given table name
+                    .get(table_name)
+                    // If the table does not exist, return 0, otherwise return the version
+                    .map_or(Ok(0), |v| Ok(v.map(|a| a.value()).unwrap_or(0))),
+            Err(e) => {
+                return match e {
+                    // If the table for table versions does not exist, return 0
+                    redb::TableError::TableDoesNotExist(_) => Ok(0),
+                    _ => Err(DsotError::TableTransactionError {
+                        table: TABLE_VERSIONS_NAME,
+                        operation: "Open table",
+                        error: e.to_string()
+                    })
+                }
+            }
+        }
     }
 
     fn set_table_version(&self, table_name: &str, version: u64) -> Result<()> {
         let trx = self.db.begin_write()
-            .map_err(to_trx_err!(TABLE_NAME, "Create write transaction"))?;
+            .map_err(to_trx_err!(TABLE_VERSIONS_NAME, "Create write transaction"))?;
 
         trx.open_table(TABLE_VERSIONS_DEF)
-            .map_err(to_trx_err!(TABLE_NAME, "Open table"))?
+            .map_err(to_trx_err!(TABLE_VERSIONS_NAME, "Open table"))?
             .insert(table_name, version)
-            .map_err(to_trx_err!(TABLE_NAME, "Insert table version"))?;
+            .map_err(to_trx_err!(TABLE_VERSIONS_NAME, "Insert table version"))?;
 
         trx.commit()
-            .map_err(to_trx_err!(TABLE_NAME, "Commit transaction"))?;
+            .map_err(to_trx_err!(TABLE_VERSIONS_NAME, "Commit transaction"))?;
 
         Ok(())
     }
