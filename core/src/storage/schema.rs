@@ -1,25 +1,20 @@
 use crate::error::Result;
+use super::{StorageEntry, Migration};
 
-/// A trait that defines the schema of a table.
-///
-/// It is used to define the table name, version, how to serialize/deserialize the value
-/// and how to update the table version.
-pub trait TableSchema {
-    /// The type of the value that the table holds.
-    type Value;
-    /// The name of the table.
-    fn table_name() -> &'static str;
-    /// The version used to serialize the table values.
-    fn version() -> u64;
-    /// Get the serialized key of the value.
-    fn get_key<'a>(value: &'a Self::Value) -> &'a [u8];
-    /// Deserialize a byte array to a value.
-    fn deserialize<'a>(version: u64, value: &'a [u8]) -> Result<Self::Value>;
-    /// Serialize the value to a byte array.
-    fn serialize<'a>(value: &'a Self::Value) -> Result<Vec<u8>>;
-    /// Update the serialized version of the value.
-    /// This is used to update the version of the value when the table version changes.
-    /// The returned value should be the serialized value of the new version.
-    /// If the value is not updated, return `None`.
-    fn update_version<'a>(version: u64, value: &'a [u8]) -> Result<Option<Vec<u8>>>;
+/// This trait is used to serialize/deserialize items and map them to a storage table.
+pub trait StorageSchema {
+    type Item: Migration;
+
+    /// The name of the table that the serializer is used for.
+    fn table_name(&self) -> &'static str;
+    /// The version of the serializer.
+    fn version(&self) -> u64;
+
+    /// Get the key of the given item.
+    fn get_key(&self) -> Result<Vec<u8>>;
+
+    /// Serialize the given item to a StorageEntry.
+    fn to_storage_entry(&self) -> Result<StorageEntry>;
+    /// Deserialize the given StorageEntry to an item.
+    fn from_storage_entry(entry: &StorageEntry) -> Result<Self::Item>;
 }

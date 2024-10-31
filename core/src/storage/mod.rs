@@ -1,9 +1,11 @@
 mod entry;
-mod entity;
 mod schema;
 mod provider;
+mod migration;
+
+mod schema_macros;
 
 pub use entry::StorageEntry;
-pub use entity::StorageEntity;
-pub use schema::TableSchema;
+pub use schema::StorageSchema;
 pub use provider::{StorageProvider, Storage, TableTransaction};
+pub use migration::{Migration, MigrationResult};

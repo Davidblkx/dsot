@@ -1,3 +1,1 @@
-mod album;
-
-pub use album::Album;
+pub mod file_storage;

@@ -36,6 +36,12 @@ pub enum DsotError {
     #[error("Unsupported client version: {0}")]
     UnsupportedClientVersion(u8),
 
+    #[error("Invalid storage version {version} for {entity}")]
+    InvalidStorageVersion{
+        entity: &'static str,
+        version: u64,
+    },
+
     #[error("Unknown DSOT error")]
     Unknown,
 }
