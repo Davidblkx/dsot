@@ -1,12 +1,10 @@
 #[macro_use]
 mod macros;
 
-mod trx;
-mod storage;
-mod file;
-mod mem;
+mod transaction;
+mod handler;
+mod provider;
 
-pub use trx::RedbTransaction;
-pub use storage::RedbStorage;
-pub use file::RedbFileProvider;
-pub use mem::RedbInMemoryProvider;
+pub use transaction::RedbTransaction;
+pub use handler::RedbHandler;
+pub use provider::RedbStorage;

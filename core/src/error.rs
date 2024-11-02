@@ -21,6 +21,13 @@ pub enum DsotError {
         error: String,
     },
 
+    #[error("Error handling bucket: {bucket} - {operation}: {error}")]
+    TransactionError{
+        bucket: String,
+        operation: &'static str,
+        error: String,
+    },
+
     #[error("IO Error: {0}")]
     IOError(#[from] std::io::Error),
 
