@@ -14,6 +14,9 @@ pub enum DsotError {
     #[error("Error opening database: {0} - {1}")]
     OpenDatabaseError(String, String),
 
+    #[error("Data format out of bounds error: {0}")]
+    DataFormatError(String),
+
     #[error("Error handling table: {table} - {operation}: {error}")]
     TableTransactionError{
         table: &'static str,
