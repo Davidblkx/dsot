@@ -1,84 +1,6 @@
-use serde::{Deserialize, Serialize};
-use crate::error::{DsotError, Result};
-
-#[derive(Serialize, Deserialize)]
-pub struct ModelV0 {
-    pub id: uuid::Uuid,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ModelV1 {
-    pub id: uuid::Uuid,
-    pub name: String,
-}
-
-impl From<ModelV0> for ModelV1 {
-    fn from(model: ModelV0) -> Self {
-        ModelV1 {
-            id: model.id,
-            name: String::new(),
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct ModelV2 {
-    pub id: uuid::Uuid,
-    pub name: String,
-    pub age: u32,
-}
-
-impl From<ModelV1> for ModelV2 {
-    fn from(model: ModelV1) -> Self {
-        ModelV2 {
-            id: model.id,
-            name: model.name,
-            age: 0,
-        }
-    }
-}
-
-pub struct BinModelData<'a> {
-    pub version: u32,
-    pub data: &'a [u8],
-}
-
-pub fn parse_data<'a>(data: &'a [u8]) -> Result<BinModelData<'a>> {
-    if data.len() < 5 {
-        return Err(DsotError::DataFormatError("Data is too short".to_string()));
-    }
-
-    let version: [u8; 4] = data[..4].try_into()
-        .map_err(|_| DsotError::DataFormatError("Invalid version data".to_string()))?;
-
-    let version = u32::from_be_bytes(version);
-    let data = &data[5..];
-
-    Ok(BinModelData { version, data })
-}
-
-pub fn serialize_data(version: u32, data: &[u8]) -> Result<Vec<u8>> {
-    let mut buf = Vec::with_capacity(data.len() + 4);
-    buf.extend_from_slice(&version.to_be_bytes());
-    buf.push(0);
-    buf.extend_from_slice(data);
-
-    Ok(buf)
-}
-
-pub trait BinModel {
-    type Model: Sized;
-
-    fn deserialize<'a>(data: &'a [u8]) -> Result<Self::Model>;
-
-    fn deserialize_version<'a>(data: &'a [u8], version: u32) -> Result<Self::Model>;
-
-    fn serialize(&self) -> Result<Vec<u8>>;
-}
-
 macro_rules! declare_model_de_v0 {
     ($name: ident $(, $rest: ident)*) => {
-        impl BinModel for $name {
+        impl $crate::storage::BinModel for $name {
             type Model = $name;
 
             fn deserialize<'a>(data: &'a [u8]) -> $crate::error::Result<Self::Model> {
@@ -107,7 +29,7 @@ macro_rules! declare_model_de_v0 {
 
 macro_rules! declare_model_de {
     ($minor:ident, $major:ident, $version: literal) => {
-        impl BinModel for $major {
+        impl $crate::storage::BinModel for $major {
             type Model = $major;
 
             fn deserialize<'a>(data: &'a [u8]) -> $crate::error::Result<Self::Model> {
@@ -142,11 +64,12 @@ macro_rules! declare_model_de {
 macro_rules! declare_all_model_de {
     ($version: literal: $name: ident) => {};
     ($version_prev: literal: $name_prev: ident, $version: literal: $name: ident $(, $v: literal: $n:ident)*) => {
-        declare_model_de!($name_prev, $name, $version);
+        $crate::storage::macros::bin_model::declare_model_de!($name_prev, $name, $version);
 
         declare_all_model_de!($version: $name $(, $v: $n)*);
     };
 }
+
 
 macro_rules! declare_type {
     ($name: ident, $type: ident, $($rest: ident),*) => {
@@ -157,22 +80,25 @@ macro_rules! declare_type {
     };
 }
 
+#[macro_export]
 macro_rules! declare_model {
     ($name: ident {
         $($version: literal: $type: ident),*
     }) => {
-        declare_type!($name, $($type),*);
+        $crate::storage::macros::bin_model::declare_type!($name, $($type),*);
 
-        declare_model_de_v0!($($type),*);
+        $crate::storage::macros::bin_model::declare_model_de_v0!($($type),*);
 
-        declare_all_model_de!($($version: $type),*);
+        $crate::storage::macros::bin_model::declare_all_model_de!($($version: $type),*);
     };
 }
 
-declare_model! {
-    Model {
-        0: ModelV0,
-        1: ModelV1,
-        2: ModelV2
-    }
+pub(crate) use declare_type;
+pub(crate) use declare_all_model_de;
+pub(crate) use declare_model_de;
+pub(crate) use declare_model_de_v0;
+
+#[cfg(test)]
+mod tests {
+
 }
