@@ -14,12 +14,8 @@ pub enum DsotError {
     #[error("Error opening database: {0} - {1}")]
     OpenDatabaseError(String, String),
 
-    #[error("Error handling table: {table} - {operation}: {error}")]
-    TableTransactionError{
-        table: &'static str,
-        operation: &'static str,
-        error: String,
-    },
+    #[error("Data format out of bounds error: {0}")]
+    DataFormatError(String),
 
     #[error("Error handling bucket: {bucket} - {operation}: {error}")]
     TransactionError{
@@ -42,12 +38,6 @@ pub enum DsotError {
 
     #[error("Unsupported client version: {0}")]
     UnsupportedClientVersion(u8),
-
-    #[error("Invalid storage version {version} for {entity}")]
-    InvalidStorageVersion{
-        entity: &'static str,
-        version: u64,
-    },
 
     #[error("Unknown DSOT error")]
     Unknown,
