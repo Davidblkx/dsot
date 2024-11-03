@@ -7,6 +7,24 @@ pub struct BinModelData<'a> {
     pub data: &'a [u8],
 }
 
+/// Defines the operations to serialize and deserialize a struct to/from binary data
+pub trait BinModel {
+    /// The model type
+    type Model: Sized;
+
+    /// Deserialize a model from binary data, data contains the version in the first 4 bytes
+    fn deserialize<'a>(data: &'a [u8]) -> Result<Self::Model>;
+
+    /// Deserialize a model from binary data with a specific version, data does not contain the version
+    fn deserialize_version<'a>(data: &'a [u8], version: u32) -> Result<Self::Model>;
+
+    /// Serialize the model to binary data, the version is included in the first 4 bytes
+    fn serialize(&self) -> Result<Vec<u8>>;
+
+    /// Check if the binary data needs to be updated to the latest version
+    fn need_update<'a>(data: &'a [u8]) -> Result<bool>;
+}
+
 /// Parse version from binary data
 ///
 /// # Arguments

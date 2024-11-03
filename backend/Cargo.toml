@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 dsot_core = { path = "../core" }
+serde = { version = "1", features = ["derive"] }
 log = "0.4"
 redb = "2.1.3"
 
