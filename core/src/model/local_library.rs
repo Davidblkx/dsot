@@ -22,3 +22,5 @@ crate::dsot_storage_declare_model!(LocalLibrary {
     0: LocalLibraryV0,
     1: LocalLibraryV1
 });
+
+crate::dsot_storage_use_id_uuid!(LocalLibrary, "local_library");
