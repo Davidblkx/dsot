@@ -93,6 +93,47 @@ macro_rules! dsot_storage_declare_model_type {
     };
 }
 
+/// Declares a new model that can be stored in the storage
+///
+/// The model must implement the serde::Serialize and serde::Deserialize traits
+///
+/// Example:
+///
+/// ```
+/// #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+/// pub struct ModelV0 {
+///    a: u32,
+///    b: u32,
+/// }
+///
+/// #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+/// pub struct ModelV1 {
+///   a: u32,
+///   b: u32,
+///   c: u32,
+/// }
+///
+/// impl From<ModelV0> for ModelV1 {
+///    fn from(model: ModelV0) -> Self {
+///       Self {
+///         a: model.a,
+///         b: model.b,
+///         c: 0,
+///       }
+///    }
+/// }
+///
+/// dsot_storage_declare_model!(Model {
+///   0: ModelV0,
+///   1: ModelV1
+/// });
+/// ```
+///
+/// This will create a new model called Model that can be stored in the storage
+///
+/// The model will have two versions, version 0 and version 1
+///
+/// The model will have a alias called Model that will be the latest version of the model
 #[macro_export]
 macro_rules! dsot_storage_declare_model {
     ($name: ident {

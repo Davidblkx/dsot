@@ -10,6 +10,7 @@ pub trait HasBytes {
     fn get_bytes(&self) -> &[u8];
 }
 
+/// Implements the StorageEntity trait for a model that uses a uuid as the id
 #[macro_export]
 macro_rules! dsot_storage_use_id_uuid {
     ($name:ident, $storage_name: literal) => {
