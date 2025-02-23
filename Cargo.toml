@@ -3,7 +3,7 @@ members = ["core", "cli", "backend", "music_brainz"]
 resolver = "2"
 
 [workspace.package]
-edition = "2021"
+edition = "2024"
 authors = ["David Pires<dev@davidpires.pt>"]
 license = "MIT"
 repository = "https://github.com/Davidblkx/dsot"
