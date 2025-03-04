@@ -227,4 +227,22 @@ mod tests {
 
         assert_eq!(value.unwrap(), b"value2");
     }
+
+    #[test]
+    fn list_in_order() {
+        let storage = RedbStorage::open_memory().unwrap();
+        let mut trx = storage.open("test").unwrap();
+
+        trx.set(b"key2", b"value2").unwrap();
+        trx.set(b"key1", b"value1").unwrap();
+        trx.commit().unwrap();
+
+        let trx = storage.open("test").unwrap();
+        let entries = trx.list().unwrap();
+        trx.close().unwrap();
+
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0], (b"key1".to_vec(), b"value1".to_vec()));
+        assert_eq!(entries[1], (b"key2".to_vec(), b"value2".to_vec()));
+    }
 }

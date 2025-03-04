@@ -1,6 +1,7 @@
 # Working now
 
 - Create core model for app
+  - Working on sync see docs
 
 I need to decide on how to handle configs (bakunin config?) and how to handle storage devices.
 How should it handle inbox? multiple inbox?
