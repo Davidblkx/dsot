@@ -9,7 +9,7 @@ pub mod macros;
 pub use transaction::StorageTransaction;
 pub use handler::StorageHandler;
 pub use ser::{BinModelData, BinModel, parse_data_with_version, serialize_data_with_version};
-pub use entity::{StorageEntity, HasBytes};
+pub use entity::{StorageEntity, HasBytes, EntityUuidKey};
 pub use storage::Storage;
 
 pub use bincode1::deserialize as deserialize_bincode1;

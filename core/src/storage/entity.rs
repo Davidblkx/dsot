@@ -5,6 +5,11 @@ pub trait StorageEntity {
     fn get_storage_name() -> &'static str;
 }
 
+/// An entity that uses a uuid as the id
+pub trait EntityUuidKey {
+    fn get_uuid(&self) -> uuid::Uuid;
+}
+
 /// Defines the method to serialize values to bytes
 pub trait HasBytes {
     fn get_bytes(&self) -> &[u8];
@@ -14,7 +19,7 @@ pub trait HasBytes {
 #[macro_export]
 macro_rules! dsot_storage_use_id_uuid {
     ($name:ident, $storage_name: literal) => {
-        use $crate::storage::StorageEntity;
+        use $crate::storage::{StorageEntity, EntityUuidKey};
 
         impl StorageEntity for $name {
             fn get_storage_key(&self) -> Vec<u8> {
@@ -23,6 +28,12 @@ macro_rules! dsot_storage_use_id_uuid {
 
             fn get_storage_name() -> &'static str {
                 $storage_name
+            }
+        }
+
+        impl EntityUuidKey for $name {
+            fn get_uuid(&self) -> uuid::Uuid {
+                self.id
             }
         }
     };
