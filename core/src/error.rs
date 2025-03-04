@@ -39,6 +39,9 @@ pub enum DsotError {
     #[error("Unsupported client version: {0}")]
     UnsupportedClientVersion(u8),
 
+    #[error("Unknown DB entity index: {0}")]
+    UnknownDbEntity(u32),
+
     #[error("Unknown DSOT error")]
     Unknown,
 }

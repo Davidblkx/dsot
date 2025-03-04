@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::db::SqlEntity;
+use crate::db::sql::SqlEntity;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct ArtistV0 {

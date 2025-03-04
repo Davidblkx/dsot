@@ -1,6 +1,6 @@
 use super::entities::*;
-use super::SqlEntity;
 use super::DbOperation;
+use super::sql::SqlEntity;
 
 use crate::error::Result;
 use crate::storage::BinModel;
@@ -65,6 +65,17 @@ macro_rules! entity_enum {
                         _ => None,
                     }
                 }
+
+                pub fn get_values(&self, data: &[u8]) -> Result<Vec<String>> {
+                    match self {
+                        $(
+                            DbEntity::$entity => {
+                                let model = $entity::deserialize(data)?;
+                                Ok(model.values())
+                            },
+                        )*
+                    }
+                }
             }
 
             impl DbOperation {
@@ -93,8 +104,6 @@ macro_rules! entity_enum {
                         }
                     }
                 )*
-
-                // TODO: Implement logic to generate SQL insert, update and delete operations
             }
         }
     };
