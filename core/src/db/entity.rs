@@ -80,7 +80,7 @@ macro_rules! entity_enum {
 
             impl DbOperation {
                 $(
-                    pub fn [<create_ $entity:lower>](value: $entity) -> Result<DbOperation> {
+                    pub fn [<create_ $entity:lower>](value: &$entity) -> Result<DbOperation> {
                         let data = value.serialize()?;
                         Ok(DbOperation::Create {
                             id: value.id,

@@ -30,3 +30,28 @@ impl SqlEntity for Artist {
         ]
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sqlx::Executor;
+    use sqlx::sqlite::SqlitePool;
+
+    use crate::db::DbOperation;
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn sql_create_entity(pool: SqlitePool) -> sqlx::Result<()> {
+        let artist = Artist {
+            id: Uuid::now_v7(),
+            name: "Test Artist".to_string(),
+        };
+        let op = DbOperation::create_artist(&artist).unwrap();
+        let op_sql = op.generate_sql().unwrap();
+
+        let mut conn = pool.acquire().await?;
+
+        conn.execute(op_sql.as_str()).await?;
+
+        Ok(())
+    }
+}

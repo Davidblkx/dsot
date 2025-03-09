@@ -1,5 +1,5 @@
 -- Add migration script here
-CREATE TABLE artist (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+CREATE TABLE artists (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL
 );
