@@ -1,11 +1,12 @@
 use uuid::Uuid;
 
-use crate::db::sql::SqlEntity;
+use crate::db::sql::{SqlEntity, SqlValue};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct ArtistV0 {
     pub id: Uuid,
     pub name: String,
+    pub sort_name: Option<String>,
 }
 
 crate::dsot_storage_declare_model!(Artist {
@@ -20,13 +21,17 @@ impl SqlEntity for Artist {
     }
 
     fn columns() -> Vec<&'static str> {
-        vec!["id", "name"]
+        vec!["id", "name", "sort_name"]
     }
 
     fn values(&self) -> Vec<String> {
         vec![
-            self.id.to_string(),
-            self.name.to_string(),
+            SqlValue::uuid(&self.id),
+            SqlValue::string(&self.name),
+            match &self.sort_name {
+                Some(sort_name) => SqlValue::string(sort_name),
+                None => SqlValue::null(),
+            }
         ]
     }
 }
@@ -44,6 +49,7 @@ mod tests {
         let artist = Artist {
             id: Uuid::now_v7(),
             name: "Test Artist".to_string(),
+            sort_name: Some("Artist, Test".to_string()),
         };
         let op = DbOperation::create_artist(&artist).unwrap();
         let op_sql = op.generate_sql().unwrap();
@@ -51,6 +57,17 @@ mod tests {
         let mut conn = pool.acquire().await?;
 
         conn.execute(op_sql.as_str()).await?;
+
+        conn.close().await?;
+
+        let row = sqlx::query_as::<_, Artist>("SELECT * from artists WHERE id = ?1")
+            .bind(artist.id)
+            .fetch_one(&pool)
+            .await?;
+
+        assert_eq!(row.id, artist.id);
+        assert_eq!(row.name, artist.name);
+        assert_eq!(row.sort_name, artist.sort_name);
 
         Ok(())
     }

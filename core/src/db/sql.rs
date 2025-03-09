@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use super::op::DbOperation;
 use super::entity::DbEntity;
 use crate::error::{DsotError, Result};
@@ -12,28 +14,39 @@ pub trait SqlEntity {
     fn values(&self) -> Vec<String>;
 }
 
-/// Sanitizes sql parameters by wrapping the parameter in single quotes and escaping any single quotes in the parameter.
-pub fn sanitize_param(param: &str) -> String {
-    format!("'{}'", param.replace("'", "''"))
+pub struct SqlValue;
+
+impl SqlValue {
+    pub fn string(value: &str) -> String {
+        format!("'{}'", value.replace("'", "''"))
+    }
+
+    pub fn uuid(value: &Uuid) -> String {
+        format!("X'{}'", value.to_string().replace("-", ""))
+    }
+
+    pub fn null() -> String {
+        "NULL".to_string()
+    }
 }
 
 impl DbOperation {
     pub fn generate_sql(&self) -> Result<String> {
         match self {
             DbOperation::Delete { id, entity } => {
-                let db_ent = DbEntity::from_id(*entity).ok_or(DsotError::UnknownDbEntity(*entity))?;
-                let id = sanitize_param(&id.to_string());
+                let db_ent: DbEntity = DbEntity::from_id(*entity).ok_or(DsotError::UnknownDbEntity(*entity))?;
+                let id = SqlValue::uuid(id);
                 Ok(format!("DELETE FROM {} WHERE id = {}", db_ent.table_name(), id))
             },
             DbOperation::Create { id: _, entity, data } => {
                 let db_ent = DbEntity::from_id(*entity).ok_or(DsotError::UnknownDbEntity(*entity))?;
-                let values = db_ent.get_values(data)?.iter().map(|v| sanitize_param(v)).collect::<Vec<String>>().join(", ");
+                let values = db_ent.get_values(data)?.join(", ");
                 Ok(format!("INSERT INTO {} ({}) VALUES ({})", db_ent.table_name(), db_ent.columns().join(", "), values))
             },
             DbOperation::Update { id, entity, props } => {
                 let db_ent = DbEntity::from_id(*entity).ok_or(DsotError::UnknownDbEntity(*entity))?;
-                let set = props.iter().map(|(k, v)| format!("{} = {}", k, sanitize_param(v))).collect::<Vec<String>>().join(", ");
-                let id = sanitize_param(&id.to_string());
+                let set = props.iter().map(|(k, v)| format!("{} = {}", k, v)).collect::<Vec<String>>().join(", ");
+                let id = SqlValue::uuid(id);
                 Ok(format!("UPDATE {} SET {} WHERE id = {}", db_ent.table_name(), set, id))
             }
         }
@@ -44,13 +57,26 @@ impl DbOperation {
 mod tests {
     use super::*;
     use crate::storage::BinModel;
-    use crate::db::entities::artist::ArtistV0;
+    use crate::db::entities::artist::Artist;
+
+    #[test]
+    fn sql_value_string() {
+        assert_eq!(SqlValue::string("Test"), "'Test'");
+        assert_eq!(SqlValue::string("Test'"), "'Test'''");
+    }
+
+    #[test]
+    fn sql_value_uuid() {
+        let uuid = uuid::Uuid::now_v7();
+        assert_eq!(SqlValue::uuid(&uuid), format!("X'{}'", uuid.to_string().replace("-", "")));
+    }
 
     #[test]
     fn test_generate_insert_sql() {
-        let artist = ArtistV0 {
+        let artist = Artist {
             id: uuid::Uuid::now_v7(),
-            name: "Test Artist".to_string(),
+            name: "Test' Artist".to_string(),
+            sort_name: None
         };
         let create_op = DbOperation::Create {
             id: artist.id,
@@ -58,7 +84,8 @@ mod tests {
             data: artist.serialize().unwrap(),
         };
 
-        let expected = format!("INSERT INTO artists (id, name) VALUES ('{}', 'Test Artist')", artist.id);
+        let id = SqlValue::uuid(&artist.id);
+        let expected = format!("INSERT INTO artists (id, name, sort_name) VALUES ({}, 'Test'' Artist', NULL)", id);
         assert_eq!(create_op.generate_sql().unwrap(), expected);
     }
 
@@ -68,10 +95,11 @@ mod tests {
         let update_op = DbOperation::Update {
             id,
             entity: DbEntity::Artist.to_id(),
-            props: vec![("name".to_string(), "Updated Artist".to_string())],
+            props: vec![("name".to_string(), SqlValue::string("Updated Artist"))],
         };
 
-        let expected = format!("UPDATE artists SET name = 'Updated Artist' WHERE id = '{}'", id);
+        let art_id = SqlValue::uuid(&id);
+        let expected = format!("UPDATE artists SET name = 'Updated Artist' WHERE id = {}", art_id);
         assert_eq!(update_op.generate_sql().unwrap(), expected);
     }
 
@@ -83,7 +111,8 @@ mod tests {
             entity: DbEntity::Artist.to_id(),
         };
 
-        let expected = format!("DELETE FROM artists WHERE id = '{}'", id);
+        let art_id = SqlValue::uuid(&id);
+        let expected = format!("DELETE FROM artists WHERE id = {}", art_id);
         assert_eq!(delete_op.generate_sql().unwrap(), expected);
     }
 }

@@ -1,0 +1,11 @@
+### Lookup
+
+https://musicbrainz.org/ws/2/artist/f6f2326f-6b25-4170-b89d-e235b25508e8?inc=aliases&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)
+
+### Search
+
+https://musicbrainz.org/ws/2/artist?query=artist:sigur%20ros&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)

@@ -1,5 +1,6 @@
 -- Add migration script here
 CREATE TABLE artists (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL
+    id BLOB PRIMARY KEY,
+    name TEXT NOT NULL,
+    sort_name TEXT,
 );
