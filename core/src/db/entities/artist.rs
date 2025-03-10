@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use music_brainz::model::artist::ArtistType;
 
 use crate::db::sql::{SqlEntity, SqlValue};
 
@@ -7,6 +8,7 @@ pub struct ArtistV0 {
     pub id: Uuid,
     pub name: String,
     pub sort_name: Option<String>,
+    pub artist_type: u32,
 }
 
 crate::dsot_storage_declare_model!(Artist {
@@ -21,7 +23,7 @@ impl SqlEntity for Artist {
     }
 
     fn columns() -> Vec<&'static str> {
-        vec!["id", "name", "sort_name"]
+        vec!["id", "name", "sort_name", "artist_type"]
     }
 
     fn values(&self) -> Vec<String> {
@@ -31,8 +33,24 @@ impl SqlEntity for Artist {
             match &self.sort_name {
                 Some(sort_name) => SqlValue::string(sort_name),
                 None => SqlValue::null(),
-            }
+            },
+            self.artist_type.to_string(),
         ]
+    }
+}
+
+impl Artist {
+    pub fn new(id: Uuid, name: &str) -> Self {
+        Self {
+            id,
+            name: name.to_string(),
+            sort_name: None,
+            artist_type: ArtistType::Unknown.into(),
+        }
+    }
+
+    pub fn get_artist_type(&self) -> ArtistType {
+        ArtistType::from(self.artist_type)
     }
 }
 
@@ -46,11 +64,10 @@ mod tests {
 
     #[sqlx::test(migrations = "../migrations")]
     async fn sql_create_entity(pool: SqlitePool) -> sqlx::Result<()> {
-        let artist = Artist {
-            id: Uuid::now_v7(),
-            name: "Test Artist".to_string(),
-            sort_name: Some("Artist, Test".to_string()),
-        };
+        let mut artist = Artist::new(Uuid::now_v7(), "Test Artist");
+        artist.sort_name = Some("Artist, Test".to_string());
+        artist.artist_type = 1;
+
         let op = DbOperation::create_artist(&artist).unwrap();
         let op_sql = op.generate_sql().unwrap();
 
@@ -68,6 +85,7 @@ mod tests {
         assert_eq!(row.id, artist.id);
         assert_eq!(row.name, artist.name);
         assert_eq!(row.sort_name, artist.sort_name);
+        assert_eq!(row.artist_type, artist.artist_type);
 
         Ok(())
     }

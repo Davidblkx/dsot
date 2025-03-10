@@ -73,11 +73,9 @@ mod tests {
 
     #[test]
     fn test_generate_insert_sql() {
-        let artist = Artist {
-            id: uuid::Uuid::now_v7(),
-            name: "Test' Artist".to_string(),
-            sort_name: None
-        };
+        let mut artist = Artist::new(Uuid::now_v7(), "Test' Artist");
+        artist.artist_type = 1;
+
         let create_op = DbOperation::Create {
             id: artist.id,
             entity: DbEntity::Artist.to_id(),
@@ -85,7 +83,7 @@ mod tests {
         };
 
         let id = SqlValue::uuid(&artist.id);
-        let expected = format!("INSERT INTO artists (id, name, sort_name) VALUES ({}, 'Test'' Artist', NULL)", id);
+        let expected = format!("INSERT INTO artists (id, name, sort_name, artist_type) VALUES ({}, 'Test'' Artist', NULL, 1)", id);
         assert_eq!(create_op.generate_sql().unwrap(), expected);
     }
 

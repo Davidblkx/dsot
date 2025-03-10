@@ -3,4 +3,5 @@ CREATE TABLE artists (
     id BLOB PRIMARY KEY,
     name TEXT NOT NULL,
     sort_name TEXT,
+    artist_type INTEGER NOT NULL
 );
