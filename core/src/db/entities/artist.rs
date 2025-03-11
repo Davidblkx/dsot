@@ -8,7 +8,7 @@ pub struct ArtistV0 {
     pub id: Uuid,
     pub name: String,
     pub sort_name: Option<String>,
-    pub artist_type: u32,
+    pub artist_type: u32
 }
 
 crate::dsot_storage_declare_model!(Artist {
