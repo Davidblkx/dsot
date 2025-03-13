@@ -63,7 +63,7 @@ mod tests {
     use crate::db::DbOperation;
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn sql_create_entity(pool: SqlitePool) -> sqlx::Result<()> {
+    async fn artist_sql_crud(pool: SqlitePool) -> sqlx::Result<()> {
         let mut artist = Artist::new(Uuid::now_v7(), "Test Artist");
         artist.sort_name = Some("Artist, Test".to_string());
         artist.artist_type = 1;
@@ -72,9 +72,7 @@ mod tests {
         let op_sql = op.generate_sql().unwrap();
 
         let mut conn = pool.acquire().await?;
-
         conn.execute(op_sql.as_str()).await?;
-
         conn.close().await?;
 
         let row = sqlx::query_as::<_, Artist>("SELECT * from artists WHERE id = ?1")
@@ -86,6 +84,43 @@ mod tests {
         assert_eq!(row.name, artist.name);
         assert_eq!(row.sort_name, artist.sort_name);
         assert_eq!(row.artist_type, artist.artist_type);
+
+        let op = DbOperation::update_artist(
+            artist.id.clone(), vec![
+                ("name".to_string(), SqlValue::string("Updated Artist")),
+                ("sort_name".to_string(), SqlValue::string("Artist, Updated")),
+                ("artist_type".to_string(), SqlValue::integer(2)),
+            ]
+        );
+        let op_sql = op.generate_sql().unwrap();
+
+        let mut conn = pool.acquire().await?;
+        conn.execute(op_sql.as_str()).await?;
+        conn.close().await?;
+
+        let row = sqlx::query_as::<_, Artist>("SELECT * from artists WHERE id = ?1")
+            .bind(artist.id)
+            .fetch_one(&pool)
+            .await?;
+
+        assert_eq!(row.id, artist.id);
+        assert_eq!(row.name, "Updated Artist");
+        assert_eq!(row.sort_name, Some("Artist, Updated".to_string()));
+        assert_eq!(row.artist_type, 2);
+
+        let op = DbOperation::delete_artist(artist.id.clone());
+        let op_sql = op.generate_sql().unwrap();
+
+        let mut conn = pool.acquire().await?;
+        conn.execute(op_sql.as_str()).await?;
+        conn.close().await?;
+
+        let row = sqlx::query_as::<_, Artist>("SELECT * from artists WHERE id = ?1")
+            .bind(artist.id)
+            .fetch_optional(&pool)
+            .await?;
+
+        assert!(row.is_none());
 
         Ok(())
     }

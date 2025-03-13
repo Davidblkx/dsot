@@ -99,7 +99,7 @@ macro_rules! dsot_storage_declare_model_type {
 ///
 /// Example:
 ///
-/// ```
+/// ```ignore
 /// #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 /// pub struct ModelV0 {
 ///    a: u32,

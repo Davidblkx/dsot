@@ -28,6 +28,10 @@ impl SqlValue {
     pub fn null() -> String {
         "NULL".to_string()
     }
+
+    pub fn integer(value: i64) -> String {
+        value.to_string()
+    }
 }
 
 impl DbOperation {

@@ -1,12 +1,11 @@
 use uuid::Uuid;
 
-use crate::db::sql::{SqlEntity, SqlValue};
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
-pub struct ArtistAliaseV0 {
-    pub id: Uuid,
-    pub artist_id: Uuid,
-    pub name: String,
+crate::dsot_sql_entity!{
+    ArtistAliaseV0 ["artist_aliases"] {
+        id: Uuid => uuid,
+        artist_id: Uuid => uuid,
+        name: String => string,
+    }
 }
 
 crate::dsot_storage_declare_model!(ArtistAliase {
@@ -14,24 +13,6 @@ crate::dsot_storage_declare_model!(ArtistAliase {
 });
 
 crate::dsot_storage_use_id_uuid!(ArtistAliase, "artist_aliases");
-
-impl SqlEntity for ArtistAliase {
-    fn table_name() -> &'static str {
-        "artist_aliases"
-    }
-
-    fn columns() -> Vec<&'static str> {
-        vec!["id", "artist_id", "name"]
-    }
-
-    fn values(&self) -> Vec<String> {
-        vec![
-            SqlValue::uuid(&self.id),
-            SqlValue::uuid(&self.artist_id),
-            SqlValue::string(&self.name),
-        ]
-    }
-}
 
 impl ArtistAliase {
     pub fn new(artist_id: &Uuid, name: &str) -> Self {
@@ -45,5 +26,17 @@ impl ArtistAliase {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use super::super::Artist;
+    use sqlx::Executor;
+    use sqlx::sqlite::SqlitePool;
+    use crate::db::sql::SqlEntity;
 
+    use crate::db::DbOperation;
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn artist_aliases_sql_crud(pool: SqlitePool) -> sqlx::Result<()> {
+        // TODO: Add tests and think of a macro for sql actions
+        Ok(())
+    }
 }
