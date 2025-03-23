@@ -1,6 +1,6 @@
 use redb::{ReadableTable, WriteTransaction};
-use dsot_core::storage::StorageTransaction;
-use dsot_core::error::{DsotError, Result};
+use crate::storage::StorageTransaction;
+use crate::error::{DsotError, Result};
 
 pub struct RedbTransaction {
     pub name: String,
@@ -116,7 +116,7 @@ impl StorageTransaction for RedbTransaction {
 
 #[cfg(test)]
 mod tests {
-    use dsot_core::storage::StorageHandler;
+    use crate::storage::StorageHandler;
     use super::super::RedbStorage;
     use super::*;
 

@@ -3,6 +3,7 @@ mod handler;
 mod ser;
 mod entity;
 mod storage;
+mod r#impl;
 
 pub use transaction::StorageTransaction;
 pub use handler::StorageHandler;
@@ -12,3 +13,5 @@ pub use storage::Storage;
 
 pub use bincode1::deserialize as deserialize_bincode1;
 pub use bincode1::serialize as serialize_bincode1;
+
+pub use r#impl::redb;

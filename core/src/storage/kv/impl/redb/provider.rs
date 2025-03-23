@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use super::RedbHandler;
-use dsot_core::error::{DsotError, Result};
+use crate::error::{DsotError, Result};
 
 static MEMORY_NAME : &'static str = "[IN MEMORY]";
 

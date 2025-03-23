@@ -1,5 +1,5 @@
-use dsot_core::storage::StorageHandler;
-use dsot_core::error::{DsotError, Result};
+use crate::storage::StorageHandler;
+use crate::error::{DsotError, Result};
 
 use super::RedbTransaction;
 
@@ -61,7 +61,7 @@ impl StorageHandler for RedbHandler {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dsot_core::storage::StorageTransaction;
+    use crate::storage::StorageTransaction;
     use super::super::RedbStorage;
 
     #[test]
