@@ -182,18 +182,18 @@ VALUES (?, ?, ?, ?, ?)
 impl SqlOperationHandler for Artist {
     async fn apply_sql_op(
         trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        op: &crate::storage::SQLOperation,
+        op: &crate::storage::SqlOperation,
     ) -> crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
         match op {
-            crate::storage::SQLOperation::Create { data, .. } => {
+            crate::storage::SqlOperation::Create { data, .. } => {
                 let entity = Artist::deserialize(data)?;
                 Self::execute_create(trx, &entity).await
             },
-            crate::storage::SQLOperation::Update { id, action, .. } => {
+            crate::storage::SqlOperation::Update { id, action, .. } => {
                 let op = ArtistUpdateOp::deserialize(action)?;
                 Self::execute_update(trx, id, &op).await
             },
-            crate::storage::SQLOperation::Delete { id, .. } => {
+            crate::storage::SqlOperation::Delete { id, .. } => {
                 Self::execute_delete(trx, id).await
             },
         }

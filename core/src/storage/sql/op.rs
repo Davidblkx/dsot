@@ -2,7 +2,7 @@ use crate::error::Result;
 
 /// Represents a single operation that can be performed on the database.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-pub enum SQLOperation {
+pub enum SqlOperation {
     Create {
         id: uuid::Uuid,
         entity: u32,
@@ -19,20 +19,20 @@ pub enum SQLOperation {
     },
 }
 
-impl SQLOperation {
+impl SqlOperation {
     pub fn get_entity(&self) -> u32 {
         match self {
-            SQLOperation::Create { entity, .. } => *entity,
-            SQLOperation::Update { entity, .. } => *entity,
-            SQLOperation::Delete { entity, .. } => *entity,
+            SqlOperation::Create { entity, .. } => *entity,
+            SqlOperation::Update { entity, .. } => *entity,
+            SqlOperation::Delete { entity, .. } => *entity,
         }
     }
 
     pub fn get_id(&self) -> uuid::Uuid {
         match self {
-            SQLOperation::Create { id, .. } => *id,
-            SQLOperation::Update { id, .. } => *id,
-            SQLOperation::Delete { id, .. } => *id,
+            SqlOperation::Create { id, .. } => *id,
+            SqlOperation::Update { id, .. } => *id,
+            SqlOperation::Delete { id, .. } => *id,
         }
     }
 }
@@ -41,6 +41,6 @@ impl SQLOperation {
 pub trait SqlOperationHandler {
     fn apply_sql_op(
         trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        op: &SQLOperation,
+        op: &SqlOperation,
     ) -> impl Future<Output = Result<sqlx::Transaction<'static, sqlx::Sqlite>>>;
 }

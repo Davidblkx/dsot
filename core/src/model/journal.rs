@@ -1,10 +1,10 @@
 use uuid::Uuid;
 
-use crate::storage::sql::SQLOperation;
+use crate::storage::sql::SqlOperation;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum JournalOperation {
-    SQL(SQLOperation),
+    SQL(SqlOperation),
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
