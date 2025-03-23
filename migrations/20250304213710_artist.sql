@@ -1,10 +1,13 @@
 -- Add migration script here
 CREATE TABLE artists (
     id BLOB PRIMARY KEY,
+    mbid BLOB,
     name TEXT NOT NULL,
     sort_name TEXT,
-    artist_type INTEGER NOT NULL
+    artist_type_id INTEGER NOT NULL
 );
+
+CREATE INDEX artists_mbid ON artists (mbid);
 
 CREATE TABLE artist_aliases (
     id BLOB PRIMARY KEY,

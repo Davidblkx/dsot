@@ -19,7 +19,7 @@ pub trait HasBytes {
 #[macro_export]
 macro_rules! dsot_storage_use_id_uuid {
     ($name:ident, $storage_name: literal) => {
-        use $crate::storage::{StorageEntity, EntityUuidKey};
+        use $crate::storage::kv::{StorageEntity, EntityUuidKey};
 
         impl StorageEntity for $name {
             fn get_storage_key(&self) -> Vec<u8> {

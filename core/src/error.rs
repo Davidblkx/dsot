@@ -42,6 +42,9 @@ pub enum DsotError {
     #[error("Unknown DB entity index: {0}")]
     UnknownDbEntity(u32),
 
+    #[error("SQL Error: {0}")]
+    SqlError(#[from] sqlx::Error),
+
     #[error("Unknown DSOT error")]
     Unknown,
 }
