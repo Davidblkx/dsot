@@ -51,6 +51,13 @@ impl Default for Artist {
     }
 }
 
+crate::dsot_sql_entity!(["artists"] Artist with ArtistUpdateOp {
+    mbid,
+    name,
+    sort_name,
+    artist_type_id
+});
+
 impl SqlTable for Artist {
     fn table() -> &'static str {
         "artists"
