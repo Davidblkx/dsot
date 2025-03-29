@@ -17,3 +17,13 @@ macro_rules! macro_util_value_or {
         $v2
     };
 }
+
+#[macro_export]
+macro_rules! mu_stringify_last {
+    ($($value:tt)*, $last:tt) => {
+        stringify!($last)
+    };
+    ($last:tt) => {
+        stringify!($last)
+    };
+}

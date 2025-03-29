@@ -206,3 +206,15 @@ impl SqlOperationHandler for Artist {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_artist() {
+        let val = ArtistV0::get_insert();
+        let expected = "";
+        assert_eq!(val, expected);
+    }
+}
