@@ -1,4 +1,4 @@
 # Working now
 
-- Test artist sql and operations
-- Create macro for sql entities
+- Add record-group entity
+- Work on relations: artist <-> record-group, artist <-> aliases

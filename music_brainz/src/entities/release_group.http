@@ -1,0 +1,5 @@
+### Lookup
+
+https://musicbrainz.org/ws/2/release-group/59654e61-9ef3-4093-87a1-8c6fb8c628dc?inc=artists&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)
