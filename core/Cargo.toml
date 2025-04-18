@@ -20,4 +20,5 @@ redb = "2.1.3"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.8.3", features = ["macros", "uuid", "sqlite", "uuid", "migrate", "runtime-tokio"], default-features = false}
 tempfile = "3"

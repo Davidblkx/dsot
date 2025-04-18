@@ -17,3 +17,8 @@ CREATE TABLE artist_aliases (
 );
 
 CREATE INDEX artist_aliases_artist_id ON artist_aliases (artist_id);
+
+CREATE TABLE music_files (
+    id BLOB PRIMARY KEY,
+    path TEXT NOT NULL
+);
