@@ -22,7 +22,7 @@ pub enum ArtistUpdateOpV0 {
     SetMbid(Uuid),
     SetName(String),
     SetSortName(String),
-    SetArtistType(u32),
+    SetArtistTypeId(u32),
 }
 
 crate::dsot_storage_declare_model!(ArtistUpdateOp {
@@ -132,7 +132,7 @@ VALUES (?, ?, ?, ?, ?)
                 .execute(&mut *trx)
                 .await?;
             },
-            ArtistUpdateOp::SetArtistType(artist_type_id) => {
+            ArtistUpdateOp::SetArtistTypeId(artist_type_id) => {
                 sqlx::query!(
                     r#"
                         UPDATE artists

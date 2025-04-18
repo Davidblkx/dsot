@@ -38,22 +38,8 @@ mod tests {
     use sqlx::SqlitePool;
     use crate::storage::sql::SqlEntity;
 
-    #[test]
-    fn generates_expected_insert_sql() {
-        let result = MusicFile::get_sql_insert_statement();
-        let expected = "INSERT INTO music_files (id, path) VALUES (?, ?)";
-        assert_eq!(result, expected);
-    }
-
-    #[test]
-    fn generates_expected_fetch_sql() {
-        let result = MusicFile::get_sql_fetch_by_id_statement();
-        let expected = "SELECT id, path FROM music_files WHERE id = ?";
-        assert_eq!(result, expected);
-    }
-
     #[sqlx::test(migrations = "../migrations")]
-    async fn can_do_insert_query(pool: SqlitePool) {
+    async fn can_do_sql_crud_operations(pool: SqlitePool) {
         let trx = pool.begin().await.unwrap();
 
         let music_file = MusicFile {
@@ -61,12 +47,33 @@ mod tests {
             path: String::from("test_path"),
         };
 
+        // Insert
         let trx = MusicFile::execute_sql_insert(trx, &music_file).await.unwrap();
 
+        // Fetch by ID
         let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
-        assert!(result.is_some());
-        let fetched_music_file = result.unwrap();
+        let trx = result.0;
+        let fetched_music_file = result.1.unwrap();
         assert_eq!(fetched_music_file.id, music_file.id);
         assert_eq!(fetched_music_file.path, music_file.path);
+
+        // Update Path
+        let trx = MusicFile::execute_sql_update(
+            trx,
+            &music_file.id,
+            &MusicFileUpdateOp::SetPath(String::from("new_path")),
+        ).await.unwrap();
+
+        // Fetch by ID again to check the updates
+        let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
+        let trx = result.0;
+        let fetched_music_file = result.1.unwrap();
+        assert_eq!(fetched_music_file.path, "new_path");
+
+        // Delete
+        let trx = MusicFile::execute_sql_delete(trx, &music_file.id).await.unwrap();
+
+        let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
+        assert!(result.1.is_none());
     }
 }
