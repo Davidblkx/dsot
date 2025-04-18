@@ -37,6 +37,16 @@ impl Artist {
     pub fn set_artist_type(&mut self, artist_type: ArtistType) {
         self.artist_type_id = artist_type.to_u32();
     }
+
+    pub fn new(name: &str) -> Self {
+        Self {
+            id: Uuid::now_v7(),
+            mbid: None,
+            name: name.to_string(),
+            sort_name: None,
+            artist_type_id: 1,
+        }
+    }
 }
 
 impl Default for Artist {
