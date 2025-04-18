@@ -129,5 +129,26 @@ macro_rules! dsot_sql_entity {
                 }
             }
         }
+
+        impl $crate::storage::SqlOperationHandler for $entity {
+            async fn apply_sql_op(
+                trx: sqlx::Transaction<'static, sqlx::Sqlite>,
+                op: &crate::storage::SqlOperation,
+            ) -> $crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
+                match op {
+                    crate::storage::SqlOperation::Create { data, .. } => {
+                        let entity = $entity::deserialize(data)?;
+                        $entity::execute_sql_insert(trx, &entity).await
+                    }
+                    crate::storage::SqlOperation::Update { id, action, .. } => {
+                        let op = $update::deserialize(action)?;
+                        $entity::execute_sql_update(trx, id, &op).await
+                    }
+                    crate::storage::SqlOperation::Delete { id, .. } => {
+                        $entity::execute_sql_delete(trx, id).await
+                    }
+                }
+            }
+        }
     };
 }

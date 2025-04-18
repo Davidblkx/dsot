@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use music_brainz::model::artist::ArtistType;
 
-use crate::storage::{sql::SqlTable, BinModel, SqlOperationHandler};
+use crate::storage::{BinModel, SqlEntity};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct ArtistV0 {
@@ -19,9 +19,9 @@ crate::dsot_storage_declare_model!(Artist {
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum ArtistUpdateOpV0 {
-    SetMbid(Uuid),
+    SetMbid(Option<Uuid>),
     SetName(String),
-    SetSortName(String),
+    SetSortName(Option<String>),
     SetArtistTypeId(u32),
 }
 
@@ -58,151 +58,86 @@ crate::dsot_sql_entity!(["artists"] Artist with ArtistUpdateOp {
     artist_type_id
 });
 
-impl SqlTable for Artist {
-    fn table() -> &'static str {
-        "artists"
-    }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sqlx::SqlitePool;
 
-    type Entity = Artist;
-    type UpdateOp = ArtistUpdateOp;
+    #[sqlx::test(migrations = "../migrations")]
+    async fn can_do_sql_crud_operations(pool: SqlitePool) {
+        let trx = pool.begin().await.unwrap();
 
-    async fn execute_create(
-        mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        entity: &Self::Entity
-    ) -> crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-        sqlx::query!(
-            r#"
-INSERT INTO artists (id, mbid, name, sort_name, artist_type_id)
-VALUES (?, ?, ?, ?, ?)
-            "#,
-            entity.id,
-            entity.mbid,
-            entity.name,
-            entity.sort_name,
-            entity.artist_type_id
+        let artist = Artist {
+            id: Uuid::now_v7(),
+            mbid: Some(Uuid::now_v7()),
+            name: String::from("test_name"),
+            sort_name: None,
+            artist_type_id: 1,
+        };
+
+        // Insert
+        let trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
+
+        // Fetch by ID
+        let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
+        let trx = result.0;
+        let fetched_artist = result.1.unwrap();
+        assert_eq!(fetched_artist.id, artist.id);
+        assert_eq!(fetched_artist.mbid, artist.mbid);
+        assert_eq!(fetched_artist.name, artist.name);
+        assert_eq!(fetched_artist.sort_name, artist.sort_name);
+        assert_eq!(fetched_artist.artist_type_id, artist.artist_type_id);
+
+        // Update Mbid
+        let trx = Artist::execute_sql_update(
+            trx,
+            &artist.id,
+            &ArtistUpdateOp::SetMbid(None),
         )
-        .execute(&mut *trx)
-        .await?;
+        .await
+        .unwrap();
 
-        Ok(trx)
-    }
-
-    async fn execute_update(
-        mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        id: &uuid::Uuid,
-        op: &Self::UpdateOp
-    ) -> crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-        match op {
-            ArtistUpdateOp::SetMbid(mbid) => {
-                sqlx::query!(
-                    r#"
-                        UPDATE artists
-                        SET mbid = ?
-                        WHERE id = ?
-                    "#,
-                    mbid,
-                    id
-                )
-                .execute(&mut *trx)
-                .await?;
-            },
-            ArtistUpdateOp::SetName(name) => {
-                sqlx::query!(
-                    r#"
-                        UPDATE artists
-                        SET name = ?
-                        WHERE id = ?
-                    "#,
-                    name,
-                    id
-                )
-                .execute(&mut *trx)
-                .await?;
-            },
-            ArtistUpdateOp::SetSortName(sort_name) => {
-                sqlx::query!(
-                    r#"
-                        UPDATE artists
-                        SET sort_name = ?
-                        WHERE id = ?
-                    "#,
-                    sort_name,
-                    id
-                )
-                .execute(&mut *trx)
-                .await?;
-            },
-            ArtistUpdateOp::SetArtistTypeId(artist_type_id) => {
-                sqlx::query!(
-                    r#"
-                        UPDATE artists
-                        SET artist_type_id = ?
-                        WHERE id = ?
-                    "#,
-                    artist_type_id,
-                    id
-                )
-                .execute(&mut *trx)
-                .await?;
-            },
-        }
-
-        Ok(trx)
-    }
-
-    async fn execute_delete(
-        mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        id: &uuid::Uuid
-    ) -> crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-        sqlx::query!(
-            r#"
-                DELETE FROM artists
-                WHERE id = ?
-            "#,
-            id
+        // Update Name
+        let trx = Artist::execute_sql_update(
+            trx,
+            &artist.id,
+            &ArtistUpdateOp::SetName(String::from("new_name")),
         )
-        .execute(&mut *trx)
-        .await?;
+        .await
+        .unwrap();
 
-        Ok(trx)
-    }
-
-    async fn execute_fetch(
-        mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        id: &uuid::Uuid
-    ) -> crate::error::Result<(sqlx::Transaction<'static, sqlx::Sqlite>, Self::Entity)> {
-        let entity = sqlx::query_as::<_, Artist>(
-            r#"
-                SELECT id, mbid, name, sort_name, artist_type_id
-                FROM artists
-                WHERE id = ?
-            "#
+        // Update Sort Name
+        let trx = Artist::execute_sql_update(
+            trx,
+            &artist.id,
+            &ArtistUpdateOp::SetSortName(Some(String::from("new_sort_name"))),
         )
-        .bind(id)
-        .fetch_one(&mut *trx)
-        .await?;
+        .await
+        .unwrap();
 
-        Ok((trx, entity))
-    }
-}
+        // Update Artist Type ID
+        let trx = Artist::execute_sql_update(
+            trx,
+            &artist.id,
+            &ArtistUpdateOp::SetArtistTypeId(2),
+        )
+        .await
+        .unwrap();
 
-impl SqlOperationHandler for Artist {
-    async fn apply_sql_op(
-        trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-        op: &crate::storage::SqlOperation,
-    ) -> crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-        match op {
-            crate::storage::SqlOperation::Create { data, .. } => {
-                let entity = Artist::deserialize(data)?;
-                Self::execute_create(trx, &entity).await
-            },
-            crate::storage::SqlOperation::Update { id, action, .. } => {
-                let op = ArtistUpdateOp::deserialize(action)?;
-                Self::execute_update(trx, id, &op).await
-            },
-            crate::storage::SqlOperation::Delete { id, .. } => {
-                Self::execute_delete(trx, id).await
-            },
-        }
+        // Fetch by ID again to check the updates
+        let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
+        let trx = result.0;
+        let fetched_artist = result.1.unwrap();
+        assert_eq!(fetched_artist.mbid, None);
+        assert_eq!(fetched_artist.name, "new_name");
+        assert_eq!(fetched_artist.sort_name, Some("new_sort_name".to_string()));
+        assert_eq!(fetched_artist.artist_type_id, 2);
+
+        // Delete
+        let trx = Artist::execute_sql_delete(trx, &artist.id).await.unwrap();
+
+        // Fetch by ID again to check the deletion
+        let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
+        assert!(result.1.is_none());
     }
 }

@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use crate::storage::{BinModel, sql::SqlEntity};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct MusicFileV0 {
@@ -36,7 +37,6 @@ impl Default for MusicFile {
 mod tests {
     use super::*;
     use sqlx::SqlitePool;
-    use crate::storage::sql::SqlEntity;
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_do_sql_crud_operations(pool: SqlitePool) {
@@ -73,6 +73,7 @@ mod tests {
         // Delete
         let trx = MusicFile::execute_sql_delete(trx, &music_file.id).await.unwrap();
 
+        // Check if the record is deleted
         let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
         assert!(result.1.is_none());
     }
