@@ -1,3 +1,5 @@
+use crate::error::Result;
+
 pub trait SqlEntity {
     type Value;
     type Operation;
@@ -29,3 +31,6 @@ pub trait SqlEntity {
         op: &Self::Operation
     ) -> impl Future<Output = crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>>>;
 }
+
+pub type SqlTransaction = sqlx::Transaction<'static, sqlx::Sqlite>;
+pub type SqlResult<T> = Result<(SqlTransaction, T)>;

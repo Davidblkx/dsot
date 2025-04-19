@@ -1,4 +1,3 @@
 # Working now
 
-- Add record-group entity
-- Work on relations: artist <-> record-group, artist <-> aliases
+- Rewrite SQL functions to use crate::storage::sql::SqlResult<T>

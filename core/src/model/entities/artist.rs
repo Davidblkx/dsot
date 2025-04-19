@@ -2,7 +2,9 @@ use uuid::Uuid;
 
 use music_brainz::model::artist::ArtistType;
 
-use crate::storage::{BinModel, SqlEntity};
+use super::Album;
+
+use crate::storage::{BinModel, SqlEntity, SqlTransaction, SqlResult};
 use crate::error::Result;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
@@ -61,6 +63,34 @@ impl Artist {
             (rows.into_iter().map(|alias| alias.name).collect(), trx)
         )
     }
+
+    pub async fn get_albums(&self, mut trx: SqlTransaction) -> SqlResult<Vec<Album>> {
+        let rows = sqlx::query!("SELECT * FROM album_artists WHERE artist_id = ? AND is_main = 1", self.id)
+            .fetch_all(&mut *trx)
+            .await?;
+
+        let mut albums = Vec::new();
+
+        for row in rows {
+            let id = Uuid::from_slice(&row.album_id);
+            if id.is_err() {
+                log::warn!("Error parsing album_id[{:?}] for artist[{:?}]", id, self.id);
+                continue;
+            }
+            let id = id.unwrap();
+
+            let (trx_ref, album) = Album::execute_sql_fetch_by_id(trx, &id).await?;
+            trx = trx_ref;
+
+            if let Some(album) = album {
+                albums.push(album);
+            } else {
+                log::warn!("Album[{:?}] not found for artist[{:?}]", id, self.id);
+            }
+        }
+
+        Ok((trx, albums))
+    }
 }
 
 impl Default for Artist {
@@ -86,7 +116,7 @@ crate::dsot_sql_entity!(["artists"] Artist with ArtistUpdateOp {
 mod tests {
     use super::*;
     use sqlx::SqlitePool;
-    use crate::model::entities::artist_alias::ArtistAlias;
+    use crate::model::entities::{artist_alias::ArtistAlias, album_artist::AlbumArtist};
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_do_sql_crud_operations(pool: SqlitePool) {
@@ -189,5 +219,28 @@ mod tests {
         for alias in &fetched_aliases {
             assert!(aliases.contains(alias));
         }
+    }
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn can_query_albums(pool: SqlitePool) {
+        let trx = pool.begin().await.unwrap();
+
+        let artist = Artist::new("artist");
+        let album1 = Album::new("album1", 2023);
+        let album2 = Album::new("album2", 2023);
+
+        let rel1 = AlbumArtist::new(&album1.id, &artist.id);
+        let rel2 = AlbumArtist::new(&album2.id, &artist.id);
+
+        let trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
+        let trx = Album::execute_sql_insert(trx, &album1).await.unwrap();
+        let trx = Album::execute_sql_insert(trx, &album2).await.unwrap();
+        let trx = AlbumArtist::execute_sql_insert(trx, &rel1).await.unwrap();
+        let trx = AlbumArtist::execute_sql_insert(trx, &rel2).await.unwrap();
+
+        let (_, albums) = artist.get_albums(trx).await.unwrap();
+        assert_eq!(albums.len(), 2);
+        assert!(albums.iter().any(|a| a.id == album1.id));
+        assert!(albums.iter().any(|a| a.id == album2.id));
     }
 }
