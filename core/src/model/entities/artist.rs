@@ -3,6 +3,7 @@ use uuid::Uuid;
 use music_brainz::model::artist::ArtistType;
 
 use crate::storage::{BinModel, SqlEntity};
+use crate::error::Result;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct ArtistV0 {
@@ -47,6 +48,19 @@ impl Artist {
             artist_type_id: 1,
         }
     }
+
+    pub async fn get_aliases(
+        &self,
+        mut trx: sqlx::Transaction<'static, sqlx::Sqlite>
+    ) -> Result<(Vec<String>, sqlx::Transaction<'static, sqlx::Sqlite>)> {
+        let rows = sqlx::query!("SELECT id, artist_id, name FROM artist_aliases WHERE artist_id = ?", self.id)
+            .fetch_all(&mut *trx)
+            .await?;
+
+        Ok(
+            (rows.into_iter().map(|alias| alias.name).collect(), trx)
+        )
+    }
 }
 
 impl Default for Artist {
@@ -72,6 +86,7 @@ crate::dsot_sql_entity!(["artists"] Artist with ArtistUpdateOp {
 mod tests {
     use super::*;
     use sqlx::SqlitePool;
+    use crate::model::entities::artist_alias::ArtistAlias;
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_do_sql_crud_operations(pool: SqlitePool) {
@@ -149,5 +164,30 @@ mod tests {
         // Fetch by ID again to check the deletion
         let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
         assert!(result.1.is_none());
+    }
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn can_query_aliases(pool: SqlitePool) {
+        let trx = pool.begin().await.unwrap();
+
+        let artist = Artist::new("artist");
+
+        let mut trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
+
+        let aliases = vec![
+            String::from("alias1"),
+            String::from("alias2"),
+            String::from("alias3"),
+        ];
+
+        for alias in &aliases {
+            trx = ArtistAlias::execute_sql_insert(trx, &ArtistAlias::new(&artist.id, alias)).await.unwrap();
+        }
+
+        let (fetched_aliases, _) = artist.get_aliases(trx).await.unwrap();
+        assert_eq!(fetched_aliases.len(), aliases.len());
+        for alias in &fetched_aliases {
+            assert!(aliases.contains(alias));
+        }
     }
 }
