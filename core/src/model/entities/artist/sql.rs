@@ -24,8 +24,8 @@ impl Artist {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use super::super::sql::ArtistSql;
     use crate::model::entities::rel::{ArtistAlias, ArtistAliasSql};
-    use crate::model::entities::sql::ArtistSql;
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_query_aliases(pool: sqlx::SqlitePool) {

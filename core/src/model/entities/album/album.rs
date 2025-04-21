@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use super::{Artist, sql::ArtistSql};
+use crate::model::entities::{Artist, sql::ArtistSql};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct AlbumV0 {

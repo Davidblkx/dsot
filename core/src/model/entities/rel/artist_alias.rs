@@ -39,7 +39,7 @@ crate::dsot_sql_entity!(["artist_aliases"] ArtistAlias with ArtistAliasUpdateOp 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::entities::{Artist, sql::ArtistSql};
+    use crate::model::entities::artist::{Artist, sql::ArtistSql};
     use sqlx::SqlitePool;
 
     #[sqlx::test(migrations = "../migrations")]

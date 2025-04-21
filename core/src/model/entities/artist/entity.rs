@@ -2,10 +2,16 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct ArtistV0 {
+    /// Internal ID for the artist.
     pub id: Uuid,
+    /// MusicBrainz ID for the artist.
     pub mbid: Option<Uuid>,
+    /// Name of the artist.
     pub name: String,
+    /// Sort name of the artist for sorting purposes.
     pub sort_name: Option<String>,
+    /// Type of the artist, e.g., person, group, etc.
+    /// It can be mapped to a type in the musicbrainz database.
     pub artist_type_id: u32,
 }
 

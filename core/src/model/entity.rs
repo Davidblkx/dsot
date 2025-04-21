@@ -1,4 +1,4 @@
-use super::entities::sql::ArtistSql;
+use super::entities::artist::sql::ArtistSql;
 use crate::storage::sql::{SqlOperation, SqlOperationHandler, SqlResult, SqlTransaction};
 
 pub enum DsotEntity {
