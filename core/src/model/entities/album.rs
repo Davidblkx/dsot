@@ -1,7 +1,6 @@
 use uuid::Uuid;
 
-use super::Artist;
-use crate::storage::{BinModel, SqlEntity, sql::{SqlResult, SqlTransaction}};
+use super::{Artist, ArtistSql};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct AlbumV0 {
@@ -54,7 +53,7 @@ impl Album {
             }
             let id = id.unwrap();
 
-            let (trx_ref, artist) = Artist::execute_sql_fetch_by_id(trx, &id).await?;
+            let (trx_ref, artist) = ArtistSql::fetch_by_id(trx, &id).await?;
             trx = trx_ref;
 
             if let Some(artist) = artist {
@@ -78,7 +77,7 @@ crate::dsot_sql_entity!(["albums"] Album with AlbumUpdateOp {
 mod tests {
     use super::*;
     use sqlx::SqlitePool;
-    use crate::model::entities::album_artist::AlbumArtist;
+    use crate::model::entities::album_artist::{AlbumArtist, AlbumArtistSql};
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_load_artists(pool: SqlitePool) {
@@ -91,12 +90,12 @@ mod tests {
         let rel1 = AlbumArtist::new(&album.id, &artist1.id);
         let rel2 = AlbumArtist::new(&album.id, &artist2.id);
 
-        let trx = Album::execute_sql_insert(trx, &album).await.unwrap();
-        let trx = Artist::execute_sql_insert(trx, &artist1).await.unwrap();
-        let trx = Artist::execute_sql_insert(trx, &artist2).await.unwrap();
+        let (trx, _) = AlbumSql::insert(trx, &album).await.unwrap();
+        let (trx, _) = ArtistSql::insert(trx, &artist1).await.unwrap();
+        let (trx, _) = ArtistSql::insert(trx, &artist2).await.unwrap();
 
-        let trx = AlbumArtist::execute_sql_insert(trx, &rel1).await.unwrap();
-        let trx = AlbumArtist::execute_sql_insert(trx, &rel2).await.unwrap();
+        let (trx, _) = AlbumArtistSql::insert(trx, &rel1).await.unwrap();
+        let (trx, _) = AlbumArtistSql::insert(trx, &rel2).await.unwrap();
 
         let (_, artists) = album.get_artists(trx).await.unwrap();
 

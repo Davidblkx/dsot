@@ -1,4 +1,4 @@
-use crate::error::Result;
+use super::{SqlResult, SqlTransaction};
 
 /// Represents a single operation that can be performed on the database.
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
@@ -40,7 +40,7 @@ impl SqlOperation {
 /// Trait for handling SQL operations.
 pub trait SqlOperationHandler {
     fn apply_sql_op(
-        trx: sqlx::Transaction<'static, sqlx::Sqlite>,
+        trx: SqlTransaction,
         op: &SqlOperation,
-    ) -> impl Future<Output = Result<sqlx::Transaction<'static, sqlx::Sqlite>>>;
+    ) -> impl Future<Output = SqlResult<()>>;
 }

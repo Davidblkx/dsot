@@ -3,9 +3,13 @@ macro_rules! dsot_sql_entity {
     ([$table_name:expr] $entity:ident with $update:ident {
         $($prop:ident$(: $column:ident)?),*
     }) => {
+        use $crate::storage::sql::{SqlTransaction, SqlResult};
+        use $crate::storage::BinModel;
 
-        impl $entity {
-            paste::paste! {
+        paste::paste! {
+            pub struct [< $entity Sql >];
+
+            impl [< $entity Sql >] {
                 $(
                     pub fn [< get_sql_update_ $prop >]() -> &'static str {
                         concat!(
@@ -17,135 +21,126 @@ macro_rules! dsot_sql_entity {
                         )
                     }
                 )*
-            }
-        }
 
-        impl $crate::storage::sql::SqlEntity for $entity {
-            type Value = $entity;
-            type Operation = $update;
+                pub fn get_sql_insert_statement() -> &'static str {
+                    concat!(
+                        "INSERT INTO ",
+                        $table_name,
+                        " (id",
+                        $(
+                            ", ",
+                            $crate::mu_stringify_last!($prop$(, $column)?),
+                        )*
+                        ") VALUES (?",
+                        $($crate::macro_util_value_or!($prop, ", ?")),*,
+                        ")"
+                    )
+                }
 
-            fn get_sql_insert_statement() -> &'static str {
-                concat!(
-                    "INSERT INTO ",
-                    $table_name,
-                    " (id",
+                pub fn get_sql_fetch_by_id_statement() -> &'static str {
+                    concat!(
+                        "SELECT id",
+                        $(
+                            ", ",
+                            $crate::mu_stringify_last!($prop$(, $column)?),
+                        )*
+                        " FROM ",
+                        $table_name,
+                        " WHERE id = ?"
+                    )
+                }
+
+                pub fn get_delete_sql_statement() -> &'static str {
+                    concat!(
+                        "DELETE FROM ",
+                        $table_name,
+                        " WHERE id = ?"
+                    )
+                }
+
+                pub async fn insert(
+                    mut trx: SqlTransaction,
+                    entity: &$entity
+                ) -> SqlResult<()> {
+                    sqlx::query::<sqlx::Sqlite>(
+                        Self::get_sql_insert_statement()
+                    )
+                    .bind(&entity.id)
                     $(
-                        ", ",
-                        $crate::mu_stringify_last!($prop$(, $column)?),
+                        .bind(&entity.$prop)
                     )*
-                    ") VALUES (?",
-                    $($crate::macro_util_value_or!($prop, ", ?")),*,
-                    ")"
-                )
-            }
+                    .execute(&mut *trx)
+                    .await?;
 
-            fn get_sql_fetch_by_id_statement() -> &'static str {
-                concat!(
-                    "SELECT id",
-                    $(
-                        ", ",
-                        $crate::mu_stringify_last!($prop$(, $column)?),
-                    )*
-                    " FROM ",
-                    $table_name,
-                    " WHERE id = ?"
-                )
-            }
+                    Ok((trx, ()))
+                }
 
-            fn get_delete_sql_statement() -> &'static str {
-                concat!(
-                    "DELETE FROM ",
-                    $table_name,
-                    " WHERE id = ?"
-                )
-            }
+                pub async fn fetch_by_id(
+                    mut trx: SqlTransaction,
+                    id: &uuid::Uuid
+                ) -> SqlResult<Option<$entity>> {
+                    let result = sqlx::query_as::<sqlx::Sqlite, $entity>(
+                        Self::get_sql_fetch_by_id_statement()
+                    )
+                    .bind(id)
+                    .fetch_optional(&mut *trx)
+                    .await?;
 
-            async fn execute_sql_insert(
-                mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-                entity: &Self::Value
-            ) -> $crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-                sqlx::query::<sqlx::Sqlite>(
-                    Self::get_sql_insert_statement()
-                )
-                .bind(&entity.id)
-                $(
-                    .bind(&entity.$prop)
-                )*
-                .execute(&mut *trx)
-                .await?;
+                    Ok((trx, result))
+                }
 
-                Ok(trx)
-            }
+                pub async fn delete(
+                    mut trx: SqlTransaction,
+                    id: &uuid::Uuid
+                ) -> SqlResult<()> {
+                    sqlx::query::<sqlx::Sqlite>(
+                        Self::get_delete_sql_statement()
+                    )
+                    .bind(id)
+                    .execute(&mut *trx)
+                    .await?;
 
-            async fn execute_sql_fetch_by_id(
-                mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-                id: &uuid::Uuid
-            ) -> $crate::error::Result<(sqlx::Transaction<'static, sqlx::Sqlite>, Option<Self::Value>)> {
-                let result = sqlx::query_as::<sqlx::Sqlite, Self::Value>(
-                    Self::get_sql_fetch_by_id_statement()
-                )
-                .bind(id)
-                .fetch_optional(&mut *trx)
-                .await?;
+                    Ok((trx, ()))
+                }
 
-                Ok((trx, result))
-            }
-
-            async fn execute_sql_delete(
-                mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-                id: &uuid::Uuid
-            ) -> $crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-                sqlx::query::<sqlx::Sqlite>(
-                    Self::get_delete_sql_statement()
-                )
-                .bind(id)
-                .execute(&mut *trx)
-                .await?;
-
-                Ok(trx)
-            }
-
-            async fn execute_sql_update(
-                mut trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-                id: &uuid::Uuid,
-                op: &Self::Operation
-            ) -> $crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-                paste::paste! {
+                pub async fn update(
+                    mut trx: SqlTransaction,
+                    id: &uuid::Uuid,
+                    op: &$update
+                ) -> SqlResult<()> {
                     match op {
                         $(
-                            Self::Operation::[<Set $prop:camel>](value) => {
+                            $update::[<Set $prop:camel>](value) => {
                                 sqlx::query::<sqlx::Sqlite>(
-                                    Self::Value::[<get_sql_update_ $prop>]()
+                                    Self::[<get_sql_update_ $prop>]()
                                 )
                                 .bind(value)
                                 .bind(id)
                                 .execute(&mut *trx)
                                 .await?;
 
-                                Ok(trx)
+                                Ok((trx, ()))
                             }
                         )*
                     }
                 }
-            }
-        }
 
-        impl $crate::storage::SqlOperationHandler for $entity {
-            async fn apply_sql_op(
-                trx: sqlx::Transaction<'static, sqlx::Sqlite>,
-                op: &crate::storage::SqlOperation,
-            ) -> $crate::error::Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
-                match op {
-                    crate::storage::SqlOperation::Create { data, .. } => {
-                        let entity = $entity::deserialize(data)?;
-                        $entity::execute_sql_insert(trx, &entity).await
-                    }
-                    crate::storage::SqlOperation::Update { id, action, .. } => {
-                        let op = $update::deserialize(action)?;
-                        $entity::execute_sql_update(trx, id, &op).await
-                    }
-                    crate::storage::SqlOperation::Delete { id, .. } => {
-                        $entity::execute_sql_delete(trx, id).await
+                pub async fn execute_operation(
+                    trx: SqlTransaction,
+                    op: &crate::storage::SqlOperation
+                ) -> SqlResult<()> {
+                    match op {
+                        crate::storage::SqlOperation::Create { data, .. } => {
+                            let entity = $entity::deserialize(data)?;
+                            Self::insert(trx, &entity).await
+                        }
+                        crate::storage::SqlOperation::Update { id, action, .. } => {
+                            let op = $update::deserialize(action)?;
+                            Self::update(trx, id, &op).await
+                        }
+                        crate::storage::SqlOperation::Delete { id, .. } => {
+                            Self::delete(trx, id).await
+                        }
                     }
                 }
             }

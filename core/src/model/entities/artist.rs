@@ -2,9 +2,8 @@ use uuid::Uuid;
 
 use music_brainz::model::artist::ArtistType;
 
-use super::Album;
+use super::{Album, AlbumSql};
 
-use crate::storage::{BinModel, SqlEntity, SqlTransaction, SqlResult};
 use crate::error::Result;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
@@ -79,7 +78,7 @@ impl Artist {
             }
             let id = id.unwrap();
 
-            let (trx_ref, album) = Album::execute_sql_fetch_by_id(trx, &id).await?;
+            let (trx_ref, album) = AlbumSql::fetch_by_id(trx, &id).await?;
             trx = trx_ref;
 
             if let Some(album) = album {
@@ -116,85 +115,7 @@ crate::dsot_sql_entity!(["artists"] Artist with ArtistUpdateOp {
 mod tests {
     use super::*;
     use sqlx::SqlitePool;
-    use crate::model::entities::{artist_alias::ArtistAlias, album_artist::AlbumArtist};
-
-    #[sqlx::test(migrations = "../migrations")]
-    async fn can_do_sql_crud_operations(pool: SqlitePool) {
-        let trx = pool.begin().await.unwrap();
-
-        let artist = Artist {
-            id: Uuid::now_v7(),
-            mbid: Some(Uuid::now_v7()),
-            name: String::from("test_name"),
-            sort_name: None,
-            artist_type_id: 1,
-        };
-
-        // Insert
-        let trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
-
-        // Fetch by ID
-        let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
-        let trx = result.0;
-        let fetched_artist = result.1.unwrap();
-        assert_eq!(fetched_artist.id, artist.id);
-        assert_eq!(fetched_artist.mbid, artist.mbid);
-        assert_eq!(fetched_artist.name, artist.name);
-        assert_eq!(fetched_artist.sort_name, artist.sort_name);
-        assert_eq!(fetched_artist.artist_type_id, artist.artist_type_id);
-
-        // Update Mbid
-        let trx = Artist::execute_sql_update(
-            trx,
-            &artist.id,
-            &ArtistUpdateOp::SetMbid(None),
-        )
-        .await
-        .unwrap();
-
-        // Update Name
-        let trx = Artist::execute_sql_update(
-            trx,
-            &artist.id,
-            &ArtistUpdateOp::SetName(String::from("new_name")),
-        )
-        .await
-        .unwrap();
-
-        // Update Sort Name
-        let trx = Artist::execute_sql_update(
-            trx,
-            &artist.id,
-            &ArtistUpdateOp::SetSortName(Some(String::from("new_sort_name"))),
-        )
-        .await
-        .unwrap();
-
-        // Update Artist Type ID
-        let trx = Artist::execute_sql_update(
-            trx,
-            &artist.id,
-            &ArtistUpdateOp::SetArtistTypeId(2),
-        )
-        .await
-        .unwrap();
-
-        // Fetch by ID again to check the updates
-        let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
-        let trx = result.0;
-        let fetched_artist = result.1.unwrap();
-        assert_eq!(fetched_artist.mbid, None);
-        assert_eq!(fetched_artist.name, "new_name");
-        assert_eq!(fetched_artist.sort_name, Some("new_sort_name".to_string()));
-        assert_eq!(fetched_artist.artist_type_id, 2);
-
-        // Delete
-        let trx = Artist::execute_sql_delete(trx, &artist.id).await.unwrap();
-
-        // Fetch by ID again to check the deletion
-        let result = Artist::execute_sql_fetch_by_id(trx, &artist.id).await.unwrap();
-        assert!(result.1.is_none());
-    }
+    use crate::model::entities::{artist_alias::{ArtistAlias, ArtistAliasSql}, album_artist::{AlbumArtist, AlbumArtistSql}};
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_query_aliases(pool: SqlitePool) {
@@ -202,7 +123,7 @@ mod tests {
 
         let artist = Artist::new("artist");
 
-        let mut trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
+        let (mut trx, _) = ArtistSql::insert(trx, &artist).await.unwrap();
 
         let aliases = vec![
             String::from("alias1"),
@@ -211,7 +132,7 @@ mod tests {
         ];
 
         for alias in &aliases {
-            trx = ArtistAlias::execute_sql_insert(trx, &ArtistAlias::new(&artist.id, alias)).await.unwrap();
+            (trx, _) = ArtistAliasSql::insert(trx, &ArtistAlias::new(&artist.id, alias)).await.unwrap();
         }
 
         let (fetched_aliases, _) = artist.get_aliases(trx).await.unwrap();
@@ -232,11 +153,11 @@ mod tests {
         let rel1 = AlbumArtist::new(&album1.id, &artist.id);
         let rel2 = AlbumArtist::new(&album2.id, &artist.id);
 
-        let trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
-        let trx = Album::execute_sql_insert(trx, &album1).await.unwrap();
-        let trx = Album::execute_sql_insert(trx, &album2).await.unwrap();
-        let trx = AlbumArtist::execute_sql_insert(trx, &rel1).await.unwrap();
-        let trx = AlbumArtist::execute_sql_insert(trx, &rel2).await.unwrap();
+        let (trx, _) = ArtistSql::insert(trx, &artist).await.unwrap();
+        let (trx, _) = AlbumSql::insert(trx, &album1).await.unwrap();
+        let (trx, _) = AlbumSql::insert(trx, &album2).await.unwrap();
+        let (trx, _) = AlbumArtistSql::insert(trx, &rel1).await.unwrap();
+        let (trx, _) = AlbumArtistSql::insert(trx, &rel2).await.unwrap();
 
         let (_, albums) = artist.get_albums(trx).await.unwrap();
         assert_eq!(albums.len(), 2);

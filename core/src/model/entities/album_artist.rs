@@ -1,7 +1,5 @@
 use uuid::Uuid;
 
-use crate::storage::{BinModel, SqlEntity};
-
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct AlbumArtistV0 {
     pub id: Uuid,

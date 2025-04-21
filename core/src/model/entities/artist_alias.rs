@@ -1,7 +1,5 @@
 use uuid::Uuid;
 
-use crate::storage::{BinModel, SqlEntity};
-
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct ArtistAliasV0 {
     pub id: Uuid,
@@ -41,7 +39,7 @@ crate::dsot_sql_entity!(["artist_aliases"] ArtistAlias with ArtistAliasUpdateOp 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::super::Artist;
+    use super::super::{Artist, ArtistSql};
     use sqlx::SqlitePool;
 
     #[sqlx::test(migrations = "../migrations")]
@@ -51,28 +49,27 @@ mod tests {
         let alias = ArtistAlias::new(&artist.id, "Test Alias");
 
         // Insert artist
-        let trx = Artist::execute_sql_insert(trx, &artist).await.unwrap();
+        let (trx, _) = ArtistSql::insert(trx, &artist).await.unwrap();
 
         // Insert alias
-        let trx = ArtistAlias::execute_sql_insert(trx, &alias).await.unwrap();
+        let (trx, _) = ArtistAliasSql::insert(trx, &alias).await.unwrap();
 
         // Fetch alias
-        let result = ArtistAlias::execute_sql_fetch_by_id(trx, &alias.id).await.unwrap();
-        let trx = result.0;
-        let fetched_alias: ArtistAlias = result.1.unwrap();
+        let (trx, result) = ArtistAliasSql::fetch_by_id(trx, &alias.id).await.unwrap();
+        let fetched_alias: ArtistAlias = result.unwrap();
         assert_eq!(fetched_alias.id, alias.id);
         assert_eq!(fetched_alias.artist_id, alias.artist_id);
         assert_eq!(fetched_alias.name, alias.name);
 
         // Update alias
-        let trx = ArtistAlias::execute_sql_update(
+        let (trx, _) = ArtistAliasSql::update(
             trx,
             &alias.id,
             &ArtistAliasUpdateOp::SetName("Updated Alias".to_string())
         ).await.unwrap();
 
         // Fetch updated alias
-        let result = ArtistAlias::execute_sql_fetch_by_id(trx, &alias.id).await.unwrap();
+        let result = ArtistAliasSql::fetch_by_id(trx, &alias.id).await.unwrap();
         let trx = result.0;
         let updated_alias: ArtistAlias = result.1.unwrap();
         assert_eq!(updated_alias.id, alias.id);
@@ -80,10 +77,10 @@ mod tests {
         assert_eq!(updated_alias.name, "Updated Alias");
 
         // Delete artist
-        let trx = Artist::execute_sql_delete(trx, &artist.id).await.unwrap();
+        let (trx, _) = ArtistSql::delete(trx, &artist.id).await.unwrap();
 
         // Check alias is deleted
-        let result = ArtistAlias::execute_sql_fetch_by_id(trx, &alias.id).await.unwrap();
+        let result = ArtistAliasSql::fetch_by_id(trx, &alias.id).await.unwrap();
         assert!(result.1.is_none());
     }
 }

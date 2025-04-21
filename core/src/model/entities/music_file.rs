@@ -1,5 +1,4 @@
 use uuid::Uuid;
-use crate::storage::{BinModel, sql::SqlEntity};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct MusicFileV0 {
@@ -48,33 +47,31 @@ mod tests {
         };
 
         // Insert
-        let trx = MusicFile::execute_sql_insert(trx, &music_file).await.unwrap();
+        let (trx, ()) = MusicFileSql::insert(trx, &music_file).await.unwrap();
 
         // Fetch by ID
-        let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
-        let trx = result.0;
-        let fetched_music_file = result.1.unwrap();
+        let (trx, result) = MusicFileSql::fetch_by_id(trx, &music_file.id).await.unwrap();
+        let fetched_music_file = result.unwrap();
         assert_eq!(fetched_music_file.id, music_file.id);
         assert_eq!(fetched_music_file.path, music_file.path);
 
         // Update Path
-        let trx = MusicFile::execute_sql_update(
+        let (trx, ()) = MusicFileSql::update(
             trx,
             &music_file.id,
             &MusicFileUpdateOp::SetPath(String::from("new_path")),
         ).await.unwrap();
 
         // Fetch by ID again to check the updates
-        let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
-        let trx = result.0;
-        let fetched_music_file = result.1.unwrap();
+        let (trx, result) = MusicFileSql::fetch_by_id(trx, &music_file.id).await.unwrap();
+        let fetched_music_file = result.unwrap();
         assert_eq!(fetched_music_file.path, "new_path");
 
         // Delete
-        let trx = MusicFile::execute_sql_delete(trx, &music_file.id).await.unwrap();
+        let (trx, ()) = MusicFileSql::delete(trx, &music_file.id).await.unwrap();
 
         // Check if the record is deleted
-        let result = MusicFile::execute_sql_fetch_by_id(trx, &music_file.id).await.unwrap();
-        assert!(result.1.is_none());
+        let (_, result) = MusicFileSql::fetch_by_id(trx, &music_file.id).await.unwrap();
+        assert!(result.is_none());
     }
 }

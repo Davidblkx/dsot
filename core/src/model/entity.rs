@@ -1,7 +1,5 @@
-use super::entities::Artist;
-use crate::storage::sql::{SqlOperation, SqlOperationHandler};
-
-use crate::error::Result;
+use super::entities::ArtistSql;
+use crate::storage::sql::{SqlOperation, SqlOperationHandler, SqlResult, SqlTransaction};
 
 pub enum DsotEntity {
     Artist,
@@ -27,11 +25,11 @@ impl DsotEntity {
 
 impl SqlOperationHandler for DsotEntity {
     async fn apply_sql_op(
-        trx: sqlx::Transaction<'static, sqlx::Sqlite>,
+        trx: SqlTransaction,
         op: &SqlOperation,
-    ) -> Result<sqlx::Transaction<'static, sqlx::Sqlite>> {
+    ) -> SqlResult<()> {
         match Self::from_id(op.get_entity()) {
-            Some(DsotEntity::Artist) => Artist::apply_sql_op(trx, op).await,
+            Some(DsotEntity::Artist) => ArtistSql::execute_operation(trx, op).await,
             _ => todo!(),
         }
     }
