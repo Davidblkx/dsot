@@ -1,3 +1,4 @@
 # Working now
 
-- Rewrite SQL functions to use crate::storage::sql::SqlResult<T>
+- Finish core model entities
+- Work on documentation pages (see cargo doc)
