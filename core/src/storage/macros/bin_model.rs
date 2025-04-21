@@ -85,10 +85,11 @@ macro_rules! dsot_storage_declare_all_model_de {
 
 #[macro_export]
 macro_rules! dsot_storage_declare_model_type {
-    ($name: ident, $type: ident, $($rest: ident),*) => {
-        $crate::dsot_storage_declare_model_type!($name, $($rest),*);
+    ({ $name: ident, $type: ident, $($rest: ident),* }$($desc: expr)?) => {
+        $crate::dsot_storage_declare_model_type!({ $name, $($rest),* }$($desc)?);
     };
-    ($name: ident, $type: ident) => {
+    ({ $name: ident, $type: ident }$($desc: expr)?) => {
+        $(#[doc = $desc])?
         pub type $name = $type;
     };
 }
@@ -138,8 +139,8 @@ macro_rules! dsot_storage_declare_model_type {
 macro_rules! dsot_storage_declare_model {
     ($name: ident {
         $($version: literal: $type: ident),*
-    }) => {
-        $crate::dsot_storage_declare_model_type!($name, $($type),*);
+    } $($desc: expr)?) => {
+        $crate::dsot_storage_declare_model_type!({ $name, $($type),* }$($desc)?);
 
         $crate::dsot_storage_declare_model_de_v0!($($type),*);
 

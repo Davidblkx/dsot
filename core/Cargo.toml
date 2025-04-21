@@ -11,14 +11,14 @@ music_brainz = { path = "../music_brainz" }
 serde = { version = "1", features = ["derive"] }
 bincode1 = { version = "1.3.3", package = "bincode" }
 thiserror = "1"
-uuid = { version = "1.10.0", features = ["serde", "v7"] }
+uuid = { version = "1.16.0", features = ["serde", "v7"] }
 paste = "1.0.15"
 chrono = { version = "0.4.38", features = ["serde"] }
 log = "0.4"
-sqlx = { version = "0.8.3", features = ["macros", "uuid", "sqlite", "uuid", "chrono"], default-features = false}
+sqlx = { version = "0.8.5", features = ["macros", "uuid", "sqlite", "chrono"], default-features = false}
 redb = "2.1.3"
 
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0.8.3", features = ["macros", "uuid", "sqlite", "uuid", "migrate", "runtime-tokio"], default-features = false}
+sqlx = { version = "0.8.5", features = ["macros", "uuid", "sqlite", "chrono", "migrate", "runtime-tokio"], default-features = false}
 tempfile = "3"
