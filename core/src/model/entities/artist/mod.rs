@@ -1,8 +1,7 @@
 mod entity;
-mod op;
 mod impls;
 
 pub mod sql;
+pub mod op;
 
 pub use entity::*;
-pub use op::*;

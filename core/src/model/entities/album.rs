@@ -77,7 +77,7 @@ crate::dsot_sql_entity!(["albums"] Album with AlbumUpdateOp {
 mod tests {
     use super::*;
     use sqlx::SqlitePool;
-    use crate::model::entities::album_artist::{AlbumArtist, AlbumArtistSql};
+    use crate::model::entities::rel::{AlbumArtist, AlbumArtistSql};
 
     #[sqlx::test(migrations = "../migrations")]
     async fn can_load_artists(pool: SqlitePool) {

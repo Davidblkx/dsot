@@ -1,5 +1,5 @@
-use super::{Artist, ArtistUpdateOp};
-use crate::model::entities::artist_alias::ArtistAlias;
+use super::{Artist, op::ArtistUpdateOp};
+use crate::model::entities::rel::ArtistAlias;
 
 crate::dsot_sql_entity!(["artists"] Artist with ArtistUpdateOp {
     mbid,
@@ -24,7 +24,7 @@ impl Artist {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::model::entities::artist_alias::{ArtistAlias, ArtistAliasSql};
+    use crate::model::entities::rel::{ArtistAlias, ArtistAliasSql};
     use crate::model::entities::sql::ArtistSql;
 
     #[sqlx::test(migrations = "../migrations")]

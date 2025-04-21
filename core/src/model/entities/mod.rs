@@ -2,8 +2,7 @@ mod artist;
 mod music_file;
 mod album;
 
-pub mod artist_alias;
-pub mod album_artist;
+pub mod rel;
 
 pub use artist::*;
 pub use music_file::*;
