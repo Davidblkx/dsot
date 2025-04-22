@@ -9,7 +9,7 @@ pub struct AlbumV0 {
     /// Title of the album.
     pub title: String,
     /// Year of the first release.
-    pub year: i16,
+    pub year: Option<i16>,
 }
 
 crate::dsot_storage_declare_model!(

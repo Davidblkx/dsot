@@ -45,6 +45,9 @@ pub enum DsotError {
     #[error("SQL Error: {0}")]
     SqlError(#[from] sqlx::Error),
 
+    #[error("SQL Error: [Missing relation] {0}")]
+    SqlMissingRelation(String),
+
     #[error("Unknown DSOT error")]
     Unknown,
 }

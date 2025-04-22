@@ -7,7 +7,11 @@ impl super::Album {
             id: Uuid::now_v7(),
             mbid: None,
             title: title.to_string(),
-            year,
+            year: if year > 0 {
+                Some(year)
+            } else {
+                None
+            },
         }
     }
 }

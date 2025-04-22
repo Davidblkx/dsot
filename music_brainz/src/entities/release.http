@@ -1,0 +1,11 @@
+### Search
+
+https://musicbrainz.org/ws/2/release?query=release:dark%20side%20of%moon&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)
+
+### Lookup
+
+https://musicbrainz.org/ws/2/release/591f767a-b046-3671-afc7-aaea3804dc49?inc=media+recordings&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)

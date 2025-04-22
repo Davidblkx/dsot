@@ -22,7 +22,7 @@ CREATE TABLE albums (
     id BLOB PRIMARY KEY NOT NULL,
     mbid BLOB,
     title TEXT NOT NULL,
-    year INTEGER NOT NULL
+    year INTEGER
 );
 
 CREATE INDEX albums_mbid ON albums (mbid);
@@ -38,6 +38,23 @@ CREATE TABLE album_artists (
 
 CREATE INDEX album_artists_album_id ON album_artists (album_id);
 CREATE INDEX album_artists_artist_id ON album_artists (artist_id);
+
+CREATE TABLE releases (
+    id BLOB PRIMARY KEY NOT NULL,
+    mbid BLOB,
+    title TEXT NOT NULL,
+    year INTEGER,
+    status INTEGER,
+    country TEXT,
+    duration BIGINT,
+    track_count INTEGER,
+    format TEXT,
+    album_id BLOB NOT NULL,
+    FOREIGN KEY (album_id) REFERENCES albums (id) ON DELETE CASCADE
+);
+
+CREATE INDEX releases_mbid ON releases (mbid);
+CREATE INDEX releases_album_id ON releases (album_id);
 
 CREATE TABLE music_files (
     id BLOB PRIMARY KEY NOT NULL,

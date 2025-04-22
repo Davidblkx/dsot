@@ -1,7 +1,8 @@
 use crate::model::artist::ArtistCredit;
+use crate::model::release::{ReleaseStatus, ReleaseMedia};
 
 entity!(Release{
-    inc: [artists, collections, labels, recordings, release_groups="release-groups"],
+    inc: [artists, collections, labels, recordings, release_groups="release-groups", discids, media, isrcs],
     search [releases]: {
         arid: "The MBID of any of the release artists",
         artist: "Part of the combined credited artist name for the release, including join phrases (e.g. 'Artist X feat.')",
@@ -38,6 +39,14 @@ entity!(Release{
         ["The title of the release."]
         title: String,
         ["The artist(s) that the release is primarily credited to."]
-        artists "artist-credit": Option<Vec<ArtistCredit>>
+        artists "artist-credit": Option<Vec<ArtistCredit>>,
+        ["The year the release was released."]
+        date: Option<String>,
+        ["The status of the release."]
+        status: Option<ReleaseStatus>,
+        ["The country the release was released in."]
+        country: Option<String>,
+        ["The included media."]
+        media: Option<Vec<ReleaseMedia>>
     }
 });
