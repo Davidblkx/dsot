@@ -3,3 +3,9 @@
 https://musicbrainz.org/ws/2/work/62f26dc4-b9c9-3e5f-8d16-1ec6eeb9cc6d?inc=recording-rels&fmt=json
 Content-Type: application/json
 User-Agent: dsot_tests/1 (dev@davidpires.pt)
+
+### Search
+
+https://musicbrainz.org/ws/2/work?query=work%3AThe%20Sound%20of%20Silence%20AND%20artist%3ASimon%20%26%20Garfunkel&limit=5&offset=0&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)

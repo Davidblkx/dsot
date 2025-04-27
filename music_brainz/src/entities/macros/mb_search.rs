@@ -54,6 +54,10 @@ macro_rules! mb_search {
                     let json: [< $name SearchResult>] = crate::utils::safe_parse_json::parse(json_src)?;
                     Ok(json)
                 }
+
+                pub fn get_url(&self) -> crate::error::Result<url::Url> {
+                    crate::operations::search::build_url(self)
+                }
             }
 
             #[derive(Clone, Debug)]

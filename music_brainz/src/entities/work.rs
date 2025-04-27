@@ -1,3 +1,5 @@
+use crate::model::Relationship;
+
 entity!(Work{
     inc: [recording_rels="recording-rels"],
     search [works]: {
@@ -28,6 +30,8 @@ entity!(Work{
         ["The type of the work."]
         r#type: Option<String>,
         ["The list of all languages the work is available in."]
-        languages: Option<Vec<String>>
+        languages: Option<Vec<String>>,
+        ["Included relationships to other entities."]
+        relations: Option<Vec<Relationship>>
     }
 });
