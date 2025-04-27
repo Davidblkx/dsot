@@ -8,6 +8,7 @@ async fn main() {
     let result = Recording::lookup("6dc462de-a12b-4cea-878b-52b031be8257")
         .inc_artists()
         .inc_genres()
+        .inc_work_rels()
         .execute().await;
 
     match result {
@@ -23,6 +24,14 @@ async fn main() {
             if let Some(genres) = a.genres {
                 for genre in genres {
                     println!("Genre: {}", genre.name);
+                }
+            }
+
+            if let Some(rels) = a.relations {
+                for rel in rels {
+                    if let Some(work) = rel.work {
+                        println!("Related Work: {}", work.title);
+                    }
                 }
             }
         }

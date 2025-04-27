@@ -1,7 +1,8 @@
 use crate::model::artist::ArtistCredit;
+use crate::model::Relationship;
 
 entity!(Recording{
-    inc: [artists, releases, release_groups="release-groups", isrcs, url_rels="url-rels"],
+    inc: [artists, releases, release_groups="release-groups", isrcs, url_rels="url-rels", work_rels="work-rels"],
     search [recordings]: {
         alias: "Part of any alias attached to the recording (diacritics are ignored)",
         arid: "The MBID of any of the recording artists",
@@ -48,6 +49,8 @@ entity!(Recording{
         ["The date of the earliest release that includes the recording. e.g. '1980-01-22'"]
         first_release_date "first-release-date": Option<String>,
         ["Indicating whether or not the recording is a video recording"]
-        video: Option<bool>
+        video: Option<bool>,
+        ["Included relationships to other entities."]
+        relations: Option<Vec<Relationship>>
     }
 });

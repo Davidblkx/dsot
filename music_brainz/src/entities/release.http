@@ -9,3 +9,9 @@ User-Agent: dsot_tests/1 (dev@davidpires.pt)
 https://musicbrainz.org/ws/2/release/591f767a-b046-3671-afc7-aaea3804dc49?inc=media+recordings&fmt=json
 Content-Type: application/json
 User-Agent: dsot_tests/1 (dev@davidpires.pt)
+
+### Lookup Multiple Media
+
+https://musicbrainz.org/ws/2/release/d5d807d7-2cbf-3365-8838-603c25fae8c9?inc=media+recordings&fmt=json
+Content-Type: application/json
+User-Agent: dsot_tests/1 (dev@davidpires.pt)

@@ -1,5 +1,5 @@
 ### Lookup
 
-https://musicbrainz.org/ws/2/recording/29d6a30b-b911-475c-808c-8b289844ca75?inc=artists&fmt=json
+https://musicbrainz.org/ws/2/recording/29d6a30b-b911-475c-808c-8b289844ca75?inc=artists+work-rels&fmt=json
 Content-Type: application/json
 User-Agent: dsot_tests/1 (dev@davidpires.pt)
