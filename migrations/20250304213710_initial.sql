@@ -56,7 +56,101 @@ CREATE TABLE releases (
 CREATE INDEX releases_mbid ON releases (mbid);
 CREATE INDEX releases_album_id ON releases (album_id);
 
+CREATE TABLE release_artists (
+    id BLOB PRIMARY KEY NOT NULL,
+    release_id BLOB NOT NULL,
+    artist_id BLOB NOT NULL,
+    FOREIGN KEY (release_id) REFERENCES releases (id) ON DELETE CASCADE,
+    FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE
+);
+
+CREATE INDEX release_artists_release_id ON release_artists (release_id);
+CREATE INDEX release_artists_artist_id ON release_artists (artist_id);
+
+CREATE TABLE release_media (
+    id BLOB PRIMARY KEY NOT NULL,
+    release_id BLOB NOT NULL,
+    format TEXT,
+    count INTEGER,
+    FOREIGN KEY (release_id) REFERENCES releases (id) ON DELETE CASCADE
+);
+
+CREATE INDEX release_medium_release_id ON release_medium (release_id);
+
+CREATE TABLE tracks (
+    id BLOB PRIMARY KEY NOT NULL,
+    release_media_id BLOB NOT NULL,
+    media_index INTEGER NOT NULL, -- Index of the media (CD1, CD2, etc.)
+    release_index INTEGER NOT NULL, -- Overall index in the release
+    track_number INTEGER NOT NULL, -- Track number in the media
+    position TEXT, -- Position in the media (e.g., "SideA-1")
+    title TEXT NOT NULL,
+    mbid BLOB,
+    recording_id BLOB,
+    FOREIGN KEY (release_media_id) REFERENCES release_media (id) ON DELETE CASCADE,
+    FOREIGN KEY (recording_id) REFERENCES recordings (id) ON DELETE CASCADE
+);
+
+CREATE INDEX tracks_release_media_id ON tracks (release_media_id);
+CREATE INDEX tracks_release_index ON tracks (release_index);
+
+CREATE TABLE works (
+    id BLOB PRIMARY KEY NOT NULL,
+    mbid BLOB,
+    title TEXT NOT NULL,
+    type TEXT,
+    language TEXT
+);
+
+CREATE INDEX works_mbid ON works (mbid);
+
+CREATE TABLE recordings (
+    id BLOB PRIMARY KEY NOT NULL,
+    mbid BLOB,
+    title TEXT NOT NULL,
+    isrc TEXT,
+    work_id BLOB,
+    length BIGINT,
+    FOREIGN KEY (work_id) REFERENCES works (id) ON DELETE CASCADE
+);
+
+CREATE INDEX recordings_mbid ON recordings (mbid);
+
+CREATE TABLE recordings_artists (
+    id BLOB PRIMARY KEY NOT NULL,
+    recording_id BLOB NOT NULL,
+    artist_id BLOB NOT NULL,
+    FOREIGN KEY (recording_id) REFERENCES recordings (id) ON DELETE CASCADE,
+    FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE
+);
+
+CREATE INDEX recordings_artists_recording_id ON recordings_artists (recording_id);
+CREATE INDEX recordings_artists_artist_id ON recordings_artists (artist_id);
+
+CREATE TABLE storages (
+    id BLOB PRIMARY KEY NOT NULL,
+    path TEXT NOT NULL,
+    format INTEGER NOT NULL,
+    is_local INTEGER NOT NULL DEFAULT 0,
+    os_id TEXT,
+);
+
+CREATE INDEX storages_path ON storages (path);
+
 CREATE TABLE music_files (
     id BLOB PRIMARY KEY NOT NULL,
-    path TEXT NOT NULL
+    path TEXT NOT NULL,
+    storage_id BLOB NOT NULL,
+    recording_id BLOB,
+    size BIGINT NOT NULL,
+    format INTEGER NOT NULL,
+    is_lossless INTEGER NOT NULL DEFAULT 0,
+    need_better INTEGER NOT NULL DEFAULT 0,
+    chromaprint TEXT,
+    FOREIGN KEY (storage_id) REFERENCES storages (id) ON DELETE CASCADE,
+    FOREIGN KEY (recording_id) REFERENCES recordings (id) ON DELETE SET NULL
 );
+
+CREATE INDEX music_files_path ON music_files (path);
+CREATE INDEX music_files_storage_id ON music_files (storage_id);
+CREATE INDEX music_files_recording_id ON music_files (recording_id);
