@@ -8,7 +8,6 @@ pub enum ReleaseUpdateOpV0 {
     SetStatus(Option<u32>),
     SetCountry(Option<String>),
     SetDuration(Option<i64>),
-    SetTrackCount(Option<u32>),
     SetFormat(Option<String>),
     SetAlbumId(Uuid),
 }

@@ -47,7 +47,6 @@ CREATE TABLE releases (
     status INTEGER,
     country TEXT,
     duration BIGINT,
-    track_count INTEGER,
     format TEXT,
     album_id BLOB NOT NULL,
     FOREIGN KEY (album_id) REFERENCES albums (id) ON DELETE CASCADE
@@ -75,7 +74,7 @@ CREATE TABLE release_media (
     FOREIGN KEY (release_id) REFERENCES releases (id) ON DELETE CASCADE
 );
 
-CREATE INDEX release_medium_release_id ON release_medium (release_id);
+CREATE INDEX release_media_release_id ON release_media (release_id);
 
 CREATE TABLE tracks (
     id BLOB PRIMARY KEY NOT NULL,
@@ -111,6 +110,7 @@ CREATE TABLE recordings (
     isrc TEXT,
     work_id BLOB,
     length BIGINT,
+    disambiguation TEXT,
     FOREIGN KEY (work_id) REFERENCES works (id) ON DELETE CASCADE
 );
 
@@ -132,7 +132,7 @@ CREATE TABLE storages (
     path TEXT NOT NULL,
     format INTEGER NOT NULL,
     is_local INTEGER NOT NULL DEFAULT 0,
-    os_id TEXT,
+    os_id TEXT
 );
 
 CREATE INDEX storages_path ON storages (path);

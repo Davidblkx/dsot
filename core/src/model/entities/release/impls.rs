@@ -15,7 +15,6 @@ impl Release {
             format: None,
             mbid: None,
             status: None,
-            track_count: None,
             year: None,
             album_id: *album_id,
         }
@@ -30,7 +29,6 @@ impl Release {
             format: None,
             mbid: None,
             status: None,
-            track_count: None,
             year: None,
             album_id: album.id,
         }

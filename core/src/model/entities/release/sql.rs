@@ -8,7 +8,6 @@ crate::dsot_sql_entity!(["releases"] Release with ReleaseUpdateOp {
     status,
     country,
     duration,
-    track_count,
     format,
     album_id
 });

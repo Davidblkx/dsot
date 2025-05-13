@@ -16,8 +16,6 @@ pub struct ReleaseV0 {
     pub country: Option<String>,
     /// Duration of the release.
     pub duration: Option<i64>,
-    /// Track count of the release.
-    pub track_count: Option<u32>,
     /// Format of the release (e.g., CD, vinyl, digital).
     pub format: Option<String>,
     /// Internal ID for the release group (album).

@@ -9,7 +9,7 @@ pub struct RecordingV0 {
     /// Title of the recording.
     pub title: String,
     /// Length of the recording in milliseconds.
-    pub length: Option<i64>,
+    pub length: Option<u32>,
     /// Description of the recording used for disambiguation.
     pub disambiguation: Option<String>,
     /// Year of first release of the recording.
