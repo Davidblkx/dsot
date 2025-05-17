@@ -69,8 +69,8 @@ CREATE INDEX release_artists_artist_id ON release_artists (artist_id);
 CREATE TABLE release_media (
     id BLOB PRIMARY KEY NOT NULL,
     release_id BLOB NOT NULL,
-    format TEXT,
-    count INTEGER,
+    format INTEGER NOT NULL DEFAULT 0,
+    count INTEGER NOT NULL DEFAULT 0, -- track count
     FOREIGN KEY (release_id) REFERENCES releases (id) ON DELETE CASCADE
 );
 

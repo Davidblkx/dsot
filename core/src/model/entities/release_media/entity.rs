@@ -1,0 +1,18 @@
+use uuid::Uuid;
+
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
+pub struct ReleaseMediaV0 {
+    pub id: Uuid,
+    pub release_id: Uuid,
+    pub format: u32,
+    pub count: u32,
+}
+
+crate::dsot_storage_declare_model!(
+    ReleaseMedia {
+        0: ReleaseMediaV0
+    }
+    "
+    Documentation here
+    "
+);
