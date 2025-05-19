@@ -8,6 +8,14 @@ pub struct ReleaseMediaV0 {
     pub count: u32,
 }
 
+pub enum ReleaseMediaFormat {
+    Unknown,
+    CD,
+    Vinyl,
+    Digital,
+    Cassette,
+}
+
 crate::dsot_storage_declare_model!(
     ReleaseMedia {
         0: ReleaseMediaV0
