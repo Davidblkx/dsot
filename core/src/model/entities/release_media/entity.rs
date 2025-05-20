@@ -4,6 +4,8 @@ use uuid::Uuid;
 pub struct ReleaseMediaV0 {
     pub id: Uuid,
     pub release_id: Uuid,
+    pub mbid: Option<Uuid>,
+    pub position: u32,
     pub format: u32,
     pub count: u32,
 }

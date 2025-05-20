@@ -5,6 +5,8 @@ pub enum ReleaseMediaUpdateOpV0 {
     SetReleaseId(Uuid),
     SetFormat(u32),
     SetCount(u32),
+    SetPosition(u32),
+    SetMbid(Option<Uuid>),
 }
 
 crate::dsot_storage_declare_model!(

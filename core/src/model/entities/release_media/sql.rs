@@ -2,8 +2,10 @@ use super::{ReleaseMedia, op::ReleaseMediaUpdateOp};
 
 crate::dsot_sql_entity!(["release_media"] ReleaseMedia with ReleaseMediaUpdateOp {
     release_id,
+    position,
     format,
-    count
+    count,
+    mbid
 });
 
 #[cfg(test)]

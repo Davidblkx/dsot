@@ -69,8 +69,10 @@ CREATE INDEX release_artists_artist_id ON release_artists (artist_id);
 CREATE TABLE release_media (
     id BLOB PRIMARY KEY NOT NULL,
     release_id BLOB NOT NULL,
-    format INTEGER NOT NULL DEFAULT 0,
-    count INTEGER NOT NULL DEFAULT 0, -- track count
+    position BIGINT NOT NULL DEFAULT 0,
+    format BIGINT NOT NULL DEFAULT 0,
+    count BIGINT NOT NULL DEFAULT 0, -- track count
+    mbid BLOB,
     FOREIGN KEY (release_id) REFERENCES releases (id) ON DELETE CASCADE
 );
 
@@ -107,9 +109,10 @@ CREATE TABLE recordings (
     id BLOB PRIMARY KEY NOT NULL,
     mbid BLOB,
     title TEXT NOT NULL,
+    length BIGINT,
     isrc TEXT,
     work_id BLOB,
-    length BIGINT,
+    year INTEGER,
     disambiguation TEXT,
     FOREIGN KEY (work_id) REFERENCES works (id) ON DELETE CASCADE
 );

@@ -10,10 +10,14 @@ pub struct RecordingV0 {
     pub title: String,
     /// Length of the recording in milliseconds.
     pub length: Option<u32>,
-    /// Description of the recording used for disambiguation.
-    pub disambiguation: Option<String>,
+    /// isrc (International Standard Recording Code) for the recording.
+    pub isrc: Option<String>,
+    /// The ID of the related work (song).
+    pub work_id: Option<Uuid>,
     /// Year of first release of the recording.
-    pub year: Option<i32>
+    pub year: Option<i32>,
+    /// Description of the recording used for disambiguation.
+    pub disambiguation: Option<String>
 }
 
 crate::dsot_storage_declare_model!(

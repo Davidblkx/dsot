@@ -43,6 +43,8 @@ impl ReleaseMedia {
             release_id: *release_id,
             format: format.to_u32(),
             count: 0,
+            position: 0,
+            mbid: None,
         }
     }
 
