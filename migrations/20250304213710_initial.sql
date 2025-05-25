@@ -133,17 +133,20 @@ CREATE INDEX recordings_artists_artist_id ON recordings_artists (artist_id);
 
 CREATE TABLE storages (
     id BLOB PRIMARY KEY NOT NULL,
-    path TEXT NOT NULL,
-    format INTEGER NOT NULL,
-    is_local INTEGER NOT NULL DEFAULT 0,
-    os_id TEXT
+    description TEXT NOT NULL, -- Description of the storage device, e.g., "Music Storage 1"
+    mount TEXT NOT NULL, -- Mount point of the storage device, linux "/mnt/storage1" or windows "D:\"
+    root TEXT NOT NULL, -- Root directory of the storage device, e.g., "/mnt/storage1/music" or "D:\Music"
+    serial_number TEXT NOT NULL, -- Serial number of the storage device
+    is_default INTEGER NOT NULL DEFAULT 0 -- Whether this is the default storage
 );
 
-CREATE INDEX storages_path ON storages (path);
+CREATE INDEX storages_mount ON storages (mount);
+CREATE INDEX storages_serial_number ON storages (serial_number);
+CREATE INDEX storages_is_default ON storages (is_default);
 
 CREATE TABLE music_files (
     id BLOB PRIMARY KEY NOT NULL,
-    path TEXT NOT NULL,
+    path TEXT NOT NULL, -- path relative to the storage root, e.g., "Artist/Album/Track.mp3"
     storage_id BLOB NOT NULL,
     recording_id BLOB,
     size BIGINT NOT NULL,
