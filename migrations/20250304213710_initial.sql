@@ -99,8 +99,9 @@ CREATE TABLE works (
     id BLOB PRIMARY KEY NOT NULL,
     mbid BLOB,
     title TEXT NOT NULL,
-    type TEXT,
-    language TEXT
+    kind TEXT, -- 1: Song, 2: Composition, etc.
+    language TEXT,
+    disambiguation TEXT
 );
 
 CREATE INDEX works_mbid ON works (mbid);
