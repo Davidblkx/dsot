@@ -9,6 +9,6 @@ repository.workspace = true
 [dependencies]
 dsot_core = { path = "../core" }
 music_brainz = { path = "../music_brainz" }
-log = "0.4"
-env_logger = "0.11"
-tokio = { version = "1.40.0", features = ["full"] }
+log = { workspace = true }
+env_logger = { workspace = true }
+tokio = { workspace = true, features = ["full"] }

@@ -7,3 +7,21 @@ edition = "2024"
 authors = ["David Pires<dev@davidpires.pt>"]
 license = "MIT"
 repository = "https://github.com/Davidblkx/dsot"
+
+[workspace.dependencies]
+tokio = { version = "1.45" }
+log = { version = "0.4" }
+fern = { version = "0.7" }
+serde = { version = "1", features = ["derive"] }
+reqwest = { version = "0.12.7", features = ["blocking"] }
+thiserror = { version = "1" }
+uuid = { version = "1.16.0", features = ["serde", "v7"] }
+paste = { version = "1.0.15" }
+chrono = { version = "0.4" }
+sqlx = { version = "0.8.5", features = ["macros", "uuid", "sqlite", "chrono"], default-features = false}
+redb = { version = "2.6"}
+serde_json = { version = "1.0" }
+url = { version = "2.5.2" }
+urlencoding = { version = "2.1.3" }
+tempfile = { version = "3" }
+env_logger = { version = "0.11" }

@@ -2,3 +2,4 @@
 
 - Finish core model entities
 - Work on documentation pages (see cargo doc)
+- Update to bincode2
