@@ -151,7 +151,6 @@ CREATE TABLE music_files (
     recording_id BLOB,
     size BIGINT NOT NULL,
     format INTEGER NOT NULL,
-    is_lossless INTEGER NOT NULL DEFAULT 0,
     need_better INTEGER NOT NULL DEFAULT 0,
     chromaprint TEXT,
     FOREIGN KEY (storage_id) REFERENCES storages (id) ON DELETE CASCADE,

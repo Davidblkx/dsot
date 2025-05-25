@@ -6,5 +6,6 @@ pub mod release_media;
 pub mod track;
 pub mod work;
 pub mod storage;
+pub mod music_file;
 
 pub mod rel;
