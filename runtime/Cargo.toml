@@ -1,5 +1,5 @@
 [package]
-name = "dsot_cli"
+name = "dsot_runtime"
 version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
@@ -8,9 +8,5 @@ repository.workspace = true
 
 [dependencies]
 dsot_core = { path = "../core" }
-music_brainz = { path = "../music_brainz" }
-dsot_runtime = { path = "../runtime" }
-log = { workspace = true }
-env_logger = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
 bakunin_config = { workspace = true }
+log = { workspace = true }
