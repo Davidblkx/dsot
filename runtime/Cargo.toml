@@ -10,3 +10,5 @@ repository.workspace = true
 dsot_core = { path = "../core" }
 bakunin_config = { workspace = true }
 log = { workspace = true }
+dirs = { workspace = true }
+flexi_logger = { workspace = true, features = ["async"] }
