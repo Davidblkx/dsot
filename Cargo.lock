@@ -418,7 +418,6 @@ dependencies = [
  "bakunin_config",
  "dsot_core",
  "dsot_runtime",
- "env_logger",
  "log",
  "music_brainz",
  "tokio",

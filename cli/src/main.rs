@@ -1,23 +1,22 @@
-mod config;
-
-use dsot_runtime::init;
+use dsot_runtime::{Config, infra::init_config_builder, init};
 
 #[tokio::main]
 async fn main() {
-    env_logger::init();
     music_brainz::init_user_agent("dsot", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
-    let value = config::load_config();
-    let config = dsot_runtime::infra::Config::from_value(value);
+    let config = init_config_builder(true)
+        .expect("Failed to initialize config builder")
+        .build();
 
-    let runtime = init(config).await;
-    match runtime {
-        Ok(runtime) => {
-            log::info!("Runtime initialized successfully with version: {:?}", runtime.version);
-        }
-        Err(e) => {
-            log::error!("Failed to initialize runtime: {}", e);
-            std::process::exit(1);
-        }
+    let mut config = Config::from_value(config);
+    if let Some(lg) = config.logger.as_mut() {
+        lg.enabled = true;
+        lg.use_console = true;
+        lg.use_file = false;
+        lg.level = "trace".to_string();
     }
+
+    let runtime = init(config).await.expect("Failed to initialize runtime");
+
+    runtime.shutdown();
 }

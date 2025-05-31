@@ -58,6 +58,19 @@ fn setup_file_logger(cfg: &LogConfig, lg: Logger) -> Logger {
     lg
 }
 
+/// Initializes the runtime logger based on the provided configuration.
+/// # Arguments
+/// * `cfg` - A reference to the `LogConfig` containing the logger settings.
+///
+/// # Returns
+/// An `Option<LoggerHandle>`, which is `Some` if the logger was successfully initialized,
+/// or `None` if logging is disabled or already initialized.
+///
+/// # Panics
+/// If the logger fails to initialize or start, it will panic with an error message.
+///
+/// # Notes
+/// This function uses a `Once` instance to ensure that the logger is initialized only once,
 pub fn init_runtime_logger(cfg: &LogConfig) -> Option<LoggerHandle> {
     if HAS_LOGGER.is_completed() {
         log::trace!("Logger has already been initialized. Skipping initialization.");
@@ -69,7 +82,6 @@ pub fn init_runtime_logger(cfg: &LogConfig) -> Option<LoggerHandle> {
     });
 
     if !cfg.enabled || (!cfg.use_console && !cfg.use_file) {
-        log::info!("Logging is disabled or no output method is configured. Skipping logger initialization.");
         return None;
     }
 
@@ -94,4 +106,50 @@ pub fn init_runtime_logger(cfg: &LogConfig) -> Option<LoggerHandle> {
     };
 
     return Some(handler);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::infra::config::logger::LogConfig;
+
+    #[test]
+    fn test_init_runtime_logger() {
+        let log_config = LogConfig {
+            enabled: true,
+            use_console: true,
+            use_file: false,
+            to_stderr: true,
+            to_folder: String::from("/tmp"),
+            level: String::from("info"),
+            file_level: None,
+            console_level: None,
+        };
+
+        let logger_handle = init_runtime_logger(&log_config);
+        assert!(logger_handle.is_some());
+
+        let second_handle = init_runtime_logger(&log_config);
+        assert!(
+            second_handle.is_none(),
+            "Logger should not be initialized again"
+        );
+    }
+
+    #[test]
+    fn test_init_runtime_logger_disabled() {
+        let log_config = LogConfig {
+            enabled: false,
+            use_console: false,
+            use_file: false,
+            to_stderr: false,
+            to_folder: String::from("/tmp"),
+            level: String::from("info"),
+            file_level: None,
+            console_level: None,
+        };
+
+        let logger_handle = init_runtime_logger(&log_config);
+        assert!(logger_handle.is_none());
+    }
 }

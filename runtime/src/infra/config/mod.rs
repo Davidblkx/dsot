@@ -14,8 +14,6 @@ pub struct Config {
     pub data_location: String,
     /// The user for the runtime, defaults to "root".
     pub user: String,
-    /// The password for the runtime user, if any.
-    pub password: Option<String>,
     /// Configuration for logging in the runtime environment.
     pub logger: Option<LogConfig>,
 }
@@ -36,7 +34,6 @@ impl Config {
         Self {
             data_location,
             user: v.get("user").into_string_or(DEFAULT_USER.to_string()),
-            password: v.get("password").try_into_string().ok(),
             logger,
         }
     }
