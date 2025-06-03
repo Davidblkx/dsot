@@ -1,4 +1,8 @@
-use dsot_runtime::{Config, infra::init_config_builder, init};
+use dsot_runtime::{
+    Config,
+    infra::{config::LogConfig, init_config_builder},
+    init,
+};
 
 #[tokio::main]
 async fn main() {
@@ -9,12 +13,16 @@ async fn main() {
         .build();
 
     let mut config = Config::from_value(config);
-    if let Some(lg) = config.logger.as_mut() {
-        lg.enabled = true;
-        lg.use_console = true;
-        lg.use_file = false;
-        lg.level = "trace".to_string();
-    }
+    config.logger = Some(LogConfig {
+        enabled: true,
+        level: "trace".to_string(),
+        use_file: false,
+        use_console: true,
+        file_level: None,
+        console_level: None,
+        to_folder: "./".to_string(),
+        to_stderr: false,
+    });
 
     let runtime = init(config).await.expect("Failed to initialize runtime");
 

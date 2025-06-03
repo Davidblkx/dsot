@@ -4,7 +4,7 @@
 pub mod dirs;
 pub mod logger;
 
-use logger::*;
+pub use logger::*;
 
 static DEFAULT_USER: &'static str = "root";
 
