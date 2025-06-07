@@ -1,5 +1,5 @@
-use dsot_core::error::DsotError;
 use bakunin_config::errors::ConfigError;
+use dsot_core::error::DsotError;
 
 pub type Result<T> = std::result::Result<T, RuntimeError>;
 
@@ -8,6 +8,7 @@ pub enum RuntimeError {
     InternalError(DsotError),
     ErrorLoadingConfig(ConfigError),
     UnknownError(String),
+    IOError(std::io::Error),
 }
 
 impl std::fmt::Display for RuntimeError {
@@ -16,6 +17,7 @@ impl std::fmt::Display for RuntimeError {
             RuntimeError::InternalError(e) => write!(f, "Internal error: {}", e),
             RuntimeError::ErrorLoadingConfig(e) => write!(f, "Error loading config: {}", e),
             RuntimeError::UnknownError(msg) => write!(f, "Unknown error: {}", msg),
+            RuntimeError::IOError(e) => write!(f, "IO error: {}", e),
         }
     }
 }

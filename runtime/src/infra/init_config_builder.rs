@@ -13,7 +13,16 @@ use log::{debug, trace};
 ///   - current working directory
 ///   - environment variable `DSOT_<key>`
 pub fn init_config_builder(create_root: bool) -> Result<ConfigBuilder> {
-    let default_value = value_map! { user: "root" };
+    let default_value = value_map! {
+        user: "root",
+        logger: value_map! {
+            enabled: false,
+            level: "trace",
+            use_file: false,
+            use_console: true,
+            to_folder: "./logs",
+        }
+    };
 
     let file_finder = ConfigFileFinder::for_file("dsot_config".into())
         .with_os_folder(OSFolder::UserHome)

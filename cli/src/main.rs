@@ -1,8 +1,11 @@
+use clap::Command;
 use dsot_runtime::{
     Config,
     infra::{config::LogConfig, init_config_builder},
     init,
 };
+
+mod init;
 
 #[tokio::main]
 async fn main() {
