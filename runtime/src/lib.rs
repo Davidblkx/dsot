@@ -28,8 +28,8 @@ pub async fn init(config: Config) -> error::Result<Runtime> {
     };
 
     log::debug!(
-        "Initializing runtime using data folder: {:?}",
-        config.data_location
+        "Initializing runtime using data folder: {}",
+        config.data_location.display()
     );
     init_folder(&config.data_location)?;
 

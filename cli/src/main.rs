@@ -1,19 +1,18 @@
 use clap::Command;
 use dsot_runtime::{
     Config,
-    infra::{config::LogConfig, init_config_builder},
+    infra::{config::LogConfig},
+    infra::config_load::ConfigLoader,
     init,
 };
-
-mod init;
 
 #[tokio::main]
 async fn main() {
     music_brainz::init_user_agent("dsot", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
-    let config = init_config_builder(true)
-        .expect("Failed to initialize config builder")
-        .build();
+    let config = ConfigLoader::new().load_config()
+        .expect("Failed to load configuration");
+
 
     let mut config = Config::from_value(config);
     config.logger = Some(LogConfig {
@@ -23,7 +22,7 @@ async fn main() {
         use_console: true,
         file_level: None,
         console_level: None,
-        to_folder: "./".to_string(),
+        to_folder: "./".into(),
         to_stderr: false,
     });
 

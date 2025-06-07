@@ -1,10 +1,12 @@
-pub fn get_data_location(v: &bakunin_config::Value) -> String {
+use std::path::PathBuf;
+
+pub fn get_data_location(v: &bakunin_config::Value) -> PathBuf {
     match v.get("data_location").try_into_string() {
-        Ok(path) => path,
+        Ok(path) => PathBuf::from(path),
         Err(_) => {
             match dirs::home_dir() {
-                Some(home) => format!("{}/.dsot", home.to_string_lossy()),
-                None => "./".to_string(),
+                Some(home) => home.join(".dsot"),
+                None => PathBuf::from("./"),
             }
         },
     }

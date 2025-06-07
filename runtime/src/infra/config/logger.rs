@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 static DEFAULT_LOG_LEVEL: &'static str = "warn";
 
 /// Configuration for logging in the runtime environment.
@@ -15,7 +17,7 @@ pub struct LogConfig {
     /// Override the logging level for console output, if used.
     pub console_level: Option<String>,
     /// The path to the log file, if logging to a file.
-    pub to_folder: String,
+    pub to_folder: PathBuf,
     /// Whether to log to stderr instead of stdout.
     pub to_stderr: bool,
 }
@@ -39,15 +41,15 @@ fn get_log_level(v: &bakunin_config::Value) -> String {
     }
 }
 
-fn get_log_path(v: &bakunin_config::Value, data_location: &str) -> String {
+fn get_log_path(v: &bakunin_config::Value, data_location: &PathBuf) -> PathBuf {
     match v.get("to_file_path").try_into_string() {
-        Ok(path) => path,
-        Err(_) => format!("{}/logs", data_location),
+        Ok(path) => path.into(),
+        Err(_) => data_location.join("logs"),
     }
 }
 
 impl LogConfig {
-    pub fn from_value(v: bakunin_config::Value, data_location: &str) -> Self {
+    pub fn from_value(v: bakunin_config::Value, data_location: &PathBuf) -> Self {
         LogConfig {
             enabled: v.get("enabled").into_bool_or(true),
             level: get_log_level(&v),

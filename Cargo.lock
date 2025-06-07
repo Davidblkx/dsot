@@ -464,7 +464,7 @@ dependencies = [
  "serde",
  "sqlx",
  "tempfile",
- "thiserror 1.0.69",
+ "thiserror 2.0.12",
  "tokio",
  "uuid",
 ]
@@ -478,6 +478,7 @@ dependencies = [
  "dsot_core",
  "flexi_logger",
  "log",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
@@ -1257,7 +1258,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
- "thiserror 1.0.69",
+ "thiserror 2.0.12",
  "tokio",
  "url",
  "urlencoding",

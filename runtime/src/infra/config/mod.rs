@@ -4,6 +4,8 @@
 pub mod dirs;
 pub mod logger;
 
+use std::path::PathBuf;
+
 pub use logger::*;
 
 static DEFAULT_USER: &'static str = "root";
@@ -11,7 +13,7 @@ static DEFAULT_USER: &'static str = "root";
 /// Configuration for the runtime environment.
 pub struct Config {
     /// The location where persistent data is stored (e.g., database files).
-    pub data_location: String,
+    pub data_location: PathBuf,
     /// The user for the runtime, defaults to "root".
     pub user: String,
     /// Configuration for logging in the runtime environment.

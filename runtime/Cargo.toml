@@ -12,3 +12,4 @@ bakunin_config = { workspace = true }
 log = { workspace = true }
 dirs = { workspace = true }
 flexi_logger = { workspace = true, features = ["async"] }
+thiserror = { workspace = true }

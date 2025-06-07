@@ -110,6 +110,8 @@ pub fn init_runtime_logger(cfg: &LogConfig) -> Option<LoggerHandle> {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::*;
     use crate::infra::config::logger::LogConfig;
 
@@ -120,7 +122,7 @@ mod tests {
             use_console: true,
             use_file: false,
             to_stderr: true,
-            to_folder: String::from("/tmp"),
+            to_folder: PathBuf::from("/tmp"),
             level: String::from("info"),
             file_level: None,
             console_level: None,
@@ -143,7 +145,7 @@ mod tests {
             use_console: false,
             use_file: false,
             to_stderr: false,
-            to_folder: String::from("/tmp"),
+            to_folder: PathBuf::from("/tmp"),
             level: String::from("info"),
             file_level: None,
             console_level: None,
