@@ -34,3 +34,4 @@ bakunin_config = { version = "0.2.0" }
 flexi_logger = { version = "0.30" }
 dirs = { version = "6" }
 clap = { version = "4.5" }
+anyhow = { version = "1" }

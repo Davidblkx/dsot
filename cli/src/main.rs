@@ -1,32 +1,40 @@
-use clap::Command;
+mod cmd;
+
+use std::path::PathBuf;
+
 use dsot_runtime::{
-    Config,
-    infra::{config::LogConfig},
-    infra::config_load::ConfigLoader,
-    init,
+    infra::{config::LogConfig, config_load::ConfigLoader, init_runtime_logger}, init, Config
 };
 
 #[tokio::main]
 async fn main() {
     music_brainz::init_user_agent("dsot", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
-    let config = ConfigLoader::new().load_config()
-        .expect("Failed to load configuration");
+    let args = cmd::create_app().get_matches();
 
+    if args.get_flag(cmd::ARG_DEBUG) || args.get_flag(cmd::ARG_DEBUG_FOLDER) {
+        init_runtime_logger(&LogConfig {
+            enabled: true,
+            use_console: true,
+            use_file: args.get_flag(cmd::ARG_DEBUG_FOLDER),
+            to_stderr: true,
+            to_folder: "./dsot_logs".into(),
+            level: "trace".to_string(),
+            file_level: None,
+            console_level: None,
+        });
+    }
 
-    let mut config = Config::from_value(config);
-    config.logger = Some(LogConfig {
-        enabled: true,
-        level: "trace".to_string(),
-        use_file: false,
-        use_console: true,
-        file_level: None,
-        console_level: None,
-        to_folder: "./".into(),
-        to_stderr: false,
-    });
+    let mut loader = ConfigLoader::new();
 
+    if let Some(config_file) = args.get_one::<PathBuf>(cmd::ARG_CONFIG) {
+        loader.config_path = Some(config_file.to_str().unwrap().to_string());
+    }
+
+    let config = Config::from_value(loader.load_config().expect("Failed to load configuration"));
     let runtime = init(config).await.expect("Failed to initialize runtime");
+
+    cmd::execute(&runtime, args).await;
 
     runtime.shutdown();
 }
