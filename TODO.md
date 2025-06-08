@@ -1,7 +1,8 @@
 # NOW
 
-- Load config using bakunin
-- Logging (see runtime/src/infra/)
+- Remove user from inbox
+- Setup journal db
+- work mechanism to update db using journal
 
 # TODO
 
