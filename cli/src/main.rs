@@ -10,10 +10,14 @@ use dsot_runtime::{
 
 #[tokio::main]
 async fn main() {
+    // User agent used for MusicBrainz API requests
     music_brainz::init_user_agent("dsot", env!("CARGO_PKG_VERSION"), "dev@davidpires.pt").unwrap();
 
+    // Parse command line arguments
     let args = cmd::create_app().get_matches();
 
+    // If debug or debug_folder flags are set, initialize the logger
+    // otherwise, it will be handled by the runtime logger
     let log_handler = if args.get_flag(cmd::ARG_DEBUG) || args.get_flag(cmd::ARG_DEBUG_FOLDER) {
         init_runtime_logger(&LogConfig {
             enabled: true,
@@ -31,11 +35,15 @@ async fn main() {
 
     let mut loader = ConfigLoader::new();
 
+    // If the --config argument is provided, load the specified configuration file
+    // and disable search for default config files
     if let Some(config_file) = args.get_one::<PathBuf>(cmd::ARG_CONFIG) {
         loader.config_path = Some(config_file.to_str().unwrap().to_string());
+        loader.search = false;
     }
-
     let config = Config::from_value(loader.load_config().expect("Failed to load configuration"));
+
+    // Initialize the runtime with the loaded configuration
     let runtime = match init(config).await {
         Ok(runtime) => {
             log::debug!("Runtime initialized successfully.");
@@ -47,8 +55,10 @@ async fn main() {
         }
     };
 
+    // Execute the command with the provided arguments
     cmd::execute(&runtime, args).await;
 
+    // Shutdown the runtime and logger if they were initialized
     runtime.shutdown();
     if let Some(handler) = log_handler {
         handler.shutdown();
