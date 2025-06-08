@@ -9,9 +9,13 @@ pub enum RuntimeError {
     #[error("Internal error: {0}")]
     InternalError(#[from] DsotError),
     #[error("Error loading configuration: {0}")]
-    ErrorLoadingConfig(#[from]ConfigError),
+    ErrorLoadingConfig(#[from] ConfigError),
     #[error("Unknown error: {0}")]
     UnknownError(String),
     #[error("IO error: {0}")]
     IOError(#[from] std::io::Error),
+    #[error("Database error: {0}")]
+    DatabaseError(#[from] sqlx::Error),
+    #[error("Migration error: {0}")]
+    MigrationError(#[from] sqlx::migrate::MigrateError),
 }

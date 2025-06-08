@@ -13,3 +13,12 @@ log = { workspace = true }
 dirs = { workspace = true }
 flexi_logger = { workspace = true, features = ["async"] }
 thiserror = { workspace = true }
+sqlx = { workspace = true, features = [
+    "macros",
+    "uuid",
+    "sqlite",
+    "chrono",
+    "migrate",
+    "runtime-tokio",
+], default-features = false }
+chrono = { workspace = true }

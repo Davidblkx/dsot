@@ -7,6 +7,7 @@ use infra::{init_folder, init_runtime_logger};
 pub struct Runtime {
     pub config: Config,
     pub version: &'static str,
+    pub sqlite_pool: sqlx::SqlitePool,
 
     logger_handler: Option<flexi_logger::LoggerHandle>,
 }
@@ -33,11 +34,14 @@ pub async fn init(config: Config) -> error::Result<Runtime> {
     );
     init_folder(&config.data_location)?;
 
+    let sqlite_pool = infra::db::initialize_database(&config).await?;
+
     // Initialize the runtime with the provided configuration
     let runtime = Runtime {
         config,
         version: env!("CARGO_PKG_VERSION"),
         logger_handler,
+        sqlite_pool,
     };
 
     // Return the initialized runtime

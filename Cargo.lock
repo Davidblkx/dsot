@@ -481,10 +481,12 @@ name = "dsot_runtime"
 version = "0.1.0"
 dependencies = [
  "bakunin_config",
+ "chrono",
  "dirs",
  "dsot_core",
  "flexi_logger",
  "log",
+ "sqlx",
  "thiserror 2.0.12",
 ]
 

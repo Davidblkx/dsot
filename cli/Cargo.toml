@@ -9,7 +9,6 @@ repository.workspace = true
 [[bin]]
 name = "dsot"
 path = "src/main.rs"
-description = "Command line interface for the DSOT project"
 
 [dependencies]
 dsot_core = { path = "../core" }

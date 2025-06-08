@@ -3,7 +3,9 @@ mod cmd;
 use std::path::PathBuf;
 
 use dsot_runtime::{
-    infra::{config::LogConfig, config_load::ConfigLoader, init_runtime_logger}, init, Config
+    Config,
+    infra::{config::LogConfig, config_load::ConfigLoader, init_runtime_logger},
+    init,
 };
 
 #[tokio::main]
@@ -32,7 +34,16 @@ async fn main() {
     }
 
     let config = Config::from_value(loader.load_config().expect("Failed to load configuration"));
-    let runtime = init(config).await.expect("Failed to initialize runtime");
+    let runtime = match init(config).await {
+        Ok(runtime) => {
+            log::debug!("Runtime initialized successfully.");
+            runtime
+        }
+        Err(e) => {
+            log::error!("Failed to initialize runtime: {}", e);
+            panic!("Runtime initialization failed");
+        }
+    };
 
     cmd::execute(&runtime, args).await;
 

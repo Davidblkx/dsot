@@ -6,6 +6,7 @@ mod init_logger;
 
 pub mod config;
 pub mod config_load;
+pub mod db;
 
 pub use config::Config;
 pub use init_folder::*;
