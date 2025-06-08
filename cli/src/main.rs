@@ -14,7 +14,7 @@ async fn main() {
 
     let args = cmd::create_app().get_matches();
 
-    if args.get_flag(cmd::ARG_DEBUG) || args.get_flag(cmd::ARG_DEBUG_FOLDER) {
+    let log_handler = if args.get_flag(cmd::ARG_DEBUG) || args.get_flag(cmd::ARG_DEBUG_FOLDER) {
         init_runtime_logger(&LogConfig {
             enabled: true,
             use_console: true,
@@ -24,8 +24,10 @@ async fn main() {
             level: "trace".to_string(),
             file_level: None,
             console_level: None,
-        });
-    }
+        })
+    } else {
+        None
+    };
 
     let mut loader = ConfigLoader::new();
 
@@ -48,4 +50,7 @@ async fn main() {
     cmd::execute(&runtime, args).await;
 
     runtime.shutdown();
+    if let Some(handler) = log_handler {
+        handler.shutdown();
+    }
 }
