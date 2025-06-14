@@ -20,13 +20,7 @@ mod tests {
     async fn can_query(pool: sqlx::SqlitePool) {
         let trx = pool.begin().await.unwrap();
 
-        let storage = Storage::new(
-            "Test Storage".to_string(),
-            "/mnt/test_storage".to_string(),
-            "media/music".to_string(),
-            "1234567890".to_string(),
-            true,
-        );
+        let storage = Storage::new("local".to_string());
         let mut music = MusicFile::new(&storage.id, "album/song.mp3");
         music.size = 123456;
         music.set_format(MusicFileFormat::FLAC);

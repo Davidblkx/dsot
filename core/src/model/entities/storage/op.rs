@@ -1,10 +1,9 @@
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum StorageUpdateOpV0 {
-    SetDescription(String),
-    SetMount(String),
-    SetRoot(String),
-    SetSerialNumber(String),
-    SetIsDefault(bool),
+    SetDescription(Option<String>),
+    SetKind(String),
+    SetPath(Option<String>),
+    SetInfo(Option<String>)
 }
 
 crate::dsot_storage_declare_model!(
