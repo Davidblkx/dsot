@@ -56,7 +56,10 @@ async fn main() {
     };
 
     // Execute the command with the provided arguments
-    cmd::execute(&runtime, args).await;
+    match cmd::execute(&runtime, args).await {
+        Ok(_) => log::trace!("Command executed successfully."),
+        Err(e) => log::error!("Error executing command: {}", e),
+    }
 
     // Shutdown the runtime and logger if they were initialized
     runtime.shutdown();

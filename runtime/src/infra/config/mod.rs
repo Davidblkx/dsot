@@ -5,6 +5,7 @@ pub mod dirs;
 pub mod logger;
 
 use std::path::PathBuf;
+use bakunin_config::Value;
 
 pub use logger::*;
 
@@ -18,6 +19,8 @@ pub struct Config {
     pub user: String,
     /// Configuration for logging in the runtime environment.
     pub logger: Option<LogConfig>,
+    /// Raw configuration value, if available.
+    pub raw: Option<Value>,
 }
 
 impl Config {
@@ -37,6 +40,7 @@ impl Config {
             data_location,
             user: v.get("user").into_string_or(DEFAULT_USER.to_string()),
             logger,
+            raw: Some(v),
         }
     }
 }

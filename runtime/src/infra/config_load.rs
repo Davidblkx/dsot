@@ -104,7 +104,6 @@ impl ConfigLoader {
         let file_finder = ConfigFileFinder::for_file("dsot_config".into())
             .with_os_folder(OSFolder::UserHome)
             .with_os_folder(OSFolder::WorkingDirectory)
-            .with_os_folder(OSFolder::AppConfig("dsot".into()))
             .with_supported_extensions();
 
         let files = file_finder.find_all();

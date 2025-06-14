@@ -1,6 +1,10 @@
+mod config;
+
 use std::path::PathBuf;
 
 use clap::{arg, value_parser, Command, Arg};
+
+use config::ConfigCmd;
 
 pub static ARG_DEBUG: &str = "debug";
 pub static ARG_DEBUG_FOLDER: &str = "debug-folder";
@@ -22,14 +26,14 @@ pub fn create_app() -> Command {
                 .value_parser(value_parser!(PathBuf)),
         ]);
 
-    cmd
+    return cmd
+        .subcommand(ConfigCmd::build());
 }
 
-pub async fn execute(_runtime: &dsot_runtime::Runtime, args: clap::ArgMatches) {
-    match args.subcommand() {
-        // Add subcommands here
-        _ => {
-            eprintln!("No valid command provided. Use --help for more information.");
-        }
+pub async fn execute(runtime: &dsot_runtime::Runtime, args: clap::ArgMatches) -> anyhow::Result<()> {
+    if let Some(config_args) = args.subcommand_matches(ConfigCmd::get_name()) {
+        return ConfigCmd::run(runtime, config_args);
     }
+
+    Err(anyhow::anyhow!("No valid command provided. Use --help for more information."))
 }

@@ -1,5 +1,6 @@
 pub mod error;
 pub mod infra;
+pub mod config;
 
 pub use infra::Config;
 use infra::{init_folder, init_runtime_logger};
