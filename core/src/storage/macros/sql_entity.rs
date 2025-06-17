@@ -144,6 +144,12 @@ macro_rules! dsot_sql_entity {
                     }
                 }
             }
+
+            impl $entity {
+                pub fn get_dsot_entity_id() -> u32 {
+                    $crate::model::DsotEntity::[< $entity:camel >].get_id()
+                }
+            }
         }
     };
 }

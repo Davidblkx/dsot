@@ -10,3 +10,5 @@ pub mod track;
 pub mod work;
 
 pub mod rel;
+
+pub use rel::*;
