@@ -3,7 +3,6 @@ use uuid::Uuid;
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct InboxV0 {
     pub id: Uuid,
-    pub user_id: Uuid,
     pub title: Option<String>,
     pub artist: Option<String>,
     pub album: Option<String>,
