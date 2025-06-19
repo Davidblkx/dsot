@@ -26,7 +26,7 @@ macro_rules! entity_enum {
                 async fn apply_sql_op(trx: SqlTransaction, op: &SqlOperation) -> SqlResult<()> {
                     match Self::from_id(op.get_entity()) {
                         $(Some(DsotEntity::$name) => super::entities::[<$name:snake>]::sql::[<$name Sql>]::execute_operation(trx, op).await,)*
-                        _ => todo!(),
+                        _ => Err($crate::error::DsotError::UnknownDbEntity(op.get_entity())),
                     }
                 }
             }
@@ -36,7 +36,7 @@ macro_rules! entity_enum {
 
 entity_enum! {
     1: Artist,
-    2: ArtistAliases,
+    2: ArtistAlias,
     3: Album,
     4: AlbumArtist,
     5: Inbox,
@@ -46,6 +46,5 @@ entity_enum! {
     9: ReleaseMedia,
     10: Storage,
     11: Track,
-    12: Work,
-    13: ArtistAlias
+    12: Work
 }

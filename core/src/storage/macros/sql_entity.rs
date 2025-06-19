@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! dsot_sql_entity {
     ([$table_name:expr] $entity:ident with $update:ident {
-        $($prop:ident$(: $column:ident)?),*
+        $($prop:ident$([ $column:ident])?$(: $prop_type:ty)?),*
     }) => {
         use $crate::storage::sql::{SqlTransaction, SqlResult};
         use $crate::storage::BinModel;
@@ -145,9 +145,61 @@ macro_rules! dsot_sql_entity {
                 }
             }
 
+            pub struct [< $entity SqlOperation>]<'a> {
+                entity: &'a $entity,
+            }
+
+            impl<'a> [< $entity SqlOperation>]<'a> {
+                pub fn new(entity: &'a $entity) -> Self {
+                    Self { entity }
+                }
+
+                /// Creates a SQL operation to insert this entity into the database.
+                pub fn create(&self) -> $crate::error::Result<$crate::storage::SqlOperation> {
+                    let op = crate::storage::SqlOperation::Create {
+                        id: self.entity.id,
+                        entity: $entity::get_dsot_entity_id(),
+                        data: self.entity.serialize()?,
+                    };
+                    Ok(op)
+                }
+
+                /// Creates a SQL operation to delete this entity in the database.
+                pub fn delete(&self) -> $crate::storage::SqlOperation {
+                    crate::storage::SqlOperation::Delete {
+                        id: self.entity.id,
+                        entity: $entity::get_dsot_entity_id(),
+                    }
+                }
+
+                /// Creates a SQL operation to update this entity in the database.
+                pub fn update(&self, op: $update) -> $crate::error::Result<$crate::storage::SqlOperation> {
+                    let op = crate::storage::SqlOperation::Update {
+                        id: self.entity.id,
+                        entity: $entity::get_dsot_entity_id(),
+                        action: op.serialize()?,
+                    };
+                    Ok(op)
+                }
+
+                $(
+                    $(
+                        pub fn [< update_ $prop >](&self, value: $prop_type) -> $crate::error::Result<$crate::storage::SqlOperation> {
+                            self.update($update::[<Set $prop:camel>](value))
+                        }
+                    )?
+                )*
+            }
+
             impl $entity {
+                /// Returns the internal id of the SQL table for this entity.
                 pub fn get_dsot_entity_id() -> u32 {
                     $crate::model::DsotEntity::[< $entity:camel >].get_id()
+                }
+
+                /// Returns the SQL operation handler for this entity.
+                pub fn sql_operation<'a>(&'a self) -> [< $entity SqlOperation>]<'a> {
+                    [< $entity SqlOperation>]::new(self)
                 }
             }
         }

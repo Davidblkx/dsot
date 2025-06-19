@@ -1,11 +1,11 @@
 use super::{ReleaseMedia, op::ReleaseMediaUpdateOp};
 
 crate::dsot_sql_entity!(["release_media"] ReleaseMedia with ReleaseMediaUpdateOp {
-    release_id,
-    position,
-    format,
-    count,
-    mbid
+    release_id: uuid::Uuid,
+    position: u32,
+    format: u32,
+    count: u32,
+    mbid: Option<uuid::Uuid>
 });
 
 #[cfg(test)]

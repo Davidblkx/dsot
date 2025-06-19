@@ -1,22 +1,22 @@
 use super::{Track, op::TrackUpdateOp};
 
 crate::dsot_sql_entity!(["tracks"] Track with TrackUpdateOp {
-    mbid,
-    title,
-    release_media_id,
-    media_index,
-    release_index,
-    track_number,
-    position,
-    recording_id
+    mbid: Option<uuid::Uuid>,
+    title: String,
+    release_media_id: uuid::Uuid,
+    media_index: u32,
+    release_index: u32,
+    track_number: u32,
+    position: Option<String>,
+    recording_id: uuid::Uuid
 });
 
 #[cfg(test)]
 mod tests {
-    use crate::model::entities::recording::{Recording, sql::RecordingSql};
-    use crate::model::entities::release_media::{ReleaseMedia, sql::ReleaseMediaSql};
     use crate::model::entities::album::{Album, sql::AlbumSql};
+    use crate::model::entities::recording::{Recording, sql::RecordingSql};
     use crate::model::entities::release::{Release, sql::ReleaseSql};
+    use crate::model::entities::release_media::{ReleaseMedia, sql::ReleaseMediaSql};
 
     use super::*;
 

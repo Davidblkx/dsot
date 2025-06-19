@@ -1,13 +1,13 @@
 use super::{MusicFile, op::MusicFileUpdateOp};
 
 crate::dsot_sql_entity!(["music_files"] MusicFile with MusicFileUpdateOp {
-    path,
-    storage_id,
-    recording_id,
-    size,
-    format,
-    need_better,
-    chromaprint
+    path: String,
+    storage_id: uuid::Uuid,
+    recording_id: Option<uuid::Uuid>,
+    size: u32,
+    format: u32,
+    need_better: bool,
+    chromaprint: Option<String>
 });
 
 #[cfg(test)]
@@ -25,7 +25,6 @@ mod tests {
         music.size = 123456;
         music.set_format(MusicFileFormat::FLAC);
         music.chromaprint = Some("abcdef1234567890".to_string());
-
 
         let (trx, _) = StorageSql::insert(trx, &storage).await.unwrap();
         let (trx, _) = MusicFileSql::insert(trx, &music).await.unwrap();

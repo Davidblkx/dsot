@@ -4,7 +4,7 @@ use uuid::Uuid;
 pub enum AlbumUpdateOpV0 {
     SetMbid(Option<Uuid>),
     SetTitle(String),
-    SetYear(i16),
+    SetYear(Option<i16>),
 }
 
 crate::dsot_storage_declare_model!(

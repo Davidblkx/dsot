@@ -4,7 +4,7 @@ use uuid::Uuid;
 pub enum ReleaseUpdateOpV0 {
     SetMbid(Option<Uuid>),
     SetTitle(String),
-    SetYear(i32),
+    SetYear(Option<i32>),
     SetStatus(Option<u32>),
     SetCountry(Option<String>),
     SetDuration(Option<i64>),

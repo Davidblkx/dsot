@@ -1,11 +1,11 @@
 use super::{Inbox, op::InboxUpdateOp};
 
 crate::dsot_sql_entity!(["inbox"] Inbox with InboxUpdateOp {
-    title,
-    artist,
-    album,
-    file,
-    extra_info
+    title: Option<String>,
+    artist: Option<String>,
+    album: Option<String>,
+    file: Option<String>,
+    extra_info: Option<String>
 });
 
 #[cfg(test)]

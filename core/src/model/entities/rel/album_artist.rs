@@ -8,9 +8,7 @@ pub struct AlbumArtistV0 {
     pub is_main: bool,
 }
 
-crate::dsot_storage_declare_model!(AlbumArtist {
-    0: AlbumArtistV0
-});
+crate::dsot_storage_declare_model!(AlbumArtist { 0: AlbumArtistV0 });
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum AlbumArtistUpdateOpV0 {
@@ -34,8 +32,12 @@ impl AlbumArtist {
     }
 }
 
-crate::dsot_sql_entity!(["album_artists"] AlbumArtist with AlbumArtistUpdateOp {
-    album_id,
-    artist_id,
-    is_main
-});
+pub mod sql {
+    use super::*;
+
+    crate::dsot_sql_entity!(["album_artists"] AlbumArtist with AlbumArtistUpdateOp {
+        album_id,
+        artist_id,
+        is_main
+    });
+}

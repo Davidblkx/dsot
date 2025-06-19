@@ -4,17 +4,15 @@ use uuid::Uuid;
 pub struct ArtistAliasV0 {
     pub id: Uuid,
     pub artist_id: Uuid,
-    pub name: String
+    pub name: String,
 }
 
-crate::dsot_storage_declare_model!(ArtistAlias {
-    0: ArtistAliasV0
-});
+crate::dsot_storage_declare_model!(ArtistAlias { 0: ArtistAliasV0 });
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum ArtistAliasUpdateOpV0 {
     SetName(String),
-    SetArtistId(Uuid)
+    SetArtistId(Uuid),
 }
 
 crate::dsot_storage_declare_model!(ArtistAliasUpdateOp {
@@ -26,18 +24,22 @@ impl ArtistAlias {
         Self {
             id: Uuid::now_v7(),
             artist_id: *artist_id,
-            name: name.to_string()
+            name: name.to_string(),
         }
     }
 }
 
-crate::dsot_sql_entity!(["artist_aliases"] ArtistAlias with ArtistAliasUpdateOp {
-    artist_id,
-    name
-});
+pub mod sql {
+    use super::*;
+    crate::dsot_sql_entity!(["artist_aliases"] ArtistAlias with ArtistAliasUpdateOp {
+        artist_id,
+        name
+    });
+}
 
 #[cfg(test)]
 mod tests {
+    use super::sql::ArtistAliasSql;
     use super::*;
     use crate::model::entities::artist::{Artist, sql::ArtistSql};
     use sqlx::SqlitePool;
@@ -65,8 +67,10 @@ mod tests {
         let (trx, _) = ArtistAliasSql::update(
             trx,
             &alias.id,
-            &ArtistAliasUpdateOp::SetName("Updated Alias".to_string())
-        ).await.unwrap();
+            &ArtistAliasUpdateOp::SetName("Updated Alias".to_string()),
+        )
+        .await
+        .unwrap();
 
         // Fetch updated alias
         let result = ArtistAliasSql::fetch_by_id(trx, &alias.id).await.unwrap();

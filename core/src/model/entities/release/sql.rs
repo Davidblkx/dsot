@@ -2,27 +2,27 @@ use super::{Release, op::ReleaseUpdateOp};
 use crate::model::entities::album::{Album, sql::AlbumSql};
 
 crate::dsot_sql_entity!(["releases"] Release with ReleaseUpdateOp {
-    mbid,
-    title,
-    year,
-    status,
-    country,
-    duration,
-    format,
-    album_id
+    mbid: Option<uuid::Uuid>,
+    title: String,
+    year: Option<i32>,
+    status: Option<u32>,
+    country: Option<String>,
+    duration: Option<i64>,
+    format: Option<String>,
+    album_id: uuid::Uuid
 });
 
 impl Release {
     /// Fetches the album associated with this release.
-    pub async fn get_album(
-        &self,
-        trx: SqlTransaction,
-    ) -> SqlResult<Album> {
+    pub async fn get_album(&self, trx: SqlTransaction) -> SqlResult<Album> {
         let (trx, album) = AlbumSql::fetch_by_id(trx, &self.album_id).await?;
         if let Some(album) = album {
             Ok((trx, album))
         } else {
-            Err(crate::error::DsotError::SqlMissingRelation(format!("Album with ID {} not found", self.album_id)))
+            Err(crate::error::DsotError::SqlMissingRelation(format!(
+                "Album with ID {} not found",
+                self.album_id
+            )))
         }
     }
 }

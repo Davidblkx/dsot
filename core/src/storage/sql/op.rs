@@ -6,12 +6,14 @@ pub enum SqlOperation {
     Create {
         id: uuid::Uuid,
         entity: u32,
+        /// The serialized entity to be created.
         data: Vec<u8>,
     },
     Update {
         id: uuid::Uuid,
         entity: u32,
-        action: Vec<u8>
+        /// The serialized operation to be applied to the entity.
+        action: Vec<u8>,
     },
     Delete {
         id: uuid::Uuid,
@@ -39,8 +41,5 @@ impl SqlOperation {
 
 /// Trait for handling SQL operations.
 pub trait SqlOperationHandler {
-    fn apply_sql_op(
-        trx: SqlTransaction,
-        op: &SqlOperation,
-    ) -> impl Future<Output = SqlResult<()>>;
+    fn apply_sql_op(trx: SqlTransaction, op: &SqlOperation) -> impl Future<Output = SqlResult<()>>;
 }

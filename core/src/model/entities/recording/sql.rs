@@ -1,13 +1,13 @@
 use super::{Recording, op::RecordingUpdateOp};
 
 crate::dsot_sql_entity!(["recordings"] Recording with RecordingUpdateOp {
-    mbid,
-    title,
-    length,
-    isrc,
-    work_id,
-    year,
-    disambiguation
+    mbid: Option<uuid::Uuid>,
+    title: String,
+    length: Option<u32>,
+    isrc: Option<String>,
+    work_id: Option<uuid::Uuid>,
+    year: Option<i32>,
+    disambiguation: Option<String>
 });
 
 #[cfg(test)]

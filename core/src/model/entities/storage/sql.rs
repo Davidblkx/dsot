@@ -1,10 +1,10 @@
 use super::{Storage, op::StorageUpdateOp};
 
 crate::dsot_sql_entity!(["storages"] Storage with StorageUpdateOp {
-    description,
-    kind,
-    path,
-    info
+    description: Option<String>,
+    kind: String,
+    path: Option<String>,
+    info: Option<String>
 });
 
 #[cfg(test)]

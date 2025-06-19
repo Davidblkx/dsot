@@ -4,8 +4,8 @@
 pub mod dirs;
 pub mod logger;
 
-use std::path::PathBuf;
 use bakunin_config::Value;
+use std::path::PathBuf;
 
 pub use logger::*;
 

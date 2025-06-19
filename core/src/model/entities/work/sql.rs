@@ -1,11 +1,11 @@
 use super::{Work, op::WorkUpdateOp};
 
 crate::dsot_sql_entity!(["works"] Work with WorkUpdateOp {
-    mbid,
-    title,
-    kind,
-    language,
-    disambiguation
+    mbid: Option<uuid::Uuid>,
+    title: String,
+    kind: Option<String>,
+    language: Option<String>,
+    disambiguation: Option<String>
 });
 
 #[cfg(test)]
