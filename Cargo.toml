@@ -35,3 +35,4 @@ flexi_logger = { version = "0.30" }
 dirs = { version = "6" }
 clap = { version = "4.5" }
 anyhow = { version = "1" }
+dashmap = { version = "6" }

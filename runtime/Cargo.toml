@@ -22,3 +22,4 @@ sqlx = { workspace = true, features = [
     "runtime-tokio",
 ], default-features = false }
 chrono = { workspace = true }
+dashmap = { workspace = true }
