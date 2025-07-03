@@ -1,10 +1,9 @@
 use sqlx::migrate::Migrator;
 
-use crate::error::Result;
-
 static MIGRATOR: Migrator = sqlx::migrate!("../migrations");
 
-pub async fn has_pending_migrations(pool: &sqlx::SqlitePool) -> Result<bool> {
+/// Checks if there are any pending migrations in the database.
+pub async fn has_pending_migrations(pool: &sqlx::SqlitePool) -> Result<bool, sqlx::Error> {
     let has_table = sqlx::query_scalar!(
         "SELECT name FROM sqlite_master WHERE type='table' AND name='_sqlx_migrations'"
     )
@@ -37,7 +36,8 @@ pub async fn has_pending_migrations(pool: &sqlx::SqlitePool) -> Result<bool> {
     Ok(false)
 }
 
-pub async fn run_pending_migrations(pool: &sqlx::SqlitePool) -> Result<()> {
+/// Runs all pending migrations in the database.
+pub async fn run_pending_migrations(pool: &sqlx::SqlitePool) -> Result<(), sqlx::Error> {
     log::info!("Running pending migrations...");
 
     MIGRATOR.run(pool).await?;

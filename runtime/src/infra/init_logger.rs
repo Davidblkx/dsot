@@ -116,6 +116,9 @@ mod tests {
     use crate::infra::config::logger::LogConfig;
 
     #[test]
+    // Flaky test: This test checks if the logger is initialized correctly and does not allow re-initialization.
+    // It may fail if the logger is already initialized in another test or if the environment is not reset properly.
+    // Use cargo test -j 1 to run tests sequentially to avoid this issue.
     fn test_init_runtime_logger() {
         let log_config = LogConfig {
             enabled: true,
