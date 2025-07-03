@@ -2,7 +2,7 @@
 
 - Setup journal db
 - work mechanism to update db using journal
-- replace current runtime db logic with a proper handler struct that can load/backup multiple dbs
+- Allow to edit config file ??
 
 # TODO
 
