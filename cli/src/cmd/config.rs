@@ -15,17 +15,18 @@ impl ConfigCmd {
             .arg(
                 clap::Arg::new("key")
                     .help("The configuration key to read")
-                    .required(true)
+                    .required(true),
             )
     }
 
     pub fn run(runtime: &dsot_runtime::Runtime, args: &clap::ArgMatches) -> anyhow::Result<()> {
+        // TODO: Implement the logic to write configuration values
         if let Some(key) = args.get_one::<String>("key") {
-            let value = runtime.config.read_raw_config(key);
-            if let Some(val) = value {
-                println!("{:?}", val);
-            } else {
-                println!("No value found for '{}'", key);
+            let value = runtime.config.get_config_value(key);
+
+            match value {
+                bakunin_config::Value::None => println!("No value found for '{}'", key),
+                _ => println!("{:?}", value),
             }
         } else {
             println!("No key provided");

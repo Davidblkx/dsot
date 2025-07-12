@@ -1,42 +1,23 @@
-use bakunin_config::{Value};
 use crate::Config;
+use bakunin_config::Value;
 
 impl Config {
-    pub fn read_raw_config(&self, path: &str) -> Option<Value> {
+    pub fn get_config_value(&self, path: &str) -> Value {
+        let mut val = self.raw.clone();
         if path.is_empty() {
-            return self.raw.clone();
+            return val;
         }
-
-        if let Some(raw) = &self.raw {
-            let mut val = raw.clone();
-            for part in path.split('.') {
-                val = val.get(part);
-            }
-
-            return Some(val);
-        } else {
-            return None;
+        for part in path.split('.') {
+            val = val.get(part);
         }
+        val
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bakunin_config::{value_map, Value};
-
-    #[test]
-    fn when_none_return_none() {
-        let cfg = Config {
-            data_location: std::path::PathBuf::from("./"),
-            logger: None,
-            user: "test_user".to_string(),
-            raw: None,
-        };
-
-        let result = cfg.read_raw_config("some.path");
-        assert!(result.is_none());
-    }
+    use bakunin_config::{BakuninConfig, Value, value_map};
 
     #[test]
     fn when_empty_path_return_raw() {
@@ -48,11 +29,12 @@ mod tests {
             data_location: std::path::PathBuf::from("./"),
             logger: None,
             user: "test_user".to_string(),
-            raw: Some(raw_value.clone()),
+            raw: raw_value.clone(),
+            handler: bakunin_config::BakuninConfig::new(),
         };
 
-        let result = cfg.read_raw_config("");
-        assert_eq!(result, Some(raw_value));
+        let result = cfg.get_config_value("");
+        assert_eq!(result, raw_value);
     }
 
     #[test]
@@ -66,9 +48,10 @@ mod tests {
                 }
             }
         };
-        let cfg = Config::from_value(raw_value.clone());
+        let handler = BakuninConfig::new().with_memory_layer("root", raw_value);
+        let cfg = Config::from_handler(handler).unwrap();
 
-        let result = cfg.read_raw_config("other.second.third").unwrap();
+        let result = cfg.get_config_value("other.second.third");
         assert_eq!(result, Value::String("deep_value".into()));
     }
 
@@ -83,9 +66,10 @@ mod tests {
                 }
             }
         };
-        let cfg = Config::from_value(raw_value.clone());
+        let handler = BakuninConfig::new().with_memory_layer("root", raw_value);
+        let cfg = Config::from_handler(handler).unwrap();
 
-        let result = cfg.read_raw_config("other.second.thirdss").unwrap();
+        let result = cfg.get_config_value("other.second.thirdss");
         assert_eq!(result, Value::None);
     }
 }

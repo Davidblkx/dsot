@@ -1,4 +1,4 @@
-use bakunin_config::errors::ConfigError;
+use bakunin_config::BakuninError;
 use dsot_core::error::DsotError;
 use thiserror::Error;
 
@@ -9,7 +9,7 @@ pub enum RuntimeError {
     #[error("Internal error: {0}")]
     InternalError(#[from] DsotError),
     #[error("Error loading configuration: {0}")]
-    ErrorLoadingConfig(#[from] ConfigError),
+    ErrorLoadingConfig(#[from] BakuninError),
     #[error("Unknown error: {0}")]
     UnknownError(String),
     #[error("IO error: {0}")]

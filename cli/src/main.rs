@@ -4,7 +4,10 @@ use std::path::PathBuf;
 
 use dsot_runtime::{
     Config,
-    infra::{config::LogConfig, config_load::ConfigLoader, init_runtime_logger},
+    infra::{
+        config::{ConfigOptions, LogConfig},
+        init_runtime_logger,
+    },
     init,
 };
 
@@ -33,15 +36,15 @@ async fn main() {
         None
     };
 
-    let mut loader = ConfigLoader::new();
+    let mut config_options = ConfigOptions::default();
 
     // If the --config argument is provided, load the specified configuration file
     // and disable search for default config files
     if let Some(config_file) = args.get_one::<PathBuf>(cmd::ARG_CONFIG) {
-        loader.config_path = Some(config_file.to_str().unwrap().to_string());
-        loader.search = false;
+        config_options.config_path = Some(config_file.to_str().unwrap().to_string());
+        config_options.search = false;
     }
-    let config = Config::from_value(loader.load_config().expect("Failed to load configuration"));
+    let config = Config::create(config_options).expect("Failed to create configuration");
 
     // Initialize the runtime with the loaded configuration
     let runtime = match init(config).await {

@@ -2,11 +2,15 @@
 //! This module provides functionality to load and manage configuration settings for the runtime environment.
 
 pub mod dirs;
+pub mod loader;
 pub mod logger;
+pub mod read_value;
 
-use bakunin_config::Value;
+use crate::error::Result;
+use bakunin_config::{BakuninConfig, Value};
 use std::path::PathBuf;
 
+pub use loader::ConfigOptions;
 pub use logger::*;
 
 static DEFAULT_USER: &'static str = "root";
@@ -20,12 +24,14 @@ pub struct Config {
     /// Configuration for logging in the runtime environment.
     pub logger: Option<LogConfig>,
     /// Raw configuration value, if available.
-    pub raw: Option<Value>,
+    pub raw: Value,
+    /// Configuration handler for the runtime.
+    pub handler: BakuninConfig,
 }
 
 impl Config {
-    /// Creates a new `Config` instance from a `bakunin_config::Value`.
-    pub fn from_value(v: bakunin_config::Value) -> Self {
+    pub fn from_handler(handler: BakuninConfig) -> Result<Self> {
+        let v = handler.build_value(true)?;
         let data_location = dirs::get_data_location(&v);
         let logger = {
             let log_cfg = v.get("logger");
@@ -36,11 +42,24 @@ impl Config {
             }
         };
 
-        Self {
+        Ok(Config {
             data_location,
             user: v.get("user").into_string_or(DEFAULT_USER.to_string()),
             logger,
-            raw: Some(v),
+            raw: v,
+            handler,
+        })
+    }
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            data_location: dirs::get_data_location(&Value::default()),
+            user: DEFAULT_USER.to_string(),
+            logger: None,
+            raw: Value::None,
+            handler: BakuninConfig::new(),
         }
     }
 }
