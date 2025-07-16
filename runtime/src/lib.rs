@@ -15,8 +15,17 @@ pub struct Runtime {
 }
 
 impl Runtime {
-    pub fn shutdown(&self) {
-        log::debug!("Exiting runtime version: {}", self.version);
+    pub fn shutdown(&self, exit_code: i32) {
+        if exit_code == 0 {
+            log::debug!("Exiting runtime version: {}", self.version);
+        } else {
+            log::debug!(
+                "Exiting runtime version: {} with error code: {}",
+                self.version,
+                exit_code
+            );
+        }
+
         if let Some(logger) = &self.logger_handler {
             logger.shutdown();
         }

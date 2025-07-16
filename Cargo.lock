@@ -1025,6 +1025,7 @@ dependencies = [
  "dsot_runtime",
  "log",
  "music_brainz",
+ "paste",
  "tokio",
 ]
 

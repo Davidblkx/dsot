@@ -19,3 +19,4 @@ tokio = { workspace = true, features = ["full"] }
 bakunin_config = { workspace = true }
 clap = { workspace = true }
 anyhow = { workspace = true }
+paste = { workspace = true }
