@@ -4,6 +4,7 @@ use dsot_runtime::infra::config::{
 };
 
 use super::{SubCommand, SubCommandError};
+use crate::print::print_message;
 
 static NAME: &str = "config";
 
@@ -36,7 +37,7 @@ impl SubCommand for ConfigCommand {
 
     async fn run(
         runtime: &dsot_runtime::Runtime,
-        _global_args: &clap::ArgMatches,
+        global_args: &clap::ArgMatches,
         cmd_args: &clap::ArgMatches,
     ) -> Result<(), SubCommandError> {
         if let (Some(key), Some(value)) = (
@@ -66,11 +67,7 @@ impl SubCommand for ConfigCommand {
             }
         } else if let Some(key) = cmd_args.get_one::<String>("key") {
             let value = runtime.config.get_config_value(key);
-
-            match value {
-                bakunin_config::Value::None => println!("No value found for '{}'", key),
-                _ => println!("{:?}", value),
-            }
+            print_message(&global_args, format!("{:?}", value));
         } else {
             return SubCommandError::MissingArgument()
                 .with_message("The 'key' argument is required.")

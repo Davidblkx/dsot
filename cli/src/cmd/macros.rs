@@ -27,7 +27,7 @@ macro_rules! declare_arg_path {
 }
 
 macro_rules! declare_arg_bool {
-    ($name:ident, $long:literal$(, short: $short:literal)?, $help:literal) => {
+    ($name:ident, $long:literal$(, short: $short:literal)?, $help:literal$(, action: $action:ident)?) => {
         pub struct $name;
 
         impl $name {
@@ -43,6 +43,7 @@ macro_rules! declare_arg_bool {
                     $(.short($short))?
                     .help($help)
                     .action(clap::ArgAction::SetTrue)
+                    $(.action($action))?
                     .required(false)
             }
 
