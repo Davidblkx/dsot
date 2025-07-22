@@ -10,7 +10,10 @@ use crate::error::Result;
 use bakunin_config::{BakuninConfig, Value};
 use std::path::PathBuf;
 
-pub use loader::ConfigOptions;
+pub use loader::{
+    CONFIG_FILE_NAME, CUSTOM_FILE_LAYER_NAME, ConfigOptions, GLOBAL_FILE_LAYER_NAME,
+    LOCAL_FILE_LAYER_NAME,
+};
 pub use logger::*;
 
 static DEFAULT_USER: &'static str = "root";

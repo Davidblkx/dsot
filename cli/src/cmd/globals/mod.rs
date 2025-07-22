@@ -1,6 +1,3 @@
-#[macro_use]
-mod macros;
-
 declare_arg_path!(ConfigArg, "config", short: 'c', "Use a custom configuration file, instead of the default ones");
 declare_arg_path!(LayerConfigArg, "layer-config", short: 'l', "Add a custom layer configuration file, on top of the default ones");
 declare_arg_bool!(DebugArg, "debug", short: 'd', "Enable debug mode");

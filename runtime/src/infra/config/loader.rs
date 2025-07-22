@@ -4,7 +4,11 @@ use crate::error::Result;
 use bakunin_config::file_finder::FileFinder;
 use bakunin_config::{BakuninConfig, value_map};
 
-static CONFIG_FILE: &'static str = ".dsot";
+pub static CONFIG_FILE_NAME: &'static str = ".dsot";
+
+pub static GLOBAL_FILE_LAYER_NAME: &'static str = "global";
+pub static LOCAL_FILE_LAYER_NAME: &'static str = "local";
+pub static CUSTOM_FILE_LAYER_NAME: &'static str = "custom";
 
 /// Options for loading the configuration.
 #[derive(Debug, Clone)]
@@ -50,26 +54,24 @@ impl Config {
         let mut handler = BakuninConfig::new().with_memory_layer("default", default_value.clone());
 
         if options.search {
-            let global_search = FileFinder::new(CONFIG_FILE)
+            let global_search = FileFinder::new(CONFIG_FILE_NAME)
                 .with_supported_extensions()
                 .with_user_home()
                 .with_user_config()
                 .find_first(true)?;
 
-            handler.add_file_layer("global", global_search.path)?;
+            handler.add_file_layer(GLOBAL_FILE_LAYER_NAME, global_search.path)?;
 
-            let local_search = FileFinder::new(CONFIG_FILE)
+            let local_search = FileFinder::new(CONFIG_FILE_NAME)
                 .with_supported_extensions()
                 .with_working_directory()
                 .find_first(true)?;
 
-            if local_search.exists {
-                handler.add_file_layer("local", local_search.path)?;
-            }
+            handler.add_file_layer(LOCAL_FILE_LAYER_NAME, local_search.path)?;
         }
 
         if options.create {
-            if let Some(cfg) = handler.get_layer("global") {
+            if let Some(cfg) = handler.get_layer(GLOBAL_FILE_LAYER_NAME) {
                 if !cfg.has_value() {
                     cfg.write_value(&default_value)?;
                 }
@@ -77,7 +79,7 @@ impl Config {
         }
 
         if let Some(path) = options.config_path {
-            handler.add_file_layer("custom", std::path::PathBuf::from(path))?;
+            handler.add_file_layer(CUSTOM_FILE_LAYER_NAME, std::path::PathBuf::from(path))?;
         }
 
         if options.use_env {

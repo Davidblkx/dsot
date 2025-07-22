@@ -1,6 +1,14 @@
+use bakunin_config::{Value, config_layer::ConfigLayer};
+use dsot_runtime::infra::config::{
+    CUSTOM_FILE_LAYER_NAME, GLOBAL_FILE_LAYER_NAME, LOCAL_FILE_LAYER_NAME,
+};
+
 use super::{SubCommand, SubCommandError};
 
 static NAME: &str = "config";
+
+declare_arg_bool!(UseGlobalArg, "global", short: 'g', "Write to global configuration");
+declare_arg_bool!(InitArg, "init", short: 'i', "Creates configuration file if not present");
 
 pub struct ConfigCommand;
 
@@ -12,7 +20,8 @@ impl SubCommand for ConfigCommand {
     fn build() -> clap::Command {
         clap::Command::new(Self::get_name())
             .about("Read configuration values")
-            .arg(clap::arg!(--global "Write to global configuration"))
+            .arg(UseGlobalArg::build())
+            .arg(InitArg::build())
             .arg(
                 clap::Arg::new("key")
                     .help("The configuration key to read")
@@ -34,8 +43,27 @@ impl SubCommand for ConfigCommand {
             cmd_args.get_one::<String>("key"),
             cmd_args.get_one::<String>("value"),
         ) {
-            log::warn!("Setting configuration values is not supported in this command.");
-            log::trace!("Key: {}, Value: {}", key, value);
+            let create = InitArg::enabled(cmd_args);
+            if UseGlobalArg::enabled(cmd_args) {
+                if let Some(layer) = runtime.config.handler.get_layer(GLOBAL_FILE_LAYER_NAME) {
+                    log::trace!("Writing [{}] to global config", key);
+                    return write_to_layer(layer, key, value.clone(), create);
+                } else {
+                    return SubCommandError::ConfigError()
+                        .with_message("Global config file not defined")
+                        .to_err();
+                }
+            } else if let Some(layer) = runtime.config.handler.get_layer(CUSTOM_FILE_LAYER_NAME) {
+                log::trace!("Writing [{}] to config file", key);
+                return write_to_layer(layer, key, value.clone(), create);
+            } else if let Some(layer) = runtime.config.handler.get_layer(LOCAL_FILE_LAYER_NAME) {
+                log::trace!("Writing [{}] to config file", key);
+                return write_to_layer(layer, key, value.clone(), create);
+            } else {
+                return SubCommandError::ConfigError()
+                    .with_message("Local config file not defined")
+                    .to_err();
+            }
         } else if let Some(key) = cmd_args.get_one::<String>("key") {
             let value = runtime.config.get_config_value(key);
 
@@ -51,4 +79,36 @@ impl SubCommand for ConfigCommand {
 
         Ok(())
     }
+}
+
+fn write_to_layer(
+    layer: &Box<dyn ConfigLayer>,
+    key: &str,
+    value: String,
+    create: bool,
+) -> Result<(), SubCommandError> {
+    if layer.has_value() {
+        let mut v: Value = layer
+            .read_value()
+            .map_err(|e| SubCommandError::from_bakunin_error(e))?;
+
+        v.set(key, Value::String(value))
+            .map_err(|e| SubCommandError::ConfigError().with_message(e.to_string()))?;
+        layer
+            .write_value(&v)
+            .map_err(|e| SubCommandError::from_bakunin_error(e))?;
+    } else if create {
+        let mut v = Value::new_map();
+        v.set(key, Value::String(value))
+            .map_err(|e| SubCommandError::ConfigError().with_message(e.to_string()))?;
+        layer
+            .write_value(&v)
+            .map_err(|e| SubCommandError::from_bakunin_error(e))?;
+    } else {
+        return SubCommandError::ConfigError()
+            .with_message("Config file doesn't exist, use -i to create it")
+            .to_err();
+    }
+
+    Ok(())
 }

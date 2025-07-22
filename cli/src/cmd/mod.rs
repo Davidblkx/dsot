@@ -1,3 +1,5 @@
+#[macro_use]
+mod macros;
 mod subcommands;
 
 pub mod globals;

@@ -1,3 +1,5 @@
+use bakunin_config::BakuninError;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SubCommandError {
     pub message: Option<String>,
@@ -40,6 +42,10 @@ impl SubCommandError {
     pub fn to_err(self) -> Result<(), Self> {
         Err(self)
     }
+
+    pub fn from_bakunin_error(e: BakuninError) -> Self {
+        SubCommandError::ConfigError().with_message(e.to_string())
+    }
 }
 
 impl Default for SubCommandError {
@@ -54,4 +60,5 @@ impl Default for SubCommandError {
 error_codes![
     InvalidCommand: 1, "No valid command provided. Use --help for more information.",
     MissingArgument: 2,
+    ConfigError: 3,
 ];
