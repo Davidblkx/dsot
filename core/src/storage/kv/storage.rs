@@ -1,19 +1,22 @@
+use super::{BinModel, HasBytes, StorageEntity, StorageHandler, StorageTransaction};
 use crate::error::Result;
-use super::{ BinModel, HasBytes, StorageEntity, StorageHandler, StorageTransaction};
 
 pub struct Storage<T: Sized + StorageHandler> {
-    handler: T
+    handler: T,
 }
 
-// TODO: Refactor this to put types in their own modules and move Redb to core and write tests
-impl <T> Storage<T> where T: Sized + StorageHandler {
+impl<T> Storage<T>
+where
+    T: Sized + StorageHandler,
+{
     pub fn new(handler: T) -> Self {
-        Self {
-            handler
-        }
+        Self { handler }
     }
 
-    pub fn get<Entity: BinModel + StorageEntity>(&self, key: impl HasBytes) -> Result<Option<Entity::Model>> {
+    pub fn get<Entity: BinModel + StorageEntity>(
+        &self,
+        key: impl HasBytes,
+    ) -> Result<Option<Entity::Model>> {
         let bucket = self.handler.open(Entity::get_storage_name())?;
         let data = bucket.get(key.get_bytes())?;
         bucket.close()?;
@@ -22,8 +25,8 @@ impl <T> Storage<T> where T: Sized + StorageHandler {
             Some(data) => {
                 let model = Entity::deserialize(&data)?;
                 Ok(Some(model))
-            },
-            None => Ok(None)
+            }
+            None => Ok(None),
         }
     }
 

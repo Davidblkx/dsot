@@ -18,7 +18,7 @@ pub enum DsotError {
     DataFormatError(String),
 
     #[error("Error handling bucket: {bucket} - {operation}: {error}")]
-    TransactionError{
+    TransactionError {
         bucket: String,
         operation: &'static str,
         error: String,
@@ -42,14 +42,26 @@ pub enum DsotError {
     #[error("Unknown DB entity index: {0}")]
     UnknownDbEntity(u32),
 
+    #[error("Database is closed")]
+    SqlClosedConnection,
+
     #[error("SQL Error: {0}")]
     SqlError(#[from] sqlx::Error),
 
     #[error("SQL Error: [Missing relation] {0}")]
     SqlMissingRelation(String),
 
+    #[error("SQL Migration Error: {0}")]
+    SqlMigrationError(#[from] sqlx::migrate::MigrateError),
+
     #[error("Unknown DSOT error")]
     Unknown,
+}
+
+impl DsotError {
+    pub fn to_err<T>(self) -> Result<T> {
+        Err(self)
+    }
 }
 
 pub type Result<T> = std::result::Result<T, DsotError>;

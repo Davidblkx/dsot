@@ -40,7 +40,7 @@ pub async fn create_db_connection<'a>(
     let mut pool = connect_db(&db_path).await?;
     let has_migrations = has_pending_migrations(&pool).await?;
 
-    if daily_backup {
+    if daily_backup && db_path.exists() {
         log::trace!(
             "Creating daily backup for database at: {}",
             db_path.display()
