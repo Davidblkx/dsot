@@ -1,5 +1,7 @@
 use thiserror::Error;
 
+use crate::storage::handler::error::DatabaseHandlerError;
+
 #[derive(Error, Debug)]
 pub enum DsotError {
     #[error("Data is for a different version of the application")]
@@ -53,6 +55,9 @@ pub enum DsotError {
 
     #[error("SQL Migration Error: {0}")]
     SqlMigrationError(#[from] sqlx::migrate::MigrateError),
+
+    #[error("Database handler error: {0}")]
+    DatabaseError(#[from] DatabaseHandlerError),
 
     #[error("Unknown DSOT error")]
     Unknown,

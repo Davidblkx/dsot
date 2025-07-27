@@ -15,8 +15,15 @@ pub struct JournalEntryV0 {
     pub op: JournalOperation,
 }
 
-crate::dsot_storage_declare_model!(JournalEntry {
-    0: JournalEntryV0
-});
+crate::dsot_storage_declare_model!(JournalEntry { 0: JournalEntryV0 });
 
 crate::dsot_storage_use_id_uuid!(JournalEntry, "journal_entry");
+
+impl JournalEntry {
+    pub fn new(op: JournalOperation) -> Self {
+        Self {
+            id: uuid::Uuid::now_v7(),
+            op,
+        }
+    }
+}

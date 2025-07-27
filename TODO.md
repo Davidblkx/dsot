@@ -1,6 +1,6 @@
 # NOW
 
-- Move db logic to core
+- Implement runtime with new SqliteDbHandler
 
 - handle users
 - Setup journal db
