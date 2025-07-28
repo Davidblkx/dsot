@@ -1,54 +1,99 @@
+use dashmap::DashMap;
+use dashmap::mapref::one::{Ref, RefMut};
+use dsot_core::storage::SqliteDbHandler;
 use std::path::PathBuf;
 
-use dashmap::DashMap;
-
+use crate::Config;
 use crate::error::Result;
 
-use super::conn::{create_db_connection, create_trx_from_pool, create_trx_from_ref};
-use super::kind::DbKind;
+use super::DatabaseHandlerError;
 
-/// DatabaseHandler is responsible for managing the main database and user-specific databases.
-/// It's the main entry point for database operations in the runtime.
+static LIBRARY_NAME: &'static str = "__library";
+
 pub struct DatabaseHandler {
-    pub db: sqlx::SqlitePool,
-    users_db: DashMap<String, sqlx::SqlitePool>,
-    db_path: PathBuf,
-    daily_backup: bool,
+    pub dbs: DashMap<String, SqliteDbHandler>,
+    pub data_folder: PathBuf,
+    pub backup_folder: PathBuf,
 }
 
 impl DatabaseHandler {
-    pub async fn new(config: &crate::Config) -> Result<Self> {
-        let daily_backup = true;
+    pub async fn new(config: &Config) -> Result<Self> {
+        let data_folder = config.data_location.clone();
+        let backup_folder = data_folder.join("backup");
 
-        let db = create_db_connection(&config.data_location, &DbKind::Main, daily_backup).await?;
+        let v = Self {
+            dbs: DashMap::with_capacity(10),
+            data_folder,
+            backup_folder,
+        };
 
-        Ok(DatabaseHandler {
-            db,
-            users_db: DashMap::new(),
-            db_path: config.data_location.clone(),
-            daily_backup: true,
-        })
+        v.create_db(LIBRARY_NAME.to_string(), "library").await?;
+
+        Ok(v)
     }
 
-    /// Creates a new user-specific database transaction.
-    pub async fn create_user_transaction(&self, user_id: &str) -> Result<sqlx::SqliteTransaction> {
-        if let Some(pool) = self.users_db.get(user_id) {
-            let trx = create_trx_from_ref(pool).await?;
-            return Ok(trx);
+    pub fn get_lib_db(&self) -> Result<Ref<'_, String, SqliteDbHandler>> {
+        self.dbs
+            .get(LIBRARY_NAME)
+            .ok_or(DatabaseHandlerError::LibraryNotDefined.into())
+    }
+
+    pub fn get_lib_db_mut(&self) -> Result<RefMut<'_, String, SqliteDbHandler>> {
+        self.dbs
+            .get_mut(LIBRARY_NAME)
+            .ok_or(DatabaseHandlerError::LibraryNotDefined.into())
+    }
+
+    pub async fn get_user_db(&self, user: &str) -> Result<Ref<'_, String, SqliteDbHandler>> {
+        let user_key = format!("User.{}", user);
+        self.create_db(user_key.clone(), user).await?;
+
+        self.dbs
+            .get(&user_key)
+            .ok_or(DatabaseHandlerError::UserNotDefined(user_key).into())
+    }
+
+    pub async fn get_user_db_mut(&self, user: &str) -> Result<RefMut<'_, String, SqliteDbHandler>> {
+        let user_key = format!("User.{}", user);
+        self.create_db(user_key.clone(), user).await?;
+
+        self.dbs
+            .get_mut(&user_key)
+            .ok_or(DatabaseHandlerError::UserNotDefined(user_key).into())
+    }
+
+    pub async fn backup(&self) -> Result<()> {
+        for mut handler in self.dbs.iter_mut() {
+            handler.backup().await?;
         }
 
-        let user_db =
-            create_db_connection(&self.db_path, &DbKind::User(user_id), self.daily_backup).await?;
-        let trx = create_trx_from_pool(&user_db).await?;
-
-        self.users_db.insert(user_id.to_string(), user_db);
-
-        Ok(trx)
+        Ok(())
     }
 
-    /// Creates a new transaction on the main database connection.
-    pub async fn create_transaction(&self) -> Result<sqlx::SqliteTransaction> {
-        let trx = create_trx_from_pool(&self.db).await?;
-        Ok(trx)
+    async fn create_db(&self, key: String, name: &str) -> Result<()> {
+        if self.dbs.contains_key(&key) {
+            log::warn!("Database for key {}, already created", key);
+            return Ok(());
+        }
+
+        log::debug!("Creating database for {}", key);
+
+        let mut db =
+            SqliteDbHandler::new_file_with_backup(name, &self.data_folder, &self.backup_folder);
+        db.open().await?;
+
+        if db.has_pending_migrations().await? {
+            if let Some(db_path) = db.connection_kind.get_db_path() {
+                if db_path.exists() {
+                    db.backup().await?;
+                }
+            }
+
+            db.run_pending_migrations().await?;
+        }
+
+        self.dbs.insert(key, db);
+
+        Ok(())
     }
 }

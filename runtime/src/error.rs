@@ -15,7 +15,7 @@ pub enum RuntimeError {
     #[error("IO error: {0}")]
     IOError(#[from] std::io::Error),
     #[error("Database error: {0}")]
-    DatabaseError(#[from] crate::infra::db::DbError),
+    DbError(#[from] crate::infra::db::DatabaseHandlerError),
     #[error("Migration error: {0}")]
     MigrationError(#[from] sqlx::migrate::MigrateError),
 }

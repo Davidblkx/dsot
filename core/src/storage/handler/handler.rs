@@ -23,6 +23,36 @@ pub struct SqliteDbHandler {
 }
 
 impl SqliteDbHandler {
+    /// Create a new handler for an in memory database
+    pub fn new_memory() -> Self {
+        Self {
+            connection_kind: HandlerConnectionKind::Memory,
+            db_pool: None,
+            journal: None,
+        }
+    }
+
+    pub fn new_file<N: Into<String>, P: Into<PathBuf>>(name: N, data_folder: P) -> Self {
+        Self {
+            connection_kind: HandlerConnectionKind::new_file(name, data_folder),
+            db_pool: None,
+            journal: None,
+        }
+    }
+
+    pub fn new_file_with_backup<N: Into<String>, P: Into<PathBuf>, B: Into<PathBuf>>(
+        name: N,
+        data_folder: P,
+        backup_folder: B,
+    ) -> Self {
+        Self {
+            connection_kind: HandlerConnectionKind::new_file(name, data_folder)
+                .with_backup_folder(backup_folder),
+            db_pool: None,
+            journal: None,
+        }
+    }
+
     /// Opens the connection to the database and it's journal
     pub async fn open(&mut self) -> Result<()> {
         if self.is_open() {
