@@ -46,5 +46,6 @@ entity_enum! {
     9: ReleaseMedia,
     10: Storage,
     11: Track,
-    12: Work
+    12: Work,
+    13: User
 }

@@ -1,3 +1,5 @@
+mod model;
+
 pub mod error;
 pub mod infra;
 
@@ -6,12 +8,14 @@ use infra::{init_folder, init_runtime_logger};
 
 use crate::infra::db::DatabaseHandler;
 
+pub use model::*;
+
 pub struct Runtime {
     pub config: Config,
     pub version: &'static str,
     pub db: DatabaseHandler,
 
-    logger_handler: Option<flexi_logger::LoggerHandle>,
+    pub(crate) logger_handler: Option<flexi_logger::LoggerHandle>,
 }
 
 impl Runtime {

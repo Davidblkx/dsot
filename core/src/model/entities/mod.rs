@@ -7,6 +7,7 @@ pub mod release;
 pub mod release_media;
 pub mod storage;
 pub mod track;
+pub mod user;
 pub mod work;
 
 pub mod rel;

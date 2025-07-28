@@ -1,4 +1,3 @@
--- Add migration script here
 CREATE TABLE inbox (
     id BLOB PRIMARY KEY,
     title TEXT,
@@ -7,3 +6,10 @@ CREATE TABLE inbox (
     file TEXT,
     extra_info TEXT
 );
+
+CREATE TABLE users (
+    id BLOB PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE
+);
+
+CREATE INDEX users_names ON users (name);

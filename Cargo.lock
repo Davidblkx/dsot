@@ -1071,6 +1071,7 @@ dependencies = [
  "log",
  "sqlx",
  "thiserror 2.0.12",
+ "uuid",
 ]
 
 [[package]]

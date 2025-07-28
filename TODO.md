@@ -1,14 +1,10 @@
 # NOW
 
-- Implement runtime with new SqliteDbHandler
-
-- handle users
-- Setup journal db
-- work mechanism to update db using journal
-- design a way to have multiple users
+- Add inbox cli
 
 # TODO
 
+- Understand why it takes so long to close
 - Work on documentation pages (see cargo doc)
 - Update to bincode2
 - would be nice to have a way to know where a file layer is located

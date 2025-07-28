@@ -44,4 +44,4 @@ macro_rules! declare_subcommands {
     }
 }
 
-declare_subcommands![config,];
+declare_subcommands![config, user,];

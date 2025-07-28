@@ -61,4 +61,11 @@ error_codes![
     InvalidCommand: 1, "No valid command provided. Use --help for more information.",
     MissingArgument: 2,
     ConfigError: 3,
+    RuntimeError: 4,
 ];
+
+impl From<dsot_runtime::error::RuntimeError> for SubCommandError {
+    fn from(value: dsot_runtime::error::RuntimeError) -> Self {
+        SubCommandError::RuntimeError().with_message(value.to_string())
+    }
+}

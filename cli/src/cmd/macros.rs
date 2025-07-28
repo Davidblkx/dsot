@@ -26,6 +26,34 @@ macro_rules! declare_arg_path {
     };
 }
 
+macro_rules! declare_arg_string {
+    ($name:ident, $long:literal$(, short: $short:literal)?, $help:literal) => {
+        pub struct $name;
+
+        impl $name {
+            /// The long name of the argument.
+            pub fn get_name() -> &'static str {
+                $long
+            }
+
+            /// Builds the clap argument.
+            pub fn build() -> clap::Arg {
+                clap::Arg::new(Self::get_name())
+                    .long($long)
+                    $(.short($short))?
+                    .help($help)
+                    .value_parser(clap::value_parser!(String))
+                    .required(false)
+            }
+
+            /// Get the PathBuf value for this argument.
+            pub fn get(args: &clap::ArgMatches) -> Option<&String> {
+                args.get_one::<String>($long)
+            }
+        }
+    };
+}
+
 macro_rules! declare_arg_bool {
     ($name:ident, $long:literal$(, short: $short:literal)?, $help:literal$(, action: $action:ident)?) => {
         pub struct $name;

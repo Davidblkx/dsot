@@ -18,4 +18,6 @@ pub enum RuntimeError {
     DbError(#[from] crate::infra::db::DatabaseHandlerError),
     #[error("Migration error: {0}")]
     MigrationError(#[from] sqlx::migrate::MigrateError),
+    #[error("Users error: {0}")]
+    UsersError(#[from] super::UsersError),
 }

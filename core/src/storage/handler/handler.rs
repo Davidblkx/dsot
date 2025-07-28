@@ -14,7 +14,6 @@ use super::error::DatabaseHandlerError;
 
 /// Handles a database IO and allows to sync/backup
 /// It will also handle any required migration
-/// TODO: REFACTOR TO MAKE KIND PRIVATE AND USE new_memory, new_file, new_file_with_backup
 pub struct SqliteDbHandler {
     /// Defines where data is loaded from (memory or file)
     pub connection_kind: HandlerConnectionKind,
