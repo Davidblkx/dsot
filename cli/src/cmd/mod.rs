@@ -1,5 +1,6 @@
 #[macro_use]
-mod macros;
+pub(crate) mod infra;
+
 mod subcommands;
 
 pub mod globals;

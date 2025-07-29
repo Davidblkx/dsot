@@ -1,15 +1,32 @@
-use clap::ArgAction::SetFalse;
+declare_arg_path!(
+    ConfigArg,
+    "config",
+    "Use a custom configuration file, instead of the default ones",
+    'c'
+);
+declare_arg_path!(
+    LayerConfigArg,
+    "layer-config",
+    "Add a custom layer configuration file, on top of the default ones"
+);
 
-declare_arg_path!(ConfigArg, "config", short: 'c', "Use a custom configuration file, instead of the default ones");
-declare_arg_path!(LayerConfigArg, "layer-config", short: 'l', "Add a custom layer configuration file, on top of the default ones");
-declare_arg_bool!(DebugArg, "debug", short: 'd', "Enable debug mode");
+declare_arg_bool!(DebugArg, "debug", "Enable debug mode", 'd');
 declare_arg_bool!(
     DebugFolderArg,
     "debug-folder",
     "Enable debug mode and write logs to a folder"
 );
-declare_arg_bool!(QuietModeArg, "quiet", short: 'q', "Don't print anything to console");
-declare_arg_bool!(DisableAnsiArg, "no-ansi", "Do not print ansi codes", action: SetFalse);
+
+declare_arg_bool!(
+    QuietModeArg,
+    "quiet",
+    "Don't print anything to console",
+    'q'
+);
+declare_arg!(DisableAnsiArg("no-ansi") {
+    help: "Do not print ansi codes",
+    flag: SetFalse,
+});
 
 pub fn register(cmd: clap::Command) -> clap::Command {
     cmd.arg(ConfigArg::build())

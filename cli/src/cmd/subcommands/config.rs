@@ -8,8 +8,13 @@ use crate::print::print_message;
 
 static NAME: &str = "config";
 
-declare_arg_bool!(UseGlobalArg, "global", short: 'g', "Write to global configuration");
-declare_arg_bool!(InitArg, "init", short: 'i', "Creates configuration file if not present");
+declare_arg_bool!(UseGlobalArg, "global", "Write to global configuration", 'g');
+declare_arg_bool!(
+    InitArg,
+    "init",
+    "Creates configuration file if not present",
+    'i'
+);
 
 pub struct ConfigCommand;
 

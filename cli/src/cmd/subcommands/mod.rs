@@ -1,18 +1,10 @@
 mod error;
+mod traits;
 
 pub use error::SubCommandError;
+pub use traits::*;
 
 use std::result::Result;
-
-pub trait SubCommand {
-    fn get_name() -> &'static str;
-    fn build() -> clap::Command;
-    async fn run(
-        runtime: &dsot_runtime::Runtime,
-        global_args: &clap::ArgMatches,
-        cmd_args: &clap::ArgMatches,
-    ) -> Result<(), SubCommandError>;
-}
 
 macro_rules! declare_subcommands {
     ($($name:ident),*$(,)?) => {
@@ -44,4 +36,4 @@ macro_rules! declare_subcommands {
     }
 }
 
-declare_subcommands![config, user,];
+declare_subcommands![config, user, inbox,];
