@@ -13,7 +13,7 @@ impl AppCommand for InboxCommand {
         register_commands(cmd)
     }
 
-    async fn execute(runtime: &dsot_runtime::Runtime, args: CommandArgs) -> AppResult<()> {
-        execute(runtime, args).await
+    async fn execute(runtime: &dsot_runtime::Runtime, context: AppCommandContext) -> AppResult<()> {
+        execute(runtime, context).await
     }
 }

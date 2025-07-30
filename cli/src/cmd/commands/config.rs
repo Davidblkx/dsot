@@ -4,8 +4,7 @@ use dsot_runtime::infra::config::{
 };
 
 use crate::cmd::error::{AppError, AppResult};
-use crate::cmd::infra::{AppCommand, CommandArgs};
-use crate::print::print_message;
+use crate::cmd::infra::{AppCommand, AppCommandContext};
 
 static NAME: &str = "config";
 
@@ -41,13 +40,13 @@ impl AppCommand for ConfigCommand {
             )
     }
 
-    async fn execute(runtime: &dsot_runtime::Runtime, args: CommandArgs) -> AppResult<()> {
+    async fn execute(runtime: &dsot_runtime::Runtime, context: AppCommandContext) -> AppResult<()> {
         if let (Some(key), Some(value)) = (
-            args.command.get_one::<String>("key"),
-            args.command.get_one::<String>("value"),
+            context.args.get_one::<String>("key"),
+            context.args.get_one::<String>("value"),
         ) {
-            let create = InitArg::enabled(&args.command);
-            if UseGlobalArg::enabled(&args.command) {
+            let create = InitArg::enabled(&context.args);
+            if UseGlobalArg::enabled(&context.args) {
                 if let Some(layer) = runtime.config.handler.get_layer(GLOBAL_FILE_LAYER_NAME) {
                     log::trace!("Writing [{}] to global config", key);
                     return write_to_layer(layer, key, value.clone(), create);
@@ -67,9 +66,9 @@ impl AppCommand for ConfigCommand {
                     .with_message("Local config file not defined")
                     .to_err();
             }
-        } else if let Some(key) = args.command.get_one::<String>("key") {
+        } else if let Some(key) = context.args.get_one::<String>("key") {
             let value = runtime.config.get_config_value(key);
-            print_message(&args.global, format!("{:?}", value));
+            context.print_message(format!("{:?}", value));
         } else {
             return AppError::MissingArgument()
                 .with_message("The 'key' argument is required.")

@@ -2,32 +2,29 @@ use crate::cmd::error::AppResult;
 use clap::ArgMatches;
 use dsot_runtime::Runtime;
 
-pub struct CommandArgs {
+pub struct AppCommandContext {
     pub global: clap::ArgMatches,
-    #[allow(unused)]
-    pub parent: Option<clap::ArgMatches>,
-    pub command: clap::ArgMatches,
+    pub args: clap::ArgMatches,
 }
 
 pub trait AppCommand {
     fn name() -> &'static str;
     fn build() -> clap::Command;
-    async fn execute(runtime: &Runtime, args: CommandArgs) -> AppResult<()>;
+    async fn execute(runtime: &Runtime, context: AppCommandContext) -> AppResult<()>;
 }
 
 pub trait MatchCommand {
-    fn match_command(&self, name: &'static str) -> Option<CommandArgs>;
+    fn match_command(&self, name: &'static str) -> Option<AppCommandContext>;
 }
 
-impl MatchCommand for CommandArgs {
-    fn match_command(&self, name: &'static str) -> Option<CommandArgs> {
-        let args = self.command.subcommand_matches(name).map(|e| e.clone());
+impl MatchCommand for AppCommandContext {
+    fn match_command(&self, name: &'static str) -> Option<AppCommandContext> {
+        let args = self.args.subcommand_matches(name).map(|e| e.clone());
 
         match args {
-            Some(command) => Some(CommandArgs {
+            Some(command) => Some(AppCommandContext {
                 global: self.global.clone(),
-                command,
-                parent: Some(self.command.clone()),
+                args: command,
             }),
             None => None,
         }
@@ -35,14 +32,13 @@ impl MatchCommand for CommandArgs {
 }
 
 impl MatchCommand for ArgMatches {
-    fn match_command(&self, name: &'static str) -> Option<CommandArgs> {
+    fn match_command(&self, name: &'static str) -> Option<AppCommandContext> {
         let args = self.subcommand_matches(name).map(|c| c.clone());
 
         match args {
-            Some(command) => Some(CommandArgs {
+            Some(command) => Some(AppCommandContext {
                 global: self.clone(),
-                command,
-                parent: None,
+                args: command,
             }),
             None => None,
         }

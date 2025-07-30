@@ -1,6 +1,5 @@
 use crate::cmd::error::AppResult;
-use crate::cmd::infra::{AppCommand, CommandArgs};
-use crate::print::print_message;
+use crate::cmd::infra::{AppCommand, AppCommandContext};
 use dsot_runtime::Users;
 
 declare_arg_bool!(ListUsersArg, "list", "List existing users", 'l');
@@ -22,16 +21,16 @@ impl AppCommand for UserCommand {
             .arg(CreateUserArg::build())
     }
 
-    async fn execute(runtime: &dsot_runtime::Runtime, args: CommandArgs) -> AppResult<()> {
-        if let Some(user_name) = CreateUserArg::get(&args.command) {
+    async fn execute(runtime: &dsot_runtime::Runtime, context: AppCommandContext) -> AppResult<()> {
+        if let Some(user_name) = CreateUserArg::get(&context.args) {
             let id = runtime.create_user(user_name).await?;
-            print_message(&args.global, id.to_string());
+            context.print_message(id);
         }
 
-        if ListUsersArg::enabled(&args.command) {
+        if ListUsersArg::enabled(&context.args) {
             let users = runtime.list_users().await?;
             for u in users {
-                print_message(&args.global, format!("{} - {}", u.id, u.name));
+                context.print_message(format!("{} - {}", u.id, u.name));
             }
         }
 

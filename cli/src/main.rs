@@ -1,7 +1,5 @@
 mod cmd;
 
-mod print;
-
 use dsot_runtime::{
     Config,
     infra::{

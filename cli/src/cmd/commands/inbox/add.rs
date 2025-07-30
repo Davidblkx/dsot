@@ -1,5 +1,5 @@
 use crate::cmd::error::AppResult;
-use crate::cmd::infra::{AppCommand, CommandArgs};
+use crate::cmd::infra::{AppCommand, AppCommandContext};
 
 pub struct AddCommand;
 
@@ -12,7 +12,10 @@ impl AppCommand for AddCommand {
         clap::Command::new(AddCommand::name())
     }
 
-    async fn execute(_runtime: &dsot_runtime::Runtime, _args: CommandArgs) -> AppResult<()> {
+    async fn execute(
+        _runtime: &dsot_runtime::Runtime,
+        _context: AppCommandContext,
+    ) -> AppResult<()> {
         todo!()
     }
 }

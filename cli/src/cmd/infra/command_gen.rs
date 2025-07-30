@@ -34,10 +34,10 @@ macro_rules! __internal_generate_command_exec {
         paste::paste! {
             pub async fn execute(
                 runtime: &dsot_runtime::Runtime,
-                args: CommandArgs,
+                context: AppCommandContext,
             ) -> AppResult<()> {
                 $(
-                    if let Some(args) = args.match_command($name::[<$name:camel Command>]::name()) {
+                    if let Some(args) = context.match_command($name::[<$name:camel Command>]::name()) {
                         return $name::[<$name:camel Command>]::execute(runtime, args).await;
                     }
                 )*
@@ -50,7 +50,7 @@ macro_rules! __internal_generate_command_exec {
 
 macro_rules! generate_subcommands {
     ($($name:ident),*$(,)?) => {
-        use $crate::cmd::infra::{CommandArgs, AppCommand, MatchCommand};
+        use $crate::cmd::infra::{AppCommandContext, AppCommand, MatchCommand};
         use $crate::cmd::error::{AppResult, AppError};
 
         __internal_generate_command_registration!{$($name, )*}
@@ -62,7 +62,7 @@ macro_rules! generate_subcommands {
 macro_rules! generate_commands {
     ($($name:ident),*$(,)?) => {
         #[allow(unused_imports)]
-        use $crate::cmd::infra::{CommandArgs, AppCommand, MatchCommand};
+        use $crate::cmd::infra::{AppCommandContext, AppCommand, MatchCommand};
         use $crate::cmd::error::{AppResult, AppError};
 
         __internal_generate_command_registration!{$($name, )*}
