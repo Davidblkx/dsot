@@ -1,4 +1,5 @@
-use super::{SubCommand, SubCommandError};
+use crate::cmd::error::AppResult;
+use crate::cmd::infra::{AppCommand, CommandArgs};
 use crate::print::print_message;
 use dsot_runtime::Users;
 
@@ -9,32 +10,28 @@ static NAME: &str = "user";
 
 pub struct UserCommand;
 
-impl SubCommand for UserCommand {
-    fn get_name() -> &'static str {
+impl AppCommand for UserCommand {
+    fn name() -> &'static str {
         NAME
     }
 
     fn build() -> clap::Command {
-        clap::Command::new(Self::get_name())
+        clap::Command::new(Self::name())
             .about("Handle users creation and list existing users")
             .arg(ListUsersArg::build())
             .arg(CreateUserArg::build())
     }
 
-    async fn run(
-        runtime: &dsot_runtime::Runtime,
-        global_args: &clap::ArgMatches,
-        cmd_args: &clap::ArgMatches,
-    ) -> Result<(), SubCommandError> {
-        if let Some(user_name) = CreateUserArg::get(cmd_args) {
+    async fn execute(runtime: &dsot_runtime::Runtime, args: CommandArgs) -> AppResult<()> {
+        if let Some(user_name) = CreateUserArg::get(&args.command) {
             let id = runtime.create_user(user_name).await?;
-            print_message(global_args, id.to_string());
+            print_message(&args.global, id.to_string());
         }
 
-        if ListUsersArg::enabled(cmd_args) {
+        if ListUsersArg::enabled(&args.command) {
             let users = runtime.list_users().await?;
             for u in users {
-                print_message(global_args, format!("{} - {}", u.id, u.name));
+                print_message(&args.global, format!("{} - {}", u.id, u.name));
             }
         }
 

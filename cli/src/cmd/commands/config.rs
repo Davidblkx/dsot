@@ -3,7 +3,8 @@ use dsot_runtime::infra::config::{
     CUSTOM_FILE_LAYER_NAME, GLOBAL_FILE_LAYER_NAME, LOCAL_FILE_LAYER_NAME,
 };
 
-use super::{SubCommand, SubCommandError};
+use crate::cmd::error::{AppError, AppResult};
+use crate::cmd::infra::{AppCommand, CommandArgs};
 use crate::print::print_message;
 
 static NAME: &str = "config";
@@ -18,13 +19,13 @@ declare_arg_bool!(
 
 pub struct ConfigCommand;
 
-impl SubCommand for ConfigCommand {
-    fn get_name() -> &'static str {
+impl AppCommand for ConfigCommand {
+    fn name() -> &'static str {
         NAME
     }
 
     fn build() -> clap::Command {
-        clap::Command::new(Self::get_name())
+        clap::Command::new(Self::name())
             .about("Read configuration values")
             .arg(UseGlobalArg::build())
             .arg(InitArg::build())
@@ -40,22 +41,18 @@ impl SubCommand for ConfigCommand {
             )
     }
 
-    async fn run(
-        runtime: &dsot_runtime::Runtime,
-        global_args: &clap::ArgMatches,
-        cmd_args: &clap::ArgMatches,
-    ) -> Result<(), SubCommandError> {
+    async fn execute(runtime: &dsot_runtime::Runtime, args: CommandArgs) -> AppResult<()> {
         if let (Some(key), Some(value)) = (
-            cmd_args.get_one::<String>("key"),
-            cmd_args.get_one::<String>("value"),
+            args.command.get_one::<String>("key"),
+            args.command.get_one::<String>("value"),
         ) {
-            let create = InitArg::enabled(cmd_args);
-            if UseGlobalArg::enabled(cmd_args) {
+            let create = InitArg::enabled(&args.command);
+            if UseGlobalArg::enabled(&args.command) {
                 if let Some(layer) = runtime.config.handler.get_layer(GLOBAL_FILE_LAYER_NAME) {
                     log::trace!("Writing [{}] to global config", key);
                     return write_to_layer(layer, key, value.clone(), create);
                 } else {
-                    return SubCommandError::ConfigError()
+                    return AppError::ConfigError()
                         .with_message("Global config file not defined")
                         .to_err();
                 }
@@ -66,15 +63,15 @@ impl SubCommand for ConfigCommand {
                 log::trace!("Writing [{}] to config file", key);
                 return write_to_layer(layer, key, value.clone(), create);
             } else {
-                return SubCommandError::ConfigError()
+                return AppError::ConfigError()
                     .with_message("Local config file not defined")
                     .to_err();
             }
-        } else if let Some(key) = cmd_args.get_one::<String>("key") {
+        } else if let Some(key) = args.command.get_one::<String>("key") {
             let value = runtime.config.get_config_value(key);
-            print_message(&global_args, format!("{:?}", value));
+            print_message(&args.global, format!("{:?}", value));
         } else {
-            return SubCommandError::MissingArgument()
+            return AppError::MissingArgument()
                 .with_message("The 'key' argument is required.")
                 .to_err();
         }
@@ -88,26 +85,20 @@ fn write_to_layer(
     key: &str,
     value: String,
     create: bool,
-) -> Result<(), SubCommandError> {
+) -> AppResult<()> {
     if layer.has_value() {
-        let mut v: Value = layer
-            .read_value()
-            .map_err(|e| SubCommandError::from_bakunin_error(e))?;
+        let mut v: Value = layer.read_value()?;
 
         v.set(key, Value::String(value))
-            .map_err(|e| SubCommandError::ConfigError().with_message(e.to_string()))?;
-        layer
-            .write_value(&v)
-            .map_err(|e| SubCommandError::from_bakunin_error(e))?;
+            .map_err(|e| AppError::ConfigError().with_message(e.to_string()))?;
+        layer.write_value(&v)?;
     } else if create {
         let mut v = Value::new_map();
         v.set(key, Value::String(value))
-            .map_err(|e| SubCommandError::ConfigError().with_message(e.to_string()))?;
-        layer
-            .write_value(&v)
-            .map_err(|e| SubCommandError::from_bakunin_error(e))?;
+            .map_err(|e| AppError::ConfigError().with_message(e.to_string()))?;
+        layer.write_value(&v)?;
     } else {
-        return SubCommandError::ConfigError()
+        return AppError::ConfigError()
             .with_message("Config file doesn't exist, use -i to create it")
             .to_err();
     }

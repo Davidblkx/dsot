@@ -90,5 +90,5 @@ async fn main() {
         handler.shutdown();
     }
 
-    std::process::exit(exit_code);
+    std::process::exit(exit_code.try_into().unwrap_or(-1));
 }

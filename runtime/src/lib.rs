@@ -19,7 +19,7 @@ pub struct Runtime {
 }
 
 impl Runtime {
-    pub fn shutdown(&self, exit_code: i32) {
+    pub fn shutdown(&self, exit_code: usize) {
         if exit_code == 0 {
             log::debug!("Exiting runtime version: {}", self.version);
         } else {
