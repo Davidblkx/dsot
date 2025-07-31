@@ -92,6 +92,17 @@ macro_rules! declare_arg_string {
     };
 }
 
+macro_rules! declare_arg_number {
+    ($arg:ident($type:ty), $long:literal, $help:literal $(,$short:literal)? $(, required: $req:literal)?) => {
+        declare_arg!($arg($long) {
+            $(short: $short,)?
+            help: $help,
+            $(required: $req,)?
+            value: $type,
+        });
+    };
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

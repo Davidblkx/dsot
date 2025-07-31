@@ -1,4 +1,4 @@
-generate_subcommands!(add);
+generate_subcommands!(add, list,);
 
 pub struct InboxCommand;
 
@@ -8,7 +8,8 @@ impl AppCommand for InboxCommand {
     }
 
     fn build() -> clap::Command {
-        let cmd = clap::Command::new(InboxCommand::name());
+        let cmd = clap::Command::new(InboxCommand::name())
+            .about("Inbox helps keeping track of tracks, albuns or artits you want to explore");
 
         register_commands(cmd)
     }

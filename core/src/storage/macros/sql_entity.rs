@@ -58,6 +58,22 @@ macro_rules! dsot_sql_entity {
                     )
                 }
 
+                pub fn get_list_sql_statement() -> &'static str {
+                    concat!(
+                        "SELECT * FROM ",
+                        $table_name,
+                        " ORDER BY id",
+                        " LIMIT ? OFFSET ? "
+                    )
+                }
+
+                pub fn get_count_sql_statement() -> &'static str {
+                    concat!(
+                        "SELECT COUNT(id) FROM ",
+                        $table_name
+                    )
+                }
+
                 pub async fn insert(
                     mut trx: SqlTransaction,
                     entity: &$entity
@@ -123,6 +139,28 @@ macro_rules! dsot_sql_entity {
                             }
                         )*
                     }
+                }
+
+                pub async fn list(mut trx: SqlTransaction, length: i64, skip: i64) -> SqlResult<Vec<$entity>> {
+                    let res = sqlx::query_as::<sqlx::Sqlite, $entity>(
+                        Self::get_list_sql_statement()
+                    )
+                    .bind(length)
+                    .bind(skip)
+                    .fetch_all(&mut *trx)
+                    .await?;
+
+                    Ok((trx, res))
+                }
+
+                pub async fn count(mut trx: SqlTransaction) -> SqlResult<i64> {
+                    let count: i64 = sqlx::query_scalar(
+                        Self::get_count_sql_statement()
+                    )
+                    .fetch_one(&mut *trx)
+                    .await?;
+
+                    Ok((trx, count))
                 }
 
                 pub async fn execute_operation(
