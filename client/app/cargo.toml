@@ -1,0 +1,16 @@
+[package]
+name = "dsot_app"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+tokio = { workspace = true, features = ["full"] }
+dioxus = { workspace = true, features = ["router", "default"] }
+
+[features]
+default = []
+desktop = ["dioxus/desktop"]
+mobile = ["dioxus/mobile"]
