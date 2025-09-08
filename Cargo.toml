@@ -1,5 +1,5 @@
 [workspace]
-members = ["core", "cli", "music_brainz", "runtime", "client/ui", "client/app"]
+members = ["core", "cli", "music_brainz", "runtime", "client/src-tauri"]
 resolver = "2"
 
 [workspace.package]
@@ -36,16 +36,3 @@ dirs = { version = "6" }
 clap = { version = "4.5" }
 anyhow = { version = "1" }
 dashmap = { version = "6" }
-dioxus = { version = "0.6", default-features = false }
-
-[profile]
-
-[profile.wasm-dev]
-inherits = "dev"
-opt-level = 1
-
-[profile.server-dev]
-inherits = "dev"
-
-[profile.android-dev]
-inherits = "dev"
