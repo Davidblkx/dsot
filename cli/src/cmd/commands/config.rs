@@ -80,7 +80,7 @@ impl AppCommand for ConfigCommand {
 }
 
 fn write_to_layer(
-    layer: &Box<dyn ConfigLayer>,
+    layer: &Box<dyn ConfigLayer + Send + Sync>,
     key: &str,
     value: String,
     create: bool,
