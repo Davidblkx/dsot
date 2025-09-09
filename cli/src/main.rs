@@ -64,24 +64,7 @@ async fn main() {
     };
 
     // Execute the command with the provided arguments
-    let exit_code = match cmd::execute(&runtime, args).await {
-        Ok(_) => {
-            log::trace!("Command executed successfully.");
-            0
-        }
-        Err(e) => {
-            if let Some(message) = e.message {
-                log::error!("Command execution failed: {}", message);
-            } else {
-                log::error!("Command execution failed with unknown error.");
-            }
-
-            e.code.unwrap_or(1)
-        }
-    };
-
-    // Shutdown the runtime and related resources
-    runtime.shutdown(exit_code);
+    let exit_code = cmd::execute(runtime, args).await;
 
     // Clean up the local logger if it was initialized
     if let Some(handler) = log_handler {

@@ -14,6 +14,7 @@ path = "src/main.rs"
 dsot_core = { path = "../core" }
 music_brainz = { path = "../music_brainz" }
 dsot_runtime = { path = "../runtime" }
+dsot_server = { path = "../server" }
 log = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 bakunin_config = { workspace = true }

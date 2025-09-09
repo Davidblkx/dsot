@@ -9,7 +9,7 @@ pub use options::ServerOptions;
 
 use crate::error::ServerResult;
 
-pub async fn run_server<'a>(options: ServerOptions) -> ServerResult<()> {
+pub async fn run_server(options: ServerOptions) -> ServerResult<()> {
     let addr = format!("0.0.0.0:{}", options.port);
 
     let app = Router::new()
@@ -23,6 +23,6 @@ pub async fn run_server<'a>(options: ServerOptions) -> ServerResult<()> {
     Ok(())
 }
 
-async fn handle_connection<'a>(State(state): State<Arc<dsot_runtime::Runtime>>) -> &'static str {
+async fn handle_connection(State(state): State<Arc<dsot_runtime::Runtime>>) -> &'static str {
     state.version
 }

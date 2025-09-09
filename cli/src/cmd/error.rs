@@ -51,6 +51,7 @@ error_codes![
     MissingArgument: 2,
     ConfigError: 3,
     RuntimeError: 4,
+    ServerError: 5,
 ];
 
 impl From<dsot_runtime::error::RuntimeError> for AppError {
@@ -62,5 +63,11 @@ impl From<dsot_runtime::error::RuntimeError> for AppError {
 impl From<bakunin_config::BakuninError> for AppError {
     fn from(value: bakunin_config::BakuninError) -> Self {
         AppError::ConfigError().with_message(value.to_string())
+    }
+}
+
+impl From<dsot_server::error::ServerError> for AppError {
+    fn from(value: dsot_server::error::ServerError) -> Self {
+        AppError::ServerError().with_message(value.to_string())
     }
 }
