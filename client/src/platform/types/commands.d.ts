@@ -13,9 +13,7 @@ export type CommandInput = {
 };
 
 export type CommandOutput = {
-    "users-list": {
-        users: string[];
-    };
+    "users-list": { id: string; name: string }[];
 };
 
 export type CommandName = keyof CommandInput & keyof CommandOutput;

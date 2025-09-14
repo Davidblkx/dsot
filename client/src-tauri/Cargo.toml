@@ -24,6 +24,10 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { workspace = true, features = ["derive"] }
 serde_json = "1"
+dsot_runtime = { path = "../../runtime" }
+dsot_core = { path = "../../core" }
+music_brainz = { path = "../../music_brainz" }
+log = { workspace = true }
 
 # [profile.dev]
 # incremental = true
