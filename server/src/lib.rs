@@ -1,10 +1,9 @@
 pub mod error;
 mod options;
+mod routes;
 
-use axum::{Router, routing::get};
-use std::sync::Arc;
+use routes::create_app_routes;
 
-use axum::extract::State;
 pub use options::ServerOptions;
 
 use crate::error::ServerResult;
@@ -12,17 +11,11 @@ use crate::error::ServerResult;
 pub async fn run_server(options: ServerOptions) -> ServerResult<()> {
     let addr = format!("0.0.0.0:{}", options.port);
 
-    let app = Router::new()
-        .route("/", get(handle_connection))
-        .with_state(options.runtime);
+    let app = create_app_routes().with_state(options.runtime);
 
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     log::info!("Server listening on {}", addr);
     axum::serve(listener, app).await?;
 
     Ok(())
-}
-
-async fn handle_connection(State(state): State<Arc<dsot_runtime::Runtime>>) -> &'static str {
-    state.version
 }

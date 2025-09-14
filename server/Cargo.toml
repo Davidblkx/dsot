@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 dsot_runtime = { path = "../runtime" }
+dsot_core = { path = "../core" }
 axum = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 log = { workspace = true }

@@ -1134,6 +1134,7 @@ name = "dsot_server"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "dsot_core",
  "dsot_runtime",
  "log",
  "thiserror 2.0.12",

@@ -8,8 +8,8 @@
 
   async function greet(event: Event) {
     event.preventDefault();
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    greetMsg = await invoke("greet", { name });
+    let users = await core.executeCommand("users-list", {});
+    console.log(users);
   }
 </script>
 

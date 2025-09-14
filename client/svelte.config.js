@@ -10,7 +10,7 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
 // @ts-ignore Deno doesn't have process global
-const isWeb = process.env.PLATFORM_MODE === "web";
+const isWeb = process.env.PLATFORM_MODE !== "tauri";
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
