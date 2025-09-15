@@ -4,5 +4,21 @@
     },
     "tasks": {
         "tauri-dev": "PLATFORM_MODE=tauri tauri dev"
+    },
+    "compilerOptions": {
+        "allowJs": true,
+        "checkJs": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "moduleResolution": "bundler",
+        "module": "esnext",
+        "types": ["https://esm.sh/@vue/runtime-dom@3.3.14/types/jsx.d.ts"],
+        "jsx": "preserve",
+        "jsxFactory": "h",
+        "jsxFragmentFactory": "Fragment",
+        "jsxImportSource": "https://esm.sh/vue@3"
+    },
+    "imports": {
+        "$platform": "./src/platform/typings.d.ts"
     }
 }

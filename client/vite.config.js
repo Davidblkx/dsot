@@ -1,13 +1,18 @@
 import { defineConfig } from "vite";
-import { sveltekit } from "@sveltejs/kit/vite";
+import vue from "@vitejs/plugin-vue";
+import vuetsx from "@vitejs/plugin-vue-jsx";
 import process from "node:process";
+import path from "node:path";
 
 const host = process.env.TAURI_DEV_HOST;
+
+const platform = process.env.PLATFORM_MODE || "web";
+console.log(`Running on platform: ${platform}`);
 
 export default defineConfig(() => {
     // https://vite.dev/config/
     return {
-        plugins: [sveltekit()],
+        plugins: [vue(), vuetsx()],
         // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
         //
         // 1. prevent Vite from obscuring rust errors
@@ -36,5 +41,10 @@ export default defineConfig(() => {
                 },
             },
         },
+        resolve: {
+            alias: {
+                $platform: path.resolve(import.meta.dirname, `src/platform/${platform}/mod.ts`),
+            }
+        }
     };
 });

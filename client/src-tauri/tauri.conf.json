@@ -14,7 +14,11 @@
       {
         "title": "dsot_client",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "devtools": true,
+        "titleBarStyle": "Visible",
+        "theme": "Dark",
+        "maximized": true
       }
     ],
     "security": {

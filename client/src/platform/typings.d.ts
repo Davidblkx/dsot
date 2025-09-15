@@ -17,4 +17,6 @@ export interface Platform {
     ) => CommandResult<CommandOutput[N]>;
 }
 
-export const core: Platform;
+declare module "$platform" {
+    const core: Platform;
+}
