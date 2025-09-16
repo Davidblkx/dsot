@@ -19,6 +19,8 @@
         "jsxImportSource": "https://esm.sh/vue@3"
     },
     "imports": {
-        "$platform": "./src/platform/typings.d.ts"
+        "$platform": "./src/platform/typings.d.ts",
+        "$pmodel/": "./src/platform/model/",
+        "$css/": "./css/"
     }
 }

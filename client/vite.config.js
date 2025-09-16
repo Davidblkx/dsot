@@ -42,9 +42,16 @@ export default defineConfig(() => {
             },
         },
         resolve: {
-            alias: {
-                $platform: path.resolve(import.meta.dirname, `src/platform/${platform}/mod.ts`),
-            }
+            alias: [
+                {
+                    find: "$platform",
+                    replacement: path.resolve(import.meta.dirname, `src/platform/${platform}/mod.ts`),
+                },
+                {
+                    find: /^\$css\/(.*).css$/,
+                    replacement: path.resolve(import.meta.dirname, "css/$1.css"),
+                }
+            ]
         }
     };
 });
