@@ -16,11 +16,12 @@
         "jsx": "preserve",
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",
-        "jsxImportSource": "https://esm.sh/vue@3"
+        "jsxImportSource": "npm:vue"
     },
     "imports": {
         "$platform": "./src/platform/typings.d.ts",
         "$pmodel/": "./src/platform/model/",
-        "$css/": "./css/"
+        "$css/": "./css/",
+        "$infra/": "./src/infra/"
     }
 }

@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, createLogger } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vuetsx from "@vitejs/plugin-vue-jsx";
 import process from "node:process";
@@ -9,9 +9,21 @@ const host = process.env.TAURI_DEV_HOST;
 const platform = process.env.PLATFORM_MODE || "web";
 console.log(`Running on platform: ${platform}`);
 
+// https://github.com/denoland/deno/issues/28850#issuecomment-2944165430
+const logger = createLogger();
+const logError = logger.error;
+
+// deno-lint-ignore ban-ts-comment
+// @ts-ignore
+logger.error = (msg, options) => {
+    if (msg.includes("http proxy error:") && msg.includes("ext:deno_fetch/23_request.js:619:7")) return;
+    logError(msg, options);
+};
+
 export default defineConfig(() => {
     // https://vite.dev/config/
     return {
+        customLogger: logger,
         plugins: [vue(), vuetsx()],
         // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
         //
@@ -38,6 +50,7 @@ export default defineConfig(() => {
                     changeOrigin: true,
                     target: "http://localhost:6677/api",
                     rewrite: (path) => path.replace(/^\/api/, ""),
+
                 },
             },
         },
@@ -50,6 +63,10 @@ export default defineConfig(() => {
                 {
                     find: /^\$css\/(.*).css$/,
                     replacement: path.resolve(import.meta.dirname, "css/$1.css"),
+                },
+                {
+                    find: /^\$infra\/(.*).ts$/,
+                    replacement: path.resolve(import.meta.dirname, `src/infra/$1.ts`),
                 }
             ]
         }
