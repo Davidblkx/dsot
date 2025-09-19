@@ -12,7 +12,7 @@
         "strict": true,
         "moduleResolution": "bundler",
         "module": "esnext",
-        "types": ["https://esm.sh/@vue/runtime-dom@3.3.14/types/jsx.d.ts"],
+        "types": [],
         "jsx": "preserve",
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",

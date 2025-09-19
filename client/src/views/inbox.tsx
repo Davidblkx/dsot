@@ -1,11 +1,12 @@
 import { defineComponent } from 'vue';
-import { RouterView } from 'vue-router';
 
 export default defineComponent({
-    name: 'App',
+    name: 'InboxView',
     setup() {
         return () => (
-            <RouterView />
+            <div>
+                INBOX
+            </div>
         )
     }
 })

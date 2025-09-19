@@ -1,0 +1,22 @@
+/* Styles for built-in components */
+
+
+/* -- Button styles -- */
+button {
+    color: var(--color-text);
+    background-color: var(--color-primary);
+    border: var(--border-size) solid var(--color-secondary);
+    padding: 0.5em 1em;
+    border-radius: var(--border-radius);
+}
+
+button:hover {
+    background-color: var(--color-secondary);
+    cursor: pointer;
+}
+
+button:active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+/* -- End Button styles -- */

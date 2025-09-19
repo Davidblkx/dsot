@@ -1,0 +1,13 @@
+[data-scope="avatar"][data-part="root"] {
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: var(--border-size-thick) solid var(--color-accent);
+    background-color: var(--color-primary);
+    display: inline-block;
+    padding: 0.5rem;
+}
+
+[data-scope="avatar"][data-part="root"]:hover {
+    background-color: var(--color-secondary);
+}

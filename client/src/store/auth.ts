@@ -1,11 +1,12 @@
 import { defineStore } from "pinia";
 import { computed } from "vue";
 import { ref } from "$infra/ref.ts";
+import { createTypedStore } from "$infra/store.ts";
 import { User } from "$pmodel/user.ts";
 import { core } from "$platform";
 import { createLocalStorageStore } from "./plugins/local_storage.ts";
 
-export const useAuthStore = defineStore("auth", () => {
+export const useAuthStore = createTypedStore(defineStore("auth", () => {
     const storage = createLocalStorageStore<User>({ key: "auth.user", defaultValue: { id: "-1", name: "unknown" } });
     const user = ref(storage.load());
     const users = ref<User[]>([]);
@@ -42,4 +43,4 @@ export const useAuthStore = defineStore("auth", () => {
     }
 
     return { user, users, isAuthenticated, loadUsers, login, logout };
-});
+}));
