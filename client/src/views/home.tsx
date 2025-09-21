@@ -1,20 +1,32 @@
 import { defineComponent } from 'vue';
 import { RouterView } from 'vue-router';
 
-import layoutStyles from '$css/layout.module.css';
-
+import { useMenuStore } from "../store/menu.ts";
 import UserAvatar from "../widgets/current_user_avatar.tsx";
+import MenuToggle from "../widgets/menu_toggle.tsx";
 
 export default defineComponent({
     name: 'HomeView',
     setup() {
+        const menuStore = useMenuStore();
+
         return () => (
-            <div class={layoutStyles.view}>
-                <header class="header"><UserAvatar /></header>
-                <div class="main">
+            <div data-view-layout="home" class={menuStore.isOpenClass}>
+                <header>
+                    <div class="left">
+                        <MenuToggle />
+                    </div>
+                    <div class="center"></div>
+                    <div class="right">
+                        <UserAvatar class="user" />
+                    </div>
+                </header>
+                <div class="menu">
+                </div>
+                <div class="content">
                     <RouterView />
                 </div>
-                <footer class="footer"></footer>
+                <footer></footer>
             </div>
         )
     }

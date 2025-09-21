@@ -16,3 +16,17 @@
     padding: 1px 1px;
 }
 /* -- End Section component styles -- */
+
+[data-widget="menu-toggle"] {
+    cursor: pointer;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-widget="menu-toggle"]:hover {
+    background-color: rgba(var(--color-secondary-rgb), 0.4);
+}

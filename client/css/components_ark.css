@@ -5,7 +5,7 @@
     border: var(--border-size-thick) solid var(--color-accent);
     background-color: var(--color-primary);
     display: inline-block;
-    padding: 0.5rem;
+    padding: 0.3rem;
 }
 
 [data-scope="avatar"][data-part="root"]:hover {
