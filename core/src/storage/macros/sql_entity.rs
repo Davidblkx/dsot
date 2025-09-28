@@ -67,6 +67,23 @@ macro_rules! dsot_sql_entity {
                     )
                 }
 
+                pub fn get_search_sql_statement() -> &'static str {
+                    concat!(
+                        "SELECT t.* FROM ",
+                        $table_name,
+                        " t",
+                        " JOIN ",
+                        $table_name,
+                        "_fts fts",
+                        " ON t.id = fts.id",
+                        " WHERE ",
+                        $table_name,
+                        "_fts MATCH ?",
+                        " ORDER BY rank",
+                        " LIMIT ? OFFSET ? "
+                    )
+                }
+
                 pub fn get_count_sql_statement() -> &'static str {
                     concat!(
                         "SELECT COUNT(id) FROM ",
@@ -145,6 +162,19 @@ macro_rules! dsot_sql_entity {
                     let res = sqlx::query_as::<sqlx::Sqlite, $entity>(
                         Self::get_list_sql_statement()
                     )
+                    .bind(length)
+                    .bind(skip)
+                    .fetch_all(&mut *trx)
+                    .await?;
+
+                    Ok((trx, res))
+                }
+
+                pub async fn search(mut trx: SqlTransaction, search: &str, length: i64, skip: i64) -> SqlResult<Vec<$entity>> {
+                    let res = sqlx::query_as::<sqlx::Sqlite, $entity>(
+                        Self::get_search_sql_statement()
+                    )
+                    .bind(search)
                     .bind(length)
                     .bind(skip)
                     .fetch_all(&mut *trx)
