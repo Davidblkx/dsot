@@ -1,6 +1,7 @@
 # NOW
 
 - Create the basic UI
+- Change inbox url to use json body
 
 # TODO
 

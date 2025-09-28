@@ -54,4 +54,5 @@ type CommandParams = {
 
 const commandParams: CommandParams = {
     "users-list": 0,
+    "inbox-list": "query",
 };

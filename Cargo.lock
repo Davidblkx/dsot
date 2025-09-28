@@ -1141,6 +1141,7 @@ dependencies = [
  "dsot_core",
  "dsot_runtime",
  "log",
+ "serde",
  "thiserror 2.0.12",
  "tokio",
 ]
