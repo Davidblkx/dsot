@@ -24,3 +24,4 @@ sqlx = { workspace = true, features = [
 chrono = { workspace = true }
 dashmap = { workspace = true }
 uuid = { workspace = true }
+serde = { workspace = true, features = ["derive"] }

@@ -28,6 +28,7 @@ dsot_runtime = { path = "../../runtime" }
 dsot_core = { path = "../../core" }
 music_brainz = { path = "../../music_brainz" }
 log = { workspace = true }
+uuid = { workspace = true }
 
 # [profile.dev]
 # incremental = true

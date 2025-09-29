@@ -1,14 +1,13 @@
 import { defineComponent } from 'vue';
 
-import InboxList from '../../widgets/inbox_list.tsx';
+import InboxView from '../../widgets/inbox/view.tsx';
 
 export default defineComponent({
     name: 'InboxView',
     setup() {
         return () => (
             <div>
-                INBOX
-                <InboxList />
+                <InboxView />
             </div>
         )
     }

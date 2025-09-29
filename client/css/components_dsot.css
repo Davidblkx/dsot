@@ -17,6 +17,7 @@
 }
 /* -- End Section component styles -- */
 
+/* -- Menu toggle button styles -- */
 [data-widget="menu-toggle"] {
     cursor: pointer;
     border-radius: 50%;
@@ -30,3 +31,9 @@
 [data-widget="menu-toggle"]:hover {
     background-color: rgba(var(--color-secondary-rgb), 0.4);
 }
+/* -- End Menu toggle button styles -- */
+
+/* -- Inbox widgets -- */
+[data-widget="inbox-item"] {}
+
+/* -- End Inbox widgets -- */

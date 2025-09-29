@@ -49,10 +49,13 @@ export const core: Platform = {
 };
 
 type CommandParams = {
-    [K in CommandName]: string | 0;
+    [K in CommandName]: 'input' | 0;
 };
 
 const commandParams: CommandParams = {
     "users-list": 0,
-    "inbox-list": "query",
+    "inbox-list": "input",
+    "inbox-create": "input",
+    "inbox-update": "input",
+    "inbox-delete": "input",
 };

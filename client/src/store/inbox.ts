@@ -26,6 +26,33 @@ export const useInboxStore = createTypedStore(defineStore("inbox", () => {
         }
     }
 
+    async function createInboxItem(item: Partial<Inbox>) {
+        const req = await core.executeCommand('inbox-create', item);
+        if (req.success) {
+            await loadInbox();
+        } else {
+            console.error("Failed to create inbox item:", req.error);
+        }
+    }
+
+    async function updateInboxItem(item: Inbox) {
+        const req = await core.executeCommand('inbox-update', item);
+        if (req.success) {
+            await loadInbox();
+        } else {
+            console.error("Failed to update inbox item:", req.error);
+        }
+    }
+
+    async function deleteInboxItem(id: string) {
+        const req = await core.executeCommand('inbox-delete', { id });
+        if (req.success) {
+            await loadInbox();
+        } else {
+            console.error("Failed to delete inbox item:", req.error);
+        }
+    }
+
     function setLimit(newLimit: number) {
         limit.value = newLimit;
         storage.save({ limit: limit.value, offset: offset.value });
@@ -44,6 +71,9 @@ export const useInboxStore = createTypedStore(defineStore("inbox", () => {
         offset,
         loadInbox,
         setLimit,
-        setOffset
+        setOffset,
+        createInboxItem,
+        updateInboxItem,
+        deleteInboxItem,
     };
 }));

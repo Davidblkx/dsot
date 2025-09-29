@@ -79,7 +79,10 @@ type CommandEndpoint = {
 
 const commandEndpoints: CommandEndpoint = {
     "users-list": "/users/list",
-    "inbox-list": "/inbox/list"
+    "inbox-list": "/inbox/list",
+    "inbox-create": "/inbox/create",
+    "inbox-update": "/inbox/update",
+    "inbox-delete": "/inbox/delete",
 };
 
 function buildURL(path: string): string {

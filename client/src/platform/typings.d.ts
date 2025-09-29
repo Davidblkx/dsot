@@ -14,11 +14,17 @@ export type CommandResult<T> = Promise<
 export type CommandInput = {
     "users-list": Record<string, never>;
     "inbox-list": { limit: number; offset: number };
+    "inbox-create": Partial<Inbox>;
+    "inbox-update": Inbox;
+    "inbox-delete": { id: string };
 };
 
 export type CommandOutput = {
     "users-list": User[];
     "inbox-list": Inbox[];
+    "inbox-create": string;
+    "inbox-update": boolean;
+    "inbox-delete": boolean;
 };
 
 export type CommandName = keyof CommandInput & keyof CommandOutput;

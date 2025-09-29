@@ -1097,6 +1097,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
+ "uuid",
 ]
 
 [[package]]
@@ -1128,6 +1129,7 @@ dependencies = [
  "dsot_core",
  "flexi_logger",
  "log",
+ "serde",
  "sqlx",
  "thiserror 2.0.12",
  "uuid",
@@ -1144,6 +1146,7 @@ dependencies = [
  "serde",
  "thiserror 2.0.12",
  "tokio",
+ "uuid",
 ]
 
 [[package]]

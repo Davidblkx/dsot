@@ -18,7 +18,8 @@
         "devtools": true,
         "titleBarStyle": "Visible",
         "theme": "Dark",
-        "maximized": true
+        "maximized": true,
+        "backgroundColor": "#1e1e1e"
       }
     ],
     "security": {

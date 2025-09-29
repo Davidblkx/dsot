@@ -20,4 +20,6 @@ pub enum RuntimeError {
     MigrationError(#[from] sqlx::migrate::MigrateError),
     #[error("Users error: {0}")]
     UsersError(#[from] super::UsersError),
+    #[error("Inbox error: {0}")]
+    InboxError(#[from] super::InboxError),
 }
