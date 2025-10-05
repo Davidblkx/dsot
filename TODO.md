@@ -2,6 +2,7 @@
 
 - Create the basic UI
 - Change inbox url to use json body
+- Fix update? Check why it doesn't work
 
 # TODO
 

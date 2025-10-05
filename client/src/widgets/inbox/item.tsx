@@ -1,51 +1,106 @@
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 import { useInboxStore } from "../../store/inbox.ts";
 import { Inbox } from "$pmodel/inbox.ts";
+import { ref } from "../../infra/ref.ts";
 
-function mapInboxItemToDisplay(item: Inbox): { label: string; value: string }[] {
-    const displayData = [];
-    if (item.title) {
-        displayData.push({ label: 'Title', value: item.title });
-    }
-    if (item.artist) {
-        displayData.push({ label: 'Artist', value: item.artist });
-    }
-    if (item.album) {
-        displayData.push({ label: 'Album', value: item.album });
-    }
-    if (item.file) {
-        displayData.push({ label: 'File', value: item.file });
-    }
-    if (item.extra_info) {
-        displayData.push({ label: 'Extra Info', value: item.extra_info });
-    }
+type TypeData = keyof Omit<Inbox, "id">;
+type DisplayData = { label: string; value: string | undefined; type: TypeData };
+function mapInboxItemToDisplay(item: Inbox): DisplayData[] {
+    const displayData: DisplayData[] = [];
+    displayData.push({ label: "Title", value: item.title, type: "title" });
+    displayData.push({ label: "Artist", value: item.artist, type: "artist" });
+    displayData.push({ label: "Album", value: item.album, type: "album" });
+    displayData.push({ label: "File", value: item.file, type: "file" });
+    displayData.push({
+        label: "Extra Info",
+        value: item.extra_info,
+        type: "extra_info",
+    });
     return displayData;
 }
 
 export default defineComponent({
-    name: 'InboxList',
+    name: "InboxList",
     props: {
         item: {
             type: Object as () => Inbox,
             required: true,
-        }
+        },
     },
     setup(props) {
-        const inboxStore = useInboxStore()
+        const inboxStore = useInboxStore();
+        const editMode = ref(false);
         const displayData = mapInboxItemToDisplay(props.item);
+
+        function deleteItem() {
+            inboxStore.deleteInboxItem(props.item.id);
+        }
+
+        function saveItem(item: DisplayData[]) {
+            const inbox: Inbox = {
+                id: props.item.id,
+            };
+
+            item.forEach((data) => {
+                inbox[data.type] = data.value;
+            });
+
+            inboxStore.updateInboxItem(inbox);
+            editMode.value = false;
+        }
 
         return () => (
             <div data-widget="inbox-item">
-                {displayData.map(data => (
-                    <div class="row">
-                        <span class="label">{data.label}</span>
-                        <span class="value">{data.value}</span>
-                    </div>
+                {displayData.map((data) => (
+                    (editMode.value || data.value) && (
+                        <div class="row">
+                            <span class="label">{data.label}:</span>
+                            {editMode.value
+                                ? <input type="text" value={data.value} />
+                                : <span class="value">{data.value}</span>}
+                        </div>
+                    )
                 ))}
-                {
-                    displayData.length === 0 && <div class="empty">No details available.</div>
-                }
+                {displayData.length === 0 && (
+                    <div class="empty">No details available.</div>
+                )}
+                {displayData.length > 0 && (
+                    <div class="actions">
+                        {editMode.value
+                            ? (
+                                <button type="button" onClick={() => saveItem(displayData)}>
+                                    Save
+                                </button>
+                            )
+                            : (
+                                <button type="button" onClick={deleteItem}>
+                                    Delete
+                                </button>
+                            )}
+                        {editMode.value
+                            ? (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        editMode.value = false;
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            )
+                            : (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        editMode.value = true;
+                                    }}
+                                >
+                                    Edit
+                                </button>
+                            )}
+                    </div>
+                )}
             </div>
-        )
-    }
+        );
+    },
 });
