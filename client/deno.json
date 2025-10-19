@@ -6,7 +6,6 @@
         "tauri-dev": "PLATFORM_MODE=tauri tauri dev"
     },
     "compilerOptions": {
-        "allowJs": true,
         "checkJs": true,
         "skipLibCheck": true,
         "strict": true,
