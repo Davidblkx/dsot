@@ -144,6 +144,8 @@ macro_rules! dsot_sql_entity {
                     match op {
                         $(
                             $update::[<Set $prop:camel>](value) => {
+                                log::trace!("Updating {}.{} for id {} with {:?}", $table_name, stringify!($prop), id, value);
+
                                 sqlx::query::<sqlx::Sqlite>(
                                     Self::[<get_sql_update_ $prop>]()
                                 )

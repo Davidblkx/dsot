@@ -66,4 +66,32 @@ mod tests {
         assert_eq!(res.file, inbox2.file);
         assert_eq!(res.extra_info, inbox2.extra_info);
     }
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn can_update(pool: sqlx::SqlitePool) {
+        let trx = pool.begin().await.unwrap();
+
+        let inbox = Inbox::new()
+            .set_title("Test Inbox")
+            .set_artist("Test Artist")
+            .set_album("Test Album")
+            .set_file("test_file.mp3")
+            .set_extra_info("Some extra info");
+
+        let (trx, _) = InboxSql::insert(trx, &inbox).await.unwrap();
+
+        let update_op = InboxUpdateOp::SetArtist(Some("My Artist".to_string()));
+
+        let (trx, _) = InboxSql::update(trx, &inbox.id, &update_op).await.unwrap();
+
+        let (_, res) = InboxSql::fetch_by_id(trx, &inbox.id).await.unwrap();
+        let res = res.unwrap();
+
+        assert_eq!(res.id, inbox.id);
+        assert_eq!(res.title, inbox.title);
+        assert_eq!(res.artist, Some("My Artist".to_string()));
+        assert_eq!(res.album, inbox.album);
+        assert_eq!(res.file, inbox.file);
+        assert_eq!(res.extra_info, inbox.extra_info);
+    }
 }

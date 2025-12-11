@@ -10,6 +10,8 @@ type StorageState = {
     offset: number;
 }
 
+export const NEW_INBOX_ID = "new-inbox-item";
+
 export const useInboxStore = createTypedStore(defineStore("inbox", () => {
     const storage = createLocalStorageStore<StorageState>({ key: "inbox.state", defaultValue: { limit: 10, offset: 0 } });
     const values = ref<Inbox[]>([]);
@@ -26,6 +28,17 @@ export const useInboxStore = createTypedStore(defineStore("inbox", () => {
         }
     }
 
+    function nemEmptyInboxItem(item?: Partial<Inbox>  ) {
+        if (values.value.find(i => i.id === NEW_INBOX_ID)) {
+            return;
+        }
+
+        values.value.unshift({
+            id: NEW_INBOX_ID,
+            ...item,
+        } as Inbox);
+    }
+
     async function createInboxItem(item: Partial<Inbox>) {
         const req = await core.executeCommand('inbox-create', item);
         if (req.success) {
@@ -36,7 +49,11 @@ export const useInboxStore = createTypedStore(defineStore("inbox", () => {
     }
 
     async function updateInboxItem(item: Inbox) {
-        const req = await core.executeCommand('inbox-update', item);
+        const reqTodo = item.id === NEW_INBOX_ID ?
+            core.executeCommand('inbox-create', item) :
+            core.executeCommand('inbox-update', item);
+
+        const req = await reqTodo;
         if (req.success) {
             await loadInbox();
         } else {
@@ -75,5 +92,6 @@ export const useInboxStore = createTypedStore(defineStore("inbox", () => {
         createInboxItem,
         updateInboxItem,
         deleteInboxItem,
+        nemEmptyInboxItem,
     };
 }));

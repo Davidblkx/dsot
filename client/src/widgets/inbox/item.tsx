@@ -1,7 +1,8 @@
 import { defineComponent } from "vue";
 import { useInboxStore } from "../../store/inbox.ts";
 import { Inbox } from "$pmodel/inbox.ts";
-import { ref } from "../../infra/ref.ts";
+import { ref } from "$infra/ref.ts";
+import { debugLog } from '../../device/settings.ts';
 
 type TypeData = keyof Omit<Inbox, "id">;
 type DisplayData = { label: string; value: string | undefined; type: TypeData };
@@ -45,6 +46,8 @@ export default defineComponent({
                 inbox[data.type] = data.value;
             });
 
+            debugLog("Saving inbox item:", inbox, item);
+
             inboxStore.updateInboxItem(inbox);
             editMode.value = false;
         }
@@ -56,7 +59,7 @@ export default defineComponent({
                         <div class="row">
                             <span class="label">{data.label}:</span>
                             {editMode.value
-                                ? <input type="text" value={data.value} />
+                                ? <input type="text" v-model={data.value} />
                                 : <span class="value">{data.value}</span>}
                         </div>
                     )

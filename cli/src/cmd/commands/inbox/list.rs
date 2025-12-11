@@ -77,12 +77,7 @@ fn get_display(inbox: &Inbox, index: i64, total: i64) -> String {
     };
 
     vec![
-        format!(
-            "{}/{} [{}] ",
-            index,
-            total,
-            inbox.id.to_string().replace("-", "")
-        ),
+        format!("{}/{} [{}] ", index, total, inbox.id.to_string()),
         info,
         file,
         notes,

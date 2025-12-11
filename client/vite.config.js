@@ -53,6 +53,7 @@ export default defineConfig(() => {
 
                 },
             },
+            allowedHosts: true
         },
         resolve: {
             alias: [

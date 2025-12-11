@@ -23,4 +23,9 @@ impl super::Artist {
             artist_type_id: 1,
         }
     }
+
+    pub fn set_sort_name<T: Into<String>>(mut self, sort_name: T) -> Self {
+        self.sort_name = Some(sort_name.into());
+        self
+    }
 }

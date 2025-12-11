@@ -235,7 +235,7 @@ mod tests {
         let result = HandlerConnectionKind::new_file("my_db", "/data/dir")
             .get_backup_db_path("id")
             .unwrap();
-        assert_eq!(PathBuf::from("/data/dir/my_db.db__id"), result);
+        assert_eq!(PathBuf::from("/data/dir/my_db.db__id.BAK"), result);
         let result = HandlerConnectionKind::new_file("my_db", "/data/dir")
             .with_backup_folder("/data/backup")
             .get_backup_db_path("id")
@@ -253,7 +253,7 @@ mod tests {
         let result = HandlerConnectionKind::new_file("my_db", "/data/dir")
             .get_backup_journal_path("id")
             .unwrap();
-        assert_eq!(PathBuf::from("/data/dir/my_db.db.journal__id"), result);
+        assert_eq!(PathBuf::from("/data/dir/my_db.db.journal__id.BAK"), result);
         let result = HandlerConnectionKind::new_file("my_db", "/data/dir")
             .with_backup_folder("/data/backup")
             .get_backup_journal_path("id")

@@ -9,3 +9,4 @@
 - Work on documentation pages (see cargo doc)
 - Update to bincode2
 - fix backup on creation, it should not copy an empty db
+- fix 2 instances running at the same time (should have a clear message and gracefully exit)

@@ -16,7 +16,12 @@
         "jsx": "preserve",
         "jsxFactory": "h",
         "jsxFragmentFactory": "Fragment",
-        "jsxImportSource": "npm:vue"
+        "jsxImportSource": "npm:vue",
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "esnext"
+        ]
     },
     "imports": {
         "$platform": "./src/platform/typings.d.ts",

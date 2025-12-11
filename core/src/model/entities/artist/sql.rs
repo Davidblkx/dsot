@@ -64,4 +64,27 @@ mod tests {
             assert_eq!(alias.artist_id, artist.id, "Alias artist_id does not match");
         }
     }
+
+    #[sqlx::test(migrations = "../migrations")]
+    async fn can_update_artist(pool: sqlx::SqlitePool) {
+        let trx = pool.begin().await.unwrap();
+
+        let artist = Artist::new("Original Name").set_sort_name("Name");
+
+        let (trx, _) = ArtistSql::insert(trx, &artist).await.unwrap();
+
+        let update_op = ArtistUpdateOp::SetSortName(Some("Updated Name".to_string()));
+
+        let (trx, _) = ArtistSql::update(trx, &artist.id, &update_op)
+            .await
+            .unwrap();
+        let (_, res) = ArtistSql::fetch_by_id(trx, &artist.id).await.unwrap();
+        let res = res.unwrap();
+
+        assert_eq!(res.id, artist.id);
+        assert_eq!(res.name, artist.name);
+        assert_eq!(res.mbid, artist.mbid);
+        assert_eq!(res.sort_name, Some("Updated Name".to_string()));
+        assert_eq!(res.artist_type_id, artist.artist_type_id);
+    }
 }
