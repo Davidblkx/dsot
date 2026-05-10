@@ -1,2 +1,0 @@
-import{j as t,M as o}from"./blocks-CUtrF6ZM.js";import{useMDXComponents as s}from"./index-D4UU_MyC.js";import"./preload-helper-Dp1pzeXC.js";import"./_commonjsHelpers-CqkleIqs.js";import"./iframe--f-C4sbL.js";function e(n){return t.jsxs(t.Fragment,{children:[t.jsx(o,{title:"Configure your project"}),`
-`,t.jsx("p",{children:"Ola"})]})}function c(n={}){const{wrapper:r}={...s(),...n.components};return r?t.jsx(r,{...n,children:t.jsx(e,{...n})}):e()}export{c as default};
