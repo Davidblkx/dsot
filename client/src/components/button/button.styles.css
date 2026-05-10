@@ -1,7 +1,3 @@
-/* Styles for built-in components */
-
-
-/* -- Button styles -- */
 button {
     color: var(--color-text);
     background-color: var(--color-primary);
@@ -19,4 +15,3 @@ button:active {
     background-color: var(--color-primary);
     border-color: var(--color-primary);
 }
-/* -- End Button styles -- */
