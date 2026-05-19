@@ -12,7 +12,7 @@ pub struct Artist {
     pub added: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default, FromRow)]
+#[derive(Debug, Clone, ::serde::Deserialize, ::serde::Serialize, Default, ::sqlx::FromRow)]
 pub struct ArtistSQLite {
     pub id: Uuid,
     pub name: String,
