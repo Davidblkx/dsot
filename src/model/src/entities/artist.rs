@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
 use dsot_db_sync::repo::SyncEntityRepository;
+use dsot_derive::SyncEntity;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::*;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
 pub struct Artist {
     pub id: Uuid,
     pub name: String,
@@ -12,40 +13,8 @@ pub struct Artist {
     pub added: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, ::serde::Deserialize, ::serde::Serialize, Default, ::sqlx::FromRow)]
-pub struct ArtistSQLite {
-    pub id: Uuid,
-    pub name: String,
-    pub sort_name: Option<String>,
-    pub added: DateTime<Utc>,
-    pub is_deleted: bool,
-}
-
-impl From<Artist> for ArtistSQLite {
-    fn from(value: Artist) -> Self {
-        Self {
-            id: value.id,
-            name: value.name,
-            sort_name: value.sort_name,
-            added: value.added,
-            is_deleted: false,
-        }
-    }
-}
-
-impl From<ArtistSQLite> for Artist {
-    fn from(value: ArtistSQLite) -> Self {
-        Self {
-            id: value.id,
-            name: value.name,
-            sort_name: value.sort_name,
-            added: value.added,
-        }
-    }
-}
-
-impl SyncEntityRepository for ArtistSQLite {
-    type Entity = ArtistSQLite;
+impl SyncEntityRepository for ArtistSql {
+    type Entity = ArtistSql;
 
     fn get_table_name() -> &'static str {
         "artists"
@@ -56,7 +25,7 @@ impl SyncEntityRepository for ArtistSQLite {
         E: Executor<'a, Database = sqlx::Sqlite>,
     {
         let value = sqlx::query_as!(
-            ArtistSQLite,
+            ArtistSql,
             r#"
                 SELECT
                     id AS "id: Uuid",
@@ -121,5 +90,46 @@ impl SyncEntityRepository for ArtistSQLite {
         E: Executor<'a, Database = sqlx::Sqlite>,
     {
         todo!()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn can_map_to_sql() {
+        let input = Artist {
+            id: Uuid::now_v7(),
+            name: "Artist".into(),
+            sort_name: Some("Artist".into()),
+            added: Utc::now(),
+        };
+
+        let sql: ArtistSql = input.clone().into();
+
+        assert_eq!(sql.id, input.id);
+        assert_eq!(sql.name, input.name);
+        assert_eq!(sql.sort_name, input.sort_name);
+        assert_eq!(sql.added, input.added);
+        assert_eq!(sql.is_deleted, false);
+    }
+
+    #[test]
+    fn can_map_to_src() {
+        let input = ArtistSql {
+            id: Uuid::now_v7(),
+            name: "Artist".into(),
+            sort_name: Some("Artist".into()),
+            added: Utc::now(),
+            is_deleted: true,
+        };
+
+        let artist: Artist = input.clone().into();
+
+        assert_eq!(artist.id, input.id);
+        assert_eq!(artist.name, input.name);
+        assert_eq!(artist.sort_name, input.sort_name);
+        assert_eq!(artist.added, input.added);
     }
 }

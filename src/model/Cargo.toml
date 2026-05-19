@@ -10,6 +10,7 @@ repository.workspace = true
 [dependencies]
 chrono = { workspace = true }
 dsot_db_sync = { path = "../db_sync" }
+dsot_derive = { path = "../derive" }
 serde = { workspace = true }
 sqlx = { workspace = true }
 uuid = { workspace = true }

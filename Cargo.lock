@@ -393,6 +393,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "dsot_db_sync",
+ "dsot_derive",
  "serde",
  "sqlx",
  "thiserror",
