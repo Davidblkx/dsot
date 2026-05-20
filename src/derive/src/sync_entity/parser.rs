@@ -3,7 +3,9 @@ use syn::{Data, DeriveInput, Field, Fields, punctuated::Punctuated, token::Comma
 use super::ir::*;
 
 static ID_FIELD_NAME: &'static str = "id";
-static DELETED_FIELD_NAME: &'static str = "is_deleted";
+pub static DELETED_FIELD_NAME: &'static str = "deleted";
+pub static CREATED_FIELD_NAME: &'static str = "created";
+pub static UPDATED_FIELD_NAME: &'static str = "updated";
 
 impl SyncEntityIR {
     pub fn parse(ast: &DeriveInput) -> syn::Result<Self> {
@@ -41,6 +43,8 @@ impl TryFrom<&DeriveInput> for SyncEntityFields {
         let mut id_field = None;
         let mut id_attr_found = false;
         let mut has_deleted = false;
+        let mut has_created = false;
+        let mut has_updated = false;
 
         let fields = collect_fields(&ast)?;
 
@@ -63,6 +67,14 @@ impl TryFrom<&DeriveInput> for SyncEntityFields {
             if f.ident.as_ref().is_some_and(|i| i == DELETED_FIELD_NAME) {
                 has_deleted = true;
             }
+
+            if f.ident.as_ref().is_some_and(|i| i == CREATED_FIELD_NAME) {
+                has_created = true;
+            }
+
+            if f.ident.as_ref().is_some_and(|i| i == UPDATED_FIELD_NAME) {
+                has_updated = true;
+            }
         }
 
         let id_field = match id_field {
@@ -77,6 +89,8 @@ impl TryFrom<&DeriveInput> for SyncEntityFields {
             id: id_field,
             fields: fields.clone(),
             has_deleted,
+            has_created,
+            has_updated,
         })
     }
 }

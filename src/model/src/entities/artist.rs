@@ -1,5 +1,4 @@
 use chrono::{DateTime, Utc};
-use dsot_db_sync::model::{SyncOperation, UpdateColumnOp, UpdateValue};
 use dsot_db_sync::repo::SyncEntityRepository;
 use dsot_derive::SyncEntity;
 use serde::{Deserialize, Serialize};
@@ -11,57 +10,6 @@ pub struct Artist {
     pub id: Uuid,
     pub name: String,
     pub sort_name: Option<String>,
-    pub added: DateTime<Utc>,
-}
-
-impl dsot_db_sync::SyncEntity for Artist {
-    type Entity = Artist;
-
-    fn get_id(&self) -> Uuid {
-        self.id
-    }
-
-    fn op_create(&self) -> dsot_db_sync::dser::Result<dsot_db_sync::model::SyncOperation> {
-        todo!()
-    }
-
-    fn op_delete(&self) -> dsot_db_sync::model::SyncOperation {
-        todo!()
-    }
-
-    fn op_restore(&self) -> dsot_db_sync::model::SyncOperation {
-        dsot_db_sync::model::SyncOperation::Restore(self.id)
-    }
-
-    fn op_update(&self, prev: &Self::Entity) -> Option<dsot_db_sync::model::SyncOperation> {
-        if self.id != prev.id {
-            return None;
-        }
-
-        let mut list: Vec<dsot_db_sync::model::UpdateColumnOp> = Vec::new();
-
-        match UpdateValue::get_if_diff(&prev.name, &self.name) {
-            Some(value) => list.push(UpdateColumnOp {
-                column: "name".to_string(),
-                value,
-            }),
-            None => {}
-        };
-
-        match UpdateValue::get_if_diff(&prev.sort_name, &self.sort_name) {
-            Some(value) => list.push(UpdateColumnOp {
-                column: "sort_name".to_string(),
-                value,
-            }),
-            None => {}
-        };
-
-        if list.len() > 0 {
-            Some(SyncOperation::Update(self.id, list))
-        } else {
-            None
-        }
-    }
 }
 
 impl SyncEntityRepository for ArtistSql {
@@ -82,8 +30,9 @@ impl SyncEntityRepository for ArtistSql {
                     id AS "id: Uuid",
                     name,
                     sort_name,
-                    added AS "added: DateTime<Utc>",
-                    is_deleted AS "is_deleted: bool"
+                    created AS "created: DateTime<Utc>",
+                    updated AS "updated: DateTime<Utc>",
+                    deleted AS "deleted: bool"
                 FROM artists
                 WHERE id = $1
                 "#,
@@ -93,34 +42,6 @@ impl SyncEntityRepository for ArtistSql {
         .await?;
 
         Ok(value)
-    }
-
-    async fn insert<'a, E>(executor: E, value: &Self::Entity) -> dsot_db_sync::repo::Result<()>
-    where
-        E: Executor<'a, Database = sqlx::Sqlite>,
-    {
-        todo!()
-    }
-
-    async fn update<'a, E>(executor: E, value: &Self::Entity) -> dsot_db_sync::repo::Result<()>
-    where
-        E: Executor<'a, Database = sqlx::Sqlite>,
-    {
-        todo!()
-    }
-
-    async fn delete<'a, E>(executor: E, id: &Uuid) -> dsot_db_sync::repo::Result<()>
-    where
-        E: Executor<'a, Database = sqlx::Sqlite>,
-    {
-        todo!()
-    }
-
-    async fn restore<'a, E>(executor: E, id: &Uuid) -> dsot_db_sync::repo::Result<()>
-    where
-        E: Executor<'a, Database = sqlx::Sqlite>,
-    {
-        todo!()
     }
 
     async fn list<'a, E>(
@@ -146,6 +67,8 @@ impl SyncEntityRepository for ArtistSql {
 
 #[cfg(test)]
 mod tests {
+    use dsot_db_sync::SyncEntity;
+
     use super::*;
 
     #[test]
@@ -154,7 +77,6 @@ mod tests {
             id: Uuid::now_v7(),
             name: "Artist".into(),
             sort_name: Some("Artist".into()),
-            added: Utc::now(),
         };
 
         let sql: ArtistSql = input.clone().into();
@@ -162,8 +84,7 @@ mod tests {
         assert_eq!(sql.id, input.id);
         assert_eq!(sql.name, input.name);
         assert_eq!(sql.sort_name, input.sort_name);
-        assert_eq!(sql.added, input.added);
-        assert_eq!(sql.is_deleted, false);
+        assert_eq!(sql.deleted, false);
     }
 
     #[test]
@@ -172,8 +93,9 @@ mod tests {
             id: Uuid::now_v7(),
             name: "Artist".into(),
             sort_name: Some("Artist".into()),
-            added: Utc::now(),
-            is_deleted: true,
+            created: Utc::now(),
+            deleted: true,
+            updated: Utc::now(),
         };
 
         let artist: Artist = input.clone().into();
@@ -181,6 +103,35 @@ mod tests {
         assert_eq!(artist.id, input.id);
         assert_eq!(artist.name, input.name);
         assert_eq!(artist.sort_name, input.sort_name);
-        assert_eq!(artist.added, input.added);
+    }
+
+    #[test]
+    fn can_detect_changes() {
+        let id = Uuid::now_v7();
+        let a1 = ArtistSql {
+            id,
+            name: "n1".to_string(),
+            sort_name: Some("n2".to_string()),
+            ..ArtistSql::default()
+        };
+        let a2 = ArtistSql {
+            sort_name: Some("n3".to_string()),
+            ..a1.clone()
+        };
+
+        let changes = match a2.op_update(&a1).unwrap() {
+            dsot_db_sync::model::SyncOperation::Update(_, list) => list,
+            _ => panic!("Should be update"),
+        };
+
+        assert_eq!(2, changes.len());
+        assert_eq!(
+            changes[0].clone(),
+            dsot_db_sync::model::UpdateColumnOp {
+                column: "sort_name".to_string(),
+                value: dsot_db_sync::model::UpdateValue::Text("n3".to_string()),
+            }
+        );
+        assert_eq!(changes[1].column, "updated".to_string());
     }
 }

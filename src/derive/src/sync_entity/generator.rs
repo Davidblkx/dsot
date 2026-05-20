@@ -1,6 +1,7 @@
 use quote::quote;
 
 use super::ir::*;
+use super::parser::{CREATED_FIELD_NAME, DELETED_FIELD_NAME, UPDATED_FIELD_NAME};
 
 impl SyncEntityIR {
     pub fn generate(self) -> proc_macro2::TokenStream {
@@ -14,6 +15,8 @@ impl SyncEntityIR {
             id,
             fields,
             has_deleted,
+            has_created,
+            has_updated,
         } = field_data;
 
         let sql_name = quote::format_ident!("{}Sql", &name);
@@ -21,7 +24,15 @@ impl SyncEntityIR {
         let mut sql_fields: Vec<_> = fields.iter().map(|f| quote! { #f }).collect();
 
         if !has_deleted {
-            sql_fields.push(quote! { pub is_deleted: bool });
+            sql_fields.push(quote! { pub deleted: bool });
+        }
+
+        if !has_created {
+            sql_fields.push(quote! { pub created: ::chrono::DateTime<::chrono::Utc> });
+        }
+
+        if !has_updated {
+            sql_fields.push(quote! { pub updated: ::chrono::DateTime<::chrono::Utc> });
         }
 
         let from_sql_to_src: Vec<_> = fields
@@ -33,8 +44,23 @@ impl SyncEntityIR {
             .collect();
         let mut from_src_to_sql = from_sql_to_src.clone();
         if !has_deleted {
-            from_src_to_sql.push(quote! { is_deleted: false });
+            from_src_to_sql.push(quote! { deleted: false });
         }
+        if !has_updated {
+            from_src_to_sql.push(quote! { updated: ::chrono::Utc::now() });
+        }
+        if !has_created {
+            from_src_to_sql.push(quote! { created: ::chrono::Utc::now() });
+        }
+
+        let update_fields: Vec<_> = fields
+            .iter()
+            .filter(|f| !f.ident.as_ref().is_some_and(|i| i == DELETED_FIELD_NAME))
+            .filter(|f| !f.ident.as_ref().is_some_and(|i| i == CREATED_FIELD_NAME))
+            .filter(|f| !f.ident.as_ref().is_some_and(|i| i == UPDATED_FIELD_NAME))
+            .filter(|f| f.ident != id.ident)
+            .map(|f| &f.ident)
+            .collect();
 
         quote! {
             #[derive(Debug, Clone, ::serde::Deserialize, ::serde::Serialize, Default, ::sqlx::FromRow)]
@@ -55,16 +81,6 @@ impl SyncEntityIR {
                     Self {
                         #(#from_sql_to_src),*
                     }
-                }
-            }
-
-            impl #sql_name {
-                pub fn to_bytes(&self) -> ::dsot_db_sync::dser::Result<Vec<u8>> {
-                    ::dsot_db_sync::dser::EntityMessagePack::serialize(self)
-                }
-
-                pub fn from_bytes(data: &[u8]) -> ::dsot_db_sync::dser::Result<Self> {
-                    ::dsot_db_sync::dser::EntityMessagePack::deserialize(data)
                 }
             }
 
@@ -95,7 +111,38 @@ impl SyncEntityIR {
                 }
 
                 fn op_update(&self, prev: &Self::Entity) -> Option<::dsot_db_sync::model::SyncOperation> {
-                    todo!()
+                    if self.#id_ident != prev.#id_ident {
+                        return None;
+                    }
+
+                    let mut list: Vec<dsot_db_sync::model::UpdateColumnOp> = Vec::new();
+
+                    #(
+                        if let Some(value) = ::dsot_db_sync::model::UpdateValue::get_if_diff(&prev.#update_fields, &self.#update_fields) {
+                            list.push(::dsot_db_sync::model::UpdateColumnOp {
+                                column: stringify!(#update_fields).to_string(),
+                                value,
+                            });
+                        }
+                    )*
+
+                    if list.len() > 0 {
+                        list.push(::dsot_db_sync::model::UpdateColumnOp {
+                            column: "updated".to_string(),
+                            value: ::dsot_db_sync::model::UpdateValue::from_utc_now(),
+                        });
+                        Some(::dsot_db_sync::model::SyncOperation::Update(self.id, list))
+                    } else {
+                        None
+                    }
+                }
+
+                fn to_bytes(&self) -> ::dsot_db_sync::dser::Result<Vec<u8>> {
+                    ::dsot_db_sync::dser::EntityMessagePack::serialize(self)
+                }
+
+                fn from_bytes(data: &[u8]) -> ::dsot_db_sync::dser::Result<Self::Entity> {
+                    ::dsot_db_sync::dser::EntityMessagePack::deserialize(data)
                 }
             }
         }

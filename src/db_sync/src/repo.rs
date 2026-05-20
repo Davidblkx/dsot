@@ -30,26 +30,6 @@ pub trait SyncEntityRepository {
     where
         E: Executor<'a, Database = Sqlite>;
 
-    /// Inserts the given entity into the database.
-    async fn insert<'a, E>(executor: E, value: &Self::Entity) -> Result<()>
-    where
-        E: Executor<'a, Database = Sqlite>;
-
-    /// Updates the given entity in the database.
-    async fn update<'a, E>(executor: E, value: &Self::Entity) -> Result<()>
-    where
-        E: Executor<'a, Database = Sqlite>;
-
-    /// Soft Delete the entity with the given ID from the database.
-    async fn delete<'a, E>(executor: E, id: &Uuid) -> Result<()>
-    where
-        E: Executor<'a, Database = Sqlite>;
-
-    /// Undelete the entity with the given ID from the database.
-    async fn restore<'a, E>(executor: E, id: &Uuid) -> Result<()>
-    where
-        E: Executor<'a, Database = Sqlite>;
-
     /// Returns all entities in the database.
     async fn list<'a, E>(executor: E, query: ListQuery) -> Result<Vec<Self::Entity>>
     where
