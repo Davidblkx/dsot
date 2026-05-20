@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use dsot_db_sync::model::{SyncOperation, UpdateColumnOp, UpdateValue};
 use dsot_db_sync::repo::SyncEntityRepository;
 use dsot_derive::SyncEntity;
 use serde::{Deserialize, Serialize};
@@ -11,6 +12,56 @@ pub struct Artist {
     pub name: String,
     pub sort_name: Option<String>,
     pub added: DateTime<Utc>,
+}
+
+impl dsot_db_sync::SyncEntity for Artist {
+    type Entity = Artist;
+
+    fn get_id(&self) -> Uuid {
+        self.id
+    }
+
+    fn op_create(&self) -> dsot_db_sync::dser::Result<dsot_db_sync::model::SyncOperation> {
+        todo!()
+    }
+
+    fn op_delete(&self) -> dsot_db_sync::model::SyncOperation {
+        todo!()
+    }
+
+    fn op_restore(&self) -> dsot_db_sync::model::SyncOperation {
+        dsot_db_sync::model::SyncOperation::Restore(self.id)
+    }
+
+    fn op_update(&self, prev: &Self::Entity) -> Option<dsot_db_sync::model::SyncOperation> {
+        if self.id != prev.id {
+            return None;
+        }
+
+        let mut list: Vec<dsot_db_sync::model::UpdateColumnOp> = Vec::new();
+
+        match UpdateValue::get_if_diff(&prev.name, &self.name) {
+            Some(value) => list.push(UpdateColumnOp {
+                column: "name".to_string(),
+                value,
+            }),
+            None => {}
+        };
+
+        match UpdateValue::get_if_diff(&prev.sort_name, &self.sort_name) {
+            Some(value) => list.push(UpdateColumnOp {
+                column: "sort_name".to_string(),
+                value,
+            }),
+            None => {}
+        };
+
+        if list.len() > 0 {
+            Some(SyncOperation::Update(self.id, list))
+        } else {
+            None
+        }
+    }
 }
 
 impl SyncEntityRepository for ArtistSql {

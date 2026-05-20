@@ -5,7 +5,7 @@ pub trait SyncEntity {
     type Entity;
 
     fn get_id(&self) -> Uuid;
-    fn op_create(&self) -> SyncOperation;
+    fn op_create(&self) -> super::dser::Result<SyncOperation>;
     fn op_delete(&self) -> SyncOperation;
     fn op_restore(&self) -> SyncOperation;
     fn op_update(&self, prev: &Self::Entity) -> Option<SyncOperation>;

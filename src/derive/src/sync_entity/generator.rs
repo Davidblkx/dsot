@@ -17,6 +17,7 @@ impl SyncEntityIR {
         } = field_data;
 
         let sql_name = quote::format_ident!("{}Sql", &name);
+        let id_ident = &id.ident.clone();
         let mut sql_fields: Vec<_> = fields.iter().map(|f| quote! { #f }).collect();
 
         if !has_deleted {
@@ -54,6 +55,47 @@ impl SyncEntityIR {
                     Self {
                         #(#from_sql_to_src),*
                     }
+                }
+            }
+
+            impl #sql_name {
+                pub fn to_bytes(&self) -> ::dsot_db_sync::dser::Result<Vec<u8>> {
+                    ::dsot_db_sync::dser::EntityMessagePack::serialize(self)
+                }
+
+                pub fn from_bytes(data: &[u8]) -> ::dsot_db_sync::dser::Result<Self> {
+                    ::dsot_db_sync::dser::EntityMessagePack::deserialize(data)
+                }
+            }
+
+            impl #name {
+                pub fn to_sql(self) -> #sql_name {
+                    self.into()
+                }
+            }
+
+            impl ::dsot_db_sync::SyncEntity for #sql_name {
+                type Entity = #sql_name;
+
+                fn get_id(&self) -> Uuid {
+                    self.#id_ident
+                }
+
+                fn op_create(&self) -> ::dsot_db_sync::dser::Result<::dsot_db_sync::model::SyncOperation> {
+                    let value = self.to_bytes()?;
+                    Ok(::dsot_db_sync::model::SyncOperation::Create(value))
+                }
+
+                fn op_delete(&self) -> ::dsot_db_sync::model::SyncOperation {
+                    ::dsot_db_sync::model::SyncOperation::Delete(self.id)
+                }
+
+                fn op_restore(&self) -> ::dsot_db_sync::model::SyncOperation {
+                    ::dsot_db_sync::model::SyncOperation::Restore(self.id)
+                }
+
+                fn op_update(&self, prev: &Self::Entity) -> Option<::dsot_db_sync::model::SyncOperation> {
+                    todo!()
                 }
             }
         }
