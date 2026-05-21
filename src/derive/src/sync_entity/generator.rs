@@ -96,7 +96,7 @@ impl SyncEntityIR {
             table, id_str
         );
 
-        let update_query_set = format!("UPDATE {} SET", table);
+        let update_query_set = format!("UPDATE {} SET ", table);
         let update_query_where = format!(" WHERE {} = ", id_str);
 
         let mut select_expr: Vec<_> = fdata
@@ -132,12 +132,14 @@ impl SyncEntityIR {
 
         quote! {
             pub struct #repo_ident;
-            impl #repo_ident {
-                pub fn get_table_name() -> &'static str {
+            impl ::dsot_db_sync::repo::SyncEntityRepository for #repo_ident {
+                type RepoEntity = #sql_entity_ident;
+
+                fn get_table_name() -> &'static str {
                     stringify!(#table)
                 }
 
-                pub async fn insert<'a, E>(executor: E, entity: &#sql_entity_ident) -> ::dsot_db_sync::repo::Result<()>
+                async fn insert<'a, E>(executor: E, entity: &#sql_entity_ident) -> ::dsot_db_sync::repo::Result<()>
                 where
                     E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
@@ -151,7 +153,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                pub async fn delete<'a, E>(executor: E, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
+                async fn delete<'a, E>(executor: E, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
                 where
                     E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
@@ -167,7 +169,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                pub async fn restore<'a, E>(executor: E, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
+                async fn restore<'a, E>(executor: E, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
                 where
                     E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
@@ -183,7 +185,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                pub async fn update<'a, E>(
+                async fn update<'a, E>(
                     executor: E,
                     id: ::uuid::Uuid,
                     updates: Vec<dsot_db_sync::model::UpdateColumnOp>,
@@ -230,7 +232,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                pub async fn get<'a, E>(executor: E, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<#sql_entity_ident>
+                async fn get<'a, E>(executor: E, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<#sql_entity_ident>
                 where
                     E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
@@ -251,7 +253,7 @@ impl SyncEntityIR {
                     }
                 }
 
-                pub async fn list<'a, E>(
+                async fn list<'a, E>(
                     executor: E,
                     query: ::dsot_db_sync::repo::ListQuery,
                 ) -> ::dsot_db_sync::repo::Result<Vec<#sql_entity_ident>>
@@ -271,7 +273,7 @@ impl SyncEntityIR {
                     Ok(value)
                 }
 
-                pub async fn exec_op<'a, E>(
+                async fn exec_op<'a, E>(
                     executor: E,
                     op: ::dsot_db_sync::model::SyncOperation,
                 ) -> ::dsot_db_sync::repo::Result<()>

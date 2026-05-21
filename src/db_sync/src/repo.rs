@@ -1,6 +1,4 @@
 use crate::dser::MessagePackError;
-use crate::model::SyncOperation;
-use sqlx::{Executor, sqlite::Sqlite};
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -23,22 +21,39 @@ pub struct ListQuery {
 }
 
 pub trait SyncEntityRepository {
-    type Entity;
+    type RepoEntity;
 
-    /// Returns the name of the table for this entity.
     fn get_table_name() -> &'static str;
 
-    /// Returns the entity with the given ID.
-    async fn get<'a, E>(executor: E, id: &Uuid) -> Result<Self::Entity>
+    async fn insert<'a, E>(executor: E, entity: &Self::RepoEntity) -> Result<()>
     where
-        E: Executor<'a, Database = Sqlite>;
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
 
-    /// Returns all entities in the database.
-    async fn list<'a, E>(executor: E, query: ListQuery) -> Result<Vec<Self::Entity>>
+    async fn delete<'a, E>(executor: E, id: ::uuid::Uuid) -> Result<()>
     where
-        E: Executor<'a, Database = Sqlite>;
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
 
-    async fn exec_op<'a, E>(executor: E, op: SyncOperation) -> Result<()>
+    async fn restore<'a, E>(executor: E, id: ::uuid::Uuid) -> Result<()>
     where
-        E: Executor<'a, Database = Sqlite>;
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
+
+    async fn update<'a, E>(
+        executor: E,
+        id: ::uuid::Uuid,
+        updates: Vec<crate::model::UpdateColumnOp>,
+    ) -> Result<()>
+    where
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
+
+    async fn get<'a, E>(executor: E, id: ::uuid::Uuid) -> Result<Self::RepoEntity>
+    where
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
+
+    async fn list<'a, E>(executor: E, query: ListQuery) -> Result<Vec<Self::RepoEntity>>
+    where
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
+
+    async fn exec_op<'a, E>(executor: E, op: crate::model::SyncOperation) -> Result<()>
+    where
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
 }
