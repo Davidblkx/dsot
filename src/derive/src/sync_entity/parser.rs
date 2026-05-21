@@ -11,29 +11,27 @@ impl SyncEntityIR {
     pub fn parse(ast: &DeriveInput) -> syn::Result<Self> {
         Ok(SyncEntityIR {
             name: ast.ident.clone(),
-            table_name: ast.into(),
+            table_name: get_table_name(ast),
             field_data: ast.try_into()?,
         })
     }
 }
 
-impl From<&DeriveInput> for TableName {
-    fn from(ast: &DeriveInput) -> Self {
-        let mut name = ast.ident.to_string().to_lowercase();
+fn get_table_name(ast: &DeriveInput) -> String {
+    let mut name = ast.ident.to_string().to_lowercase();
 
-        for att in &ast.attrs {
-            if att.path().is_ident("table") {
-                _ = att.parse_nested_meta(|m| {
-                    if let Some(ident) = m.path.get_ident() {
-                        name = ident.to_string();
-                    }
-                    Ok(())
-                });
-            }
+    for att in &ast.attrs {
+        if att.path().is_ident("table") {
+            _ = att.parse_nested_meta(|m| {
+                if let Some(ident) = m.path.get_ident() {
+                    name = ident.to_string();
+                }
+                Ok(())
+            });
         }
-
-        Self(name)
     }
+
+    name
 }
 
 impl TryFrom<&DeriveInput> for SyncEntityFields {

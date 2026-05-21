@@ -9,6 +9,7 @@ use sqlx::prelude::*;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
+#[table(artists)]
 pub struct Artist {
     pub id: Uuid,
     pub name: String,
@@ -296,7 +297,9 @@ mod tests {
     #[tokio::test]
     async fn test_repository_crud() {
         use sqlx::Connection;
-        let mut conn = sqlx::SqliteConnection::connect("sqlite::memory:").await.unwrap();
+        let mut conn = sqlx::SqliteConnection::connect("sqlite::memory:")
+            .await
+            .unwrap();
 
         // Run migrations/create table
         sqlx::query(
@@ -326,7 +329,9 @@ mod tests {
         };
 
         // Test Insert
-        TestRepository::insert(&mut conn, &artist_sql).await.unwrap();
+        TestRepository::insert(&mut conn, &artist_sql)
+            .await
+            .unwrap();
 
         // Test Get
         let fetched = TestRepository::get(&mut conn, &id).await.unwrap();
@@ -353,7 +358,9 @@ mod tests {
             column: "name".to_string(),
             value: dsot_db_sync::model::UpdateValue::Text("Updated Name".to_string()),
         }];
-        TestRepository::update(&mut conn, id, updates).await.unwrap();
+        TestRepository::update(&mut conn, id, updates)
+            .await
+            .unwrap();
 
         let fetched_updated = TestRepository::get(&mut conn, &id).await.unwrap();
         assert_eq!(fetched_updated.name, "Updated Name");

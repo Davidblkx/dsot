@@ -2,11 +2,9 @@ use syn::{Field, punctuated::Punctuated, token::Comma};
 
 pub struct SyncEntityIR {
     pub name: syn::Ident,
-    pub table_name: TableName,
+    pub table_name: String,
     pub field_data: SyncEntityFields,
 }
-
-pub struct TableName(pub String);
 
 pub struct SyncEntityFields {
     pub id: Field,
