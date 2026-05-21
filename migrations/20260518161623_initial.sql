@@ -1,5 +1,5 @@
 CREATE TABLE artists (
-    id TEXT PRIMARY KEY NOT NULL,
+    id BLOB PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     sort_name TEXT,
     created TEXT NOT NULL,

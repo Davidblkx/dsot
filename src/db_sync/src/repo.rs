@@ -1,3 +1,4 @@
+use crate::dser::MessagePackError;
 use crate::model::SyncOperation;
 use sqlx::{Executor, sqlite::Sqlite};
 use thiserror::Error;
@@ -9,14 +10,16 @@ pub enum RepositoryError {
     EntityNotFound(&'static str, Uuid),
     #[error("Database error: {0}")]
     DatabaseError(#[from] sqlx::Error),
+    #[error("{0}")]
+    SerializationError(#[from] MessagePackError),
 }
 
 pub type Result<T> = std::result::Result<T, RepositoryError>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ListQuery {
-    pub count: u64,
-    pub offset: u64,
+    pub count: i64,
+    pub offset: i64,
 }
 
 pub trait SyncEntityRepository {
