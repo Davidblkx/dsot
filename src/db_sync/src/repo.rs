@@ -1,4 +1,4 @@
-use crate::dser::MessagePackError;
+use crate::{SyncEntity, dser::MessagePackError};
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -21,7 +21,7 @@ pub struct ListQuery {
 }
 
 pub trait SyncEntityRepository {
-    type RepoEntity;
+    type RepoEntity: SyncEntity;
 
     fn get_table_name() -> &'static str;
 

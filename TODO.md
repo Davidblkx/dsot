@@ -1,2 +1,2 @@
 in derive:
-- implement repository in derive
+- finish DsotDatabase

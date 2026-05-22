@@ -2,6 +2,12 @@ use crate::dser::Result;
 use crate::model::SyncOperation;
 use uuid::Uuid;
 
+pub trait IntoSyncEntity {
+    type Entity;
+
+    fn to_sync(&self) -> Self::Entity;
+}
+
 pub trait SyncEntity {
     type Entity;
 

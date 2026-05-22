@@ -435,9 +435,11 @@ impl SyncEntityIR {
                 }
             }
 
-            impl #entity_ident {
-                pub fn to_sql(self) -> #sql_entity_ident {
-                    self.into()
+            impl ::dsot_db_sync::IntoSyncEntity for #entity_ident {
+                type Entity = #sql_entity_ident;
+
+                fn to_sync(&self) -> Self::Entity {
+                    self.clone().into()
                 }
             }
         }
