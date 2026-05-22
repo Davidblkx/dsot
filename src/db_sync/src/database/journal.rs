@@ -1,4 +1,5 @@
-use redb::{ReadableDatabase, TableDefinition};
+use redb::{ReadableDatabase, ReadableTable, TableDefinition};
+use rustc_hash::FxHashSet;
 use uuid::Uuid;
 
 use super::{DsotDatabase, Result};
@@ -19,6 +20,70 @@ impl DsotDatabase {
         let finalized = hasher.finalize();
 
         Ok(finalized.into())
+    }
+
+    /// Returns all keys currently stored in the journal.
+    pub fn get_journal_keys(&self) -> Result<Vec<[u8; 16]>> {
+        let reader = self.journal.begin_read()?;
+        let table = reader.open_table(JOURNAL_TABLE)?;
+        let mut keys = Vec::new();
+
+        for item in table.iter()? {
+            let (key, _) = item?;
+            keys.push(key.value());
+        }
+
+        Ok(keys)
+    }
+
+    /// Returns all keys that are not currently stored in the journal.
+    pub fn get_keys_not_in_journal(&self, keys: &[[u8; 16]]) -> Result<Vec<[u8; 16]>> {
+        let mut missing_keys = Vec::new();
+
+        let reader = self.journal.begin_read()?;
+        let table = reader.open_table(JOURNAL_TABLE)?;
+
+        for k in keys {
+            if table.get(k)?.is_none() {
+                missing_keys.push(*k);
+            }
+        }
+
+        Ok(missing_keys)
+    }
+
+    /// Returns all journal entries that are not in the key list.
+    pub fn get_journal_entries_not_in_array(&self, keys: &[[u8; 16]]) -> Result<Vec<Vec<u8>>> {
+        let mut missing_entries = Vec::new();
+        let set: FxHashSet<[u8; 16]> = keys.iter().copied().collect();
+
+        let reader = self.journal.begin_read()?;
+        let table = reader.open_table(JOURNAL_TABLE)?;
+
+        for item in table.iter()? {
+            let (k, v) = item?;
+            if !set.contains(&k.value()) {
+                missing_entries.push(v.value().to_vec());
+            }
+        }
+
+        Ok(missing_entries)
+    }
+
+    /// Returns all journal entries that are in the key list.
+    pub fn get_journal_entries_in_array(&self, keys: &[[u8; 16]]) -> Result<Vec<Vec<u8>>> {
+        let mut entries = Vec::new();
+
+        let reader = self.journal.begin_read()?;
+        let table = reader.open_table(JOURNAL_TABLE)?;
+
+        for k in keys {
+            if let Some(v) = table.get(k)? {
+                entries.push(v.value().to_vec());
+            }
+        }
+
+        Ok(entries)
     }
 
     pub(crate) fn remove_journal_entry(&self, id: Uuid) -> Result<()> {

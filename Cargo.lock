@@ -443,12 +443,15 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "chrono",
+ "dsot_derive",
  "linkme",
  "redb",
  "rmp-serde",
+ "rustc-hash",
  "serde",
  "sqlx",
  "thiserror",
+ "tokio",
  "uuid",
 ]
 

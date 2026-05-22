@@ -125,10 +125,12 @@ impl SyncEntityIR {
             })
             .collect();
         if !fdata.has_created {
-            select_expr.push(r#"created AS "created: DateTime<Utc>""#.to_string());
+            select_expr
+                .push(r#"created AS "created: ::chrono::DateTime<::chrono::Utc>""#.to_string());
         }
         if !fdata.has_updated {
-            select_expr.push(r#"updated AS "updated: DateTime<Utc>""#.to_string());
+            select_expr
+                .push(r#"updated AS "updated: ::chrono::DateTime<::chrono::Utc>""#.to_string());
         }
         if !fdata.has_deleted {
             select_expr.push(r#"deleted AS "deleted: bool""#.to_string());
@@ -292,7 +294,7 @@ impl SyncEntityIR {
                 {
                     match op {
                         ::dsot_db_sync::model::SyncOperation::Create(data) => {
-                            let value = #sql_entity_ident::from_bytes(&data)?;
+                            let value = <#sql_entity_ident as ::dsot_db_sync::SyncEntity>::from_bytes(&data)?;
                             Self::insert(executor, &value).await
                         }
                         ::dsot_db_sync::model::SyncOperation::Update(id, updates) => {
