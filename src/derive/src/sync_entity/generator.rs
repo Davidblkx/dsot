@@ -36,12 +36,23 @@ impl SyncEntityIR {
         let impl_repo =
             SyncEntityIR::generate_repository(&sql_ident, &repo_ident, &table_name, &field_data);
 
+        let ref_ident = quote::format_ident!("{}_REPOSITORY_REF", &name.to_string().to_uppercase());
+
         quote! {
             #create_sql_entity
 
             #impl_sync_entity
 
             #impl_repo
+
+            #[::linkme::distributed_slice(::dsot_db_sync::registry::APPLY_JOURNAL_REF)]
+            static #ref_ident: ::dsot_db_sync::registry::ApplyJournalRef =
+                dsot_db_sync::registry::ApplyJournalRef {
+                    table: stringify!(#table_name),
+                    apply_journal: |db, journal| {
+                        Box::pin(async move { db.apply_journal::<#repo_ident>(journal).await })
+                    },
+                };
         }
     }
 
@@ -139,9 +150,7 @@ impl SyncEntityIR {
                     stringify!(#table)
                 }
 
-                async fn insert<'a, E>(executor: E, entity: &#sql_entity_ident) -> ::dsot_db_sync::repo::Result<()>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
+                async fn insert(executor: &mut ::sqlx::SqliteConnection, entity: &#sql_entity_ident) -> ::dsot_db_sync::repo::Result<()>
                 {
                     ::sqlx::query!(
                         #insert_query,
@@ -153,9 +162,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                async fn delete<'a, E>(executor: E, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
+                async fn delete(executor: &mut ::sqlx::SqliteConnection, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
                 {
                     let now = ::chrono::Utc::now();
                     sqlx::query!(
@@ -169,9 +176,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                async fn restore<'a, E>(executor: E, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
+                async fn restore(executor: &mut ::sqlx::SqliteConnection, id: ::uuid::Uuid) -> dsot_db_sync::repo::Result<()>
                 {
                     let now = ::chrono::Utc::now();
                     sqlx::query!(
@@ -185,13 +190,11 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                async fn update<'a, E>(
-                    executor: E,
+                async fn update(
+                    executor: &mut ::sqlx::SqliteConnection,
                     id: ::uuid::Uuid,
                     updates: Vec<dsot_db_sync::model::UpdateColumnOp>,
                 ) -> dsot_db_sync::repo::Result<()>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
                     if updates.is_empty() {
                         return Ok(());
@@ -232,9 +235,7 @@ impl SyncEntityIR {
                     Ok(())
                 }
 
-                async fn get<'a, E>(executor: E, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<#sql_entity_ident>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
+                async fn get(executor: &mut ::sqlx::SqliteConnection, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<#sql_entity_ident>
                 {
                     let value = ::sqlx::query_as!(
                         #sql_entity_ident,
@@ -253,9 +254,7 @@ impl SyncEntityIR {
                     }
                 }
 
-                async fn try_get<'a, E>(executor: E, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<Option<#sql_entity_ident>>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
+                async fn try_get(executor: &mut ::sqlx::SqliteConnection, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<Option<#sql_entity_ident>>
                 {
                     let value = ::sqlx::query_as!(
                         #sql_entity_ident,
@@ -268,12 +267,10 @@ impl SyncEntityIR {
                     Ok(value)
                 }
 
-                async fn list<'a, E>(
-                    executor: E,
+                async fn list(
+                    executor: &mut ::sqlx::SqliteConnection,
                     query: ::dsot_db_sync::repo::ListQuery,
                 ) -> ::dsot_db_sync::repo::Result<Vec<#sql_entity_ident>>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
                     let ::dsot_db_sync::repo::ListQuery { count, offset } = query;
                     let value = ::sqlx::query_as!(
@@ -288,12 +285,10 @@ impl SyncEntityIR {
                     Ok(value)
                 }
 
-                async fn exec_op<'a, E>(
-                    executor: E,
+                async fn exec_op(
+                    executor: &mut ::sqlx::SqliteConnection,
                     op: ::dsot_db_sync::model::SyncOperation,
                 ) -> ::dsot_db_sync::repo::Result<()>
-                where
-                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
                 {
                     match op {
                         ::dsot_db_sync::model::SyncOperation::Create(data) => {

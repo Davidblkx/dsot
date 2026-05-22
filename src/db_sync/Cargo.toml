@@ -10,6 +10,7 @@ repository.workspace = true
 [dependencies]
 blake3 = { workspace = true }
 chrono = { workspace = true }
+linkme = { workspace = true }
 rmp-serde = { workspace = true }
 serde = { workspace = true }
 sqlx = { workspace = true }

@@ -12,13 +12,23 @@ impl DsotDatabase {
         &self,
         id: uuid::Uuid,
     ) -> Result<Option<R::RepoEntity>> {
-        let row = R::try_get(&self.sql, id).await?;
+        let mut conn = self
+            .sql
+            .acquire()
+            .await
+            .map_err(DsotDatabaseError::DatabaseError)?;
+        let row = R::try_get(&mut *conn, id).await?;
         Ok(row)
     }
 
     /// Gets the entity with the given ID. Returns an error if entity does not exist or retrieval fails.
     pub async fn get<R: SyncEntityRepository>(&self, id: uuid::Uuid) -> Result<R::RepoEntity> {
-        let row = R::get(&self.sql, id).await?;
+        let mut conn = self
+            .sql
+            .acquire()
+            .await
+            .map_err(DsotDatabaseError::DatabaseError)?;
+        let row = R::get(&mut *conn, id).await?;
         Ok(row)
     }
 
@@ -31,7 +41,12 @@ impl DsotDatabase {
 
     /// Updates the given entity if it exists and has changes. Returns false if entity does not exist or no update is needed.
     pub async fn update<R: SyncEntityRepository>(&self, value: &R::RepoEntity) -> Result<bool> {
-        match R::try_get(&self.sql, value.get_id()).await? {
+        let mut conn = self
+            .sql
+            .acquire()
+            .await
+            .map_err(DsotDatabaseError::DatabaseError)?;
+        match R::try_get(&mut *conn, value.get_id()).await? {
             Some(prev) => match value.op_update(&prev) {
                 Some(op) => {
                     self.exec_op::<R>(op).await?;
@@ -46,7 +61,12 @@ impl DsotDatabase {
     /// Inserts or updates the given entity, depending on whether it already exists in the database.
     /// Returns false if entity exists and no update is needed
     pub async fn upsert<R: SyncEntityRepository>(&self, value: &R::RepoEntity) -> Result<bool> {
-        let op = match R::try_get(&self.sql, value.get_id()).await? {
+        let mut conn = self
+            .sql
+            .acquire()
+            .await
+            .map_err(DsotDatabaseError::DatabaseError)?;
+        let op = match R::try_get(&mut *conn, value.get_id()).await? {
             Some(prev) => match value.op_update(&prev) {
                 Some(op) => op,
                 None => return Ok(false),
@@ -63,7 +83,12 @@ impl DsotDatabase {
         count: i64,
         offset: i64,
     ) -> Result<Vec<R::RepoEntity>> {
-        let res = R::list(&self.sql, ListQuery { count, offset }).await?;
+        let mut conn = self
+            .sql
+            .acquire()
+            .await
+            .map_err(DsotDatabaseError::DatabaseError)?;
+        let res = R::list(&mut *conn, ListQuery { count, offset }).await?;
 
         Ok(res)
     }
@@ -83,20 +108,25 @@ impl DsotDatabase {
     }
 
     /// Add entry to journal and updates current database
-    pub async fn apply_journal<R: SyncEntityRepository>(&self, entry: &[u8]) -> Result<Uuid> {
-        let JournalEntry { id, op, table } = JournalEntry::from_bytes(entry)?;
+    pub async fn apply_journal<R: SyncEntityRepository>(
+        &self,
+        entry: JournalEntry,
+    ) -> Result<Uuid> {
+        let id = entry.id;
+        let op = entry.op.clone();
 
-        if table != R::get_table_name() {
+        if &entry.table != R::get_table_name() {
             return Err(DsotDatabaseError::TableMissmatchError(
-                table,
+                entry.table,
                 R::get_table_name(),
             ));
         }
 
+        let bytes = entry.to_bytes()?;
         let jrn_trx = self.journal.begin_write()?;
         {
             let mut table = jrn_trx.open_table(JOURNAL_TABLE)?;
-            table.insert(id.to_bytes_le(), entry)?;
+            table.insert(id.to_bytes_le(), bytes.as_slice())?;
         }
 
         let mut sql_trx = self.sql.begin().await?;

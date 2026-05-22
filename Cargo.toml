@@ -13,6 +13,7 @@ repository = "https://github.com/Davidblkx/dsot"
 blake3 = { version = "1" }
 chrono = { version = "0.4", features = ["serde"] }
 env_logger = { version = "0.11" }
+linkme = "0.3"
 log = { version = "0.4" }
 paste = { version = "1.0.15" }
 reqwest = { version = "0.13", features = ["blocking"] }
@@ -20,7 +21,7 @@ redb = { version = "4" }
 rmp-serde = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1.0" }
-sqlx = { version = "0.8", features = [
+sqlx = { version = "0.9", features = [
     "macros",
     "uuid",
     "sqlite",

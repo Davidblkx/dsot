@@ -20,4 +20,6 @@ pub enum DsotDatabaseError {
     SerializationError(#[from] crate::dser::MessagePackError),
     #[error("Cannot insert journal for {0} in table {1}")]
     TableMissmatchError(String, &'static str),
+    #[error("Repository not available for table: {0}")]
+    RepositoryNotFound(String),
 }
