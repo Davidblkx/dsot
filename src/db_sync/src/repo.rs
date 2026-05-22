@@ -21,7 +21,7 @@ pub struct ListQuery {
 }
 
 pub trait SyncEntityRepository {
-    type RepoEntity: SyncEntity;
+    type RepoEntity: SyncEntity<Entity = Self::RepoEntity>;
 
     fn get_table_name() -> &'static str;
 
@@ -46,6 +46,10 @@ pub trait SyncEntityRepository {
         E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
 
     async fn get<'a, E>(executor: E, id: ::uuid::Uuid) -> Result<Self::RepoEntity>
+    where
+        E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
+
+    async fn try_get<'a, E>(executor: E, id: ::uuid::Uuid) -> Result<Option<Self::RepoEntity>>
     where
         E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>;
 

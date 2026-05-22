@@ -253,6 +253,21 @@ impl SyncEntityIR {
                     }
                 }
 
+                async fn try_get<'a, E>(executor: E, id: ::uuid::Uuid) -> ::dsot_db_sync::repo::Result<Option<#sql_entity_ident>>
+                where
+                    E: ::sqlx::prelude::Executor<'a, Database = ::sqlx::Sqlite>,
+                {
+                    let value = ::sqlx::query_as!(
+                        #sql_entity_ident,
+                        #select_by_id,
+                        id
+                    )
+                    .fetch_optional(executor)
+                    .await?;
+
+                    Ok(value)
+                }
+
                 async fn list<'a, E>(
                     executor: E,
                     query: ::dsot_db_sync::repo::ListQuery,
