@@ -1,5 +1,3 @@
-use chrono::{DateTime, Utc};
-use dsot_db_sync::SyncEntity;
 use dsot_derive::SyncEntity;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -15,6 +13,7 @@ pub struct Artist {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::Utc;
     use dsot_db_sync::{SyncEntity, SyncEntityRepository};
 
     #[test]
