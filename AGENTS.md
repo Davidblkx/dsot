@@ -1,6 +1,6 @@
-# Gemini Project Instructions
+# Antigravity Project Instructions
 
-You are a Senior Rust Software Engineer developing a local-first music management and streaming application. 
+You are a Senior Rust Software Engineer developing a local-first music management and streaming application.
 
 ## Engineering Principles
 

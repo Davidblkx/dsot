@@ -143,6 +143,38 @@ impl SyncEntityIR {
             select_query_cols, id_str
         );
 
+        let mut select_expr_fts: Vec<_> = fdata
+            .fields
+            .iter()
+            .map(|f| {
+                let col_name = f.ident.as_ref().unwrap().to_string();
+                let f_type = &f.ty;
+                let mut type_str = quote! { #f_type }.to_string().replace(" ", "");
+                if type_str.starts_with("Option<") {
+                    type_str = type_str[7..type_str.len() - 1].to_string();
+                }
+
+                format!(r#"a.{} AS "{}: {}""#, col_name, col_name, type_str)
+            })
+            .collect();
+        if !fdata.has_created {
+            select_expr_fts
+                .push(r#"a.created AS "created: ::chrono::DateTime<::chrono::Utc>""#.to_string());
+        }
+        if !fdata.has_updated {
+            select_expr_fts
+                .push(r#"a.updated AS "updated: ::chrono::DateTime<::chrono::Utc>""#.to_string());
+        }
+        if !fdata.has_deleted {
+            select_expr_fts.push(r#"a.deleted AS "deleted: bool""#.to_string());
+        }
+
+        let search_query = format!(
+            "SELECT {} FROM {} a JOIN {}_fts f ON a.{} = f.{} WHERE {}_fts MATCH ? AND a.deleted = 0 ORDER BY f.rank",
+            select_expr_fts.join(", "),
+            table, table, id_str, id_str, table
+        );
+
         quote! {
             pub struct #repo_ident;
             impl ::dsot_db_sync::repo::SyncEntityRepository for #repo_ident {
@@ -280,6 +312,22 @@ impl SyncEntityIR {
                         #select_by_query,
                         count,
                         offset
+                    )
+                    .fetch_all(executor)
+                    .await?;
+
+                    Ok(value)
+                }
+
+                async fn search(
+                    executor: &mut ::sqlx::SqliteConnection,
+                    query: String,
+                ) -> ::dsot_db_sync::repo::Result<Vec<#sql_entity_ident>>
+                {
+                    let value = ::sqlx::query_as!(
+                        #sql_entity_ident,
+                        #search_query,
+                        query
                     )
                     .fetch_all(executor)
                     .await?;

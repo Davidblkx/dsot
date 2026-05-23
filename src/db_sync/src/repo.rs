@@ -60,4 +60,9 @@ pub trait SyncEntityRepository {
         executor: &mut ::sqlx::SqliteConnection,
         op: crate::model::SyncOperation,
     ) -> Result<()>;
+
+    async fn search(
+        executor: &mut ::sqlx::SqliteConnection,
+        query: String,
+    ) -> Result<Vec<Self::RepoEntity>>;
 }

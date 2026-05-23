@@ -98,6 +98,24 @@ mod tests {
                 updated TEXT NOT NULL,
                 deleted INTEGER NOT NULL DEFAULT 0
             ) STRICT;
+
+            CREATE VIRTUAL TABLE artists_fts USING fts5(
+                id UNINDEXED,
+                name,
+                sort_name
+            );
+
+            CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
+                INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
+            END;
+
+            CREATE TRIGGER artists_after_delete AFTER DELETE ON artists BEGIN
+                DELETE FROM artists_fts WHERE id = old.id;
+            END;
+
+            CREATE TRIGGER artists_after_update AFTER UPDATE ON artists BEGIN
+                UPDATE artists_fts SET name = new.name, sort_name = new.sort_name WHERE id = old.id;
+            END;
             "#,
         )
         .execute(&mut conn)
@@ -126,6 +144,14 @@ mod tests {
         assert_eq!(fetched.sort_name, artist_sql.sort_name);
         assert_eq!(fetched.deleted, false);
 
+        // Test Search
+        let search_results = ArtistSqlRepository::search(&mut conn, "Test*".to_string())
+            .await
+            .unwrap();
+        assert_eq!(search_results.len(), 1);
+        assert_eq!(search_results[0].id, id);
+        assert_eq!(search_results[0].name, "Test Artist");
+
         // Test List
         let list = ArtistSqlRepository::list(
             &mut conn,
@@ -151,14 +177,33 @@ mod tests {
         let fetched_updated = ArtistSqlRepository::get(&mut conn, id).await.unwrap();
         assert_eq!(fetched_updated.name, "Updated Name");
 
+        // Test Search after Update
+        let search_results_updated = ArtistSqlRepository::search(&mut conn, "Updated*".to_string())
+            .await
+            .unwrap();
+        assert_eq!(search_results_updated.len(), 1);
+        assert_eq!(search_results_updated[0].name, "Updated Name");
+
         // Test Delete
         ArtistSqlRepository::delete(&mut conn, id).await.unwrap();
         let fetched_deleted = ArtistSqlRepository::get(&mut conn, id).await.unwrap();
         assert_eq!(fetched_deleted.deleted, true);
 
+        // Test Search after Delete (should be empty because of a.deleted = 0)
+        let search_results_deleted = ArtistSqlRepository::search(&mut conn, "Updated*".to_string())
+            .await
+            .unwrap();
+        assert_eq!(search_results_deleted.len(), 0);
+
         // Test Restore
         ArtistSqlRepository::restore(&mut conn, id).await.unwrap();
         let fetched_restored = ArtistSqlRepository::get(&mut conn, id).await.unwrap();
         assert_eq!(fetched_restored.deleted, false);
+
+        // Test Search after Restore
+        let search_results_restored = ArtistSqlRepository::search(&mut conn, "Updated*".to_string())
+            .await
+            .unwrap();
+        assert_eq!(search_results_restored.len(), 1);
     }
 }

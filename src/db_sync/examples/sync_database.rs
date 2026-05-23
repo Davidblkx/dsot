@@ -28,6 +28,24 @@ async fn main() {
             updated TEXT NOT NULL,
             deleted INTEGER NOT NULL DEFAULT 0
         ) STRICT;
+
+        CREATE VIRTUAL TABLE artists_fts USING fts5(
+            id UNINDEXED,
+            name,
+            sort_name
+        );
+
+        CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
+            INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
+        END;
+
+        CREATE TRIGGER artists_after_delete AFTER DELETE ON artists BEGIN
+            DELETE FROM artists_fts WHERE id = old.id;
+        END;
+
+        CREATE TRIGGER artists_after_update AFTER UPDATE ON artists BEGIN
+            UPDATE artists_fts SET name = new.name, sort_name = new.sort_name WHERE id = old.id;
+        END;
         "#,
     )
     .execute(&sql1)
@@ -52,6 +70,24 @@ async fn main() {
             updated TEXT NOT NULL,
             deleted INTEGER NOT NULL DEFAULT 0
         ) STRICT;
+
+        CREATE VIRTUAL TABLE artists_fts USING fts5(
+            id UNINDEXED,
+            name,
+            sort_name
+        );
+
+        CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
+            INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
+        END;
+
+        CREATE TRIGGER artists_after_delete AFTER DELETE ON artists BEGIN
+            DELETE FROM artists_fts WHERE id = old.id;
+        END;
+
+        CREATE TRIGGER artists_after_update AFTER UPDATE ON artists BEGIN
+            UPDATE artists_fts SET name = new.name, sort_name = new.sort_name WHERE id = old.id;
+        END;
         "#,
     )
     .execute(&sql2)

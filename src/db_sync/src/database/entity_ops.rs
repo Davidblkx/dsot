@@ -107,6 +107,14 @@ impl DsotDatabase {
         Ok(())
     }
 
+    /// Search for entity using https://sqlite.org/fts5.html
+    pub async fn search<R: SyncEntityRepository>(&self, query: &str) -> Result<Vec<R::RepoEntity>> {
+        let mut conn = self.sql.acquire().await?;
+        let list = R::search(&mut *conn, query.to_string()).await?;
+
+        Ok(list)
+    }
+
     /// Add entry to journal and updates current database
     pub async fn apply_journal<R: SyncEntityRepository>(
         &self,
