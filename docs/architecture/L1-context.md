@@ -14,13 +14,13 @@ Music collectors often have libraries spread across multiple devices (laptops, p
 ## External Systems
 
 *   **MusicBrainz:** The source of truth for music metadata (artists, albums, tracks).
-*   **Iroh:** The P2P library used for device discovery and data transfer.
-*   **SQLite/FTS5:** Local storage and search engine for library data.
-*   **Autosurgeon/Automerge:** Tools used to manage and resolve synchronization conflicts between devices.
+*   **SQLite/FTS5:** Local relational storage and search engine for library data.
+*   **Iroh [PLANNED]:** The peer-to-peer (P2P) networking library used for decentralized device discovery and data synchronization transport.
+*   **Deezer API [PLANNED]:** High-speed, unauthenticated API for cosmetic metadata (cover art, tracklists) during library onboarding.
 
 ## System Boundary
 
-DSOT manages indexing, metadata enrichment, and peer-to-peer synchronization. It is not a music storefront; it organizes and streams the user's existing local files.
+DSOT manages local indexing, metadata enrichment, database replication journaling, and peer-to-peer synchronization. It is not a music storefront; it organizes and streams the user's existing local files.
 
 ## Context Diagram
 
@@ -29,7 +29,7 @@ graph TD
     User[Music Collector]
     DSOT[DSOT System]
     MB[MusicBrainz API]
-    P2P[Other DSOT Nodes]
+    P2P[Other DSOT Nodes via Iroh - PLANNED]
     FS[Local Filesystem]
 
     User -->|Manages library| DSOT

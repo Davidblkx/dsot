@@ -14,11 +14,11 @@ We need to decide on the data sources and structural flow for metadata resolutio
 
 ## Decision Keys
 
-We will implement a **Multi-Tiered Hybrid Metadata Pipeline** structured as an asynchronous fallback chain: **Local File Tags -> Deezer API -> MusicBrainz API**.
+We will implement a **Multi-Tiered Hybrid Metadata Pipeline** structured as an asynchronous fallback chain: **Local File Tags -> Deezer API [PLANNED] -> MusicBrainz API**.
 
-1. **Frictionless Cosmetic Baseline:** Use the **Deezer API** as the primary public network engine for instant track metadata and high-resolution artwork acquisition. It requires zero configuration, API keys, or user authentication.
+1. **Frictionless Cosmetic Baseline [PLANNED]:** Use the **Deezer API** as the planned primary public network engine for instant track metadata and high-resolution artwork acquisition. It requires zero configuration, API keys, or user authentication.
 2. **Global Synchronization Anchor:** Use **MusicBrainz IDs (MBIDs)** as the immutable, deterministic global keys to link tracks, artists, and albums across multiple user devices.
-3. **Bridge Identifiers:** Leverage industry-standard **ISRC (International Standard Recording Code)** and **UPC/Barcode** values returned by Deezer as exact query parameters to resolve MBIDs, bypassing ambiguous text-based searches.
+3. **Bridge Identifiers [PLANNED]:** Leverage industry-standard **ISRC (International Standard Recording Code)** and **UPC/Barcode** values returned by Deezer as exact query parameters to resolve MBIDs, bypassing ambiguous text-based searches.
 4. **Decoupled Domain Engine:** Define the pipeline using an abstract, trait-driven interface layer in Rust to allow seamless support for optional providers (**Spotify** or **Discogs**) in future development phases.
 
 ---
@@ -38,13 +38,13 @@ The metadata pipeline splits data ingestion into two distinct priorities: **Imme
      [Has MusicBrainz ID]            [No MusicBrainz ID]
                │                               │
                │                               ▼
-               │                     Step 2: Query Deezer API
+               │                     Step 2: Query Deezer API [PLANNED]
                │                      - Fast, Unauthenticated
                │                      - Fetches Artwork & Metadata
                │                      - Extracts ISRC & Barcode
                │                               │
                ▼                               ▼
-       [Anchor Verified]             Step 3: Queue MusicBrainz Task
+       [Anchor Verified]             Step 3: Queue MusicBrainz Task [PLANNED]
                │                      - Serialized Background Worker
                │                      - Queries MBID via ISRC/Barcode
                │                               │
@@ -60,16 +60,16 @@ The metadata pipeline splits data ingestion into two distinct priorities: **Imme
 
 When a media binary is introduced, the system extracts embedded tags natively. If the file already possesses a valid `musicbrainz_id`, the track bypasses network resolution entirely and is flagged as immediate sync-ready.
 
-### 2. Ingestion Phase 2: Frictionless Acceleration (Deezer API)
+### 2. Ingestion Phase 2: Frictionless Acceleration (Deezer API) [PLANNED]
 
-If the file lacks global IDs, the system invokes the Deezer API. Because it does not require authentication tokens, it serves as an high-speed ingestion layer.
+If the file lacks global IDs, the system is planned to invoke the Deezer API. Because it does not require authentication tokens, it serves as an high-speed ingestion layer.
 
 * This phase populates the user's isolated database with display essentials (clean titles, track ordering, and high-res cover art links) so the UI feels instantly responsive.
 * Critically, it extracts the recording's unique **ISRC** and the release's **UPC/Barcode**.
 
-### 3. Ingestion Phase 3: Resolution of the Sync Anchor (MusicBrainz API)
+### 3. Ingestion Phase 3: Resolution of the Sync Anchor (MusicBrainz API) [PLANNED]
 
-Because Deezer relies on closed proprietary IDs, its internal keys cannot be safely used as universal sync hooks across independent installations. The system redirects the fetched ISRC/Barcode metadata into a background processing queue.
+Because the planned Deezer integration relies on closed proprietary IDs, its internal keys cannot be safely used as universal sync hooks across independent installations. The system redirects the fetched ISRC/Barcode metadata into a background processing queue.
 
 * An asynchronous worker isolates upstream traffic to respect MusicBrainz’s mandatory 1 request per second rule.
 * The worker uses the precise ISRC/Barcode values to retrieve the official **MBID** without performing ambiguous string parsing.
