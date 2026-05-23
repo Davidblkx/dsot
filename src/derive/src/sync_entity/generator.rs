@@ -48,9 +48,9 @@ impl SyncEntityIR {
             #[::linkme::distributed_slice(::dsot_db_sync::registry::APPLY_JOURNAL_REF)]
             static #ref_ident: ::dsot_db_sync::registry::ApplyJournalRef =
                 dsot_db_sync::registry::ApplyJournalRef {
-                    table: stringify!(#table_name),
-                    apply_journal: |db, journal| {
-                        Box::pin(async move { db.apply_journal::<#repo_ident>(journal).await })
+                    table: #table_name,
+                    apply_journal: |trx, journal| {
+                        Box::pin(async move { trx.apply_journal::<#repo_ident>(journal).await })
                     },
                 };
         }
@@ -181,7 +181,7 @@ impl SyncEntityIR {
                 type RepoEntity = #sql_entity_ident;
 
                 fn get_table_name() -> &'static str {
-                    stringify!(#table)
+                    #table
                 }
 
                 async fn insert(executor: &mut ::sqlx::SqliteConnection, entity: &#sql_entity_ident) -> ::dsot_db_sync::repo::Result<()>

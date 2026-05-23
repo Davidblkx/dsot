@@ -1,6 +1,4 @@
 now:
-- rethink how to merge journal entries. in need a strategy to add multiple entries and then apply all changes forward for the table
+- fix registry, we should change apply_journals to sync_journals, wehere we add the new journal entries, and then start on the first and apply ALL journals in table to sql aka exec_op.
 
 maybe later:
-    db_sync:
-        - fix insert 1 entity in 2 diff devices

@@ -1,15 +1,15 @@
-use std::{collections::HashMap, sync::OnceLock};
+use std::{collections::HashMap, future::Future, sync::OnceLock};
 
 use uuid::Uuid;
 
 use crate::{
-    database::{DsotDatabase, DsotDatabaseError, Result},
+    database::{DsotDatabase, DsotDatabaseError, DsotDatabaseTransaction, Result},
     model::JournalEntry,
 };
 
 pub type BoxFuture<'a, T> = std::pin::Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
-pub type ApplyJournalFn = fn(&DsotDatabase, JournalEntry) -> BoxFuture<'_, Result<Uuid>>;
+pub type ApplyJournalFn = for<'a, 'b> fn(&'b mut DsotDatabaseTransaction<'a>, JournalEntry) -> BoxFuture<'b, Result<Uuid>>;
 
 pub struct ApplyJournalRef {
     pub table: &'static str,
@@ -38,14 +38,36 @@ impl RepositoryRegistry {
         })
     }
 
-    pub async fn apply_journal(&self, db: &DsotDatabase, journal_data: &[u8]) -> Result<Uuid> {
+    pub async fn apply_journal_trx<'a, 'b>(
+        &self,
+        trx: &'b mut DsotDatabaseTransaction<'a>,
+        journal_data: &[u8],
+    ) -> Result<Uuid> {
         let journal = JournalEntry::from_bytes(journal_data)?;
         match self.repos.get(journal.table.as_str()) {
             None => Err(DsotDatabaseError::RepositoryNotFound(journal.table)),
             Some(apply) => {
-                let id = apply(db, journal).await?;
+                let id = apply(trx, journal).await?;
                 Ok(id)
             }
         }
+    }
+
+    pub async fn apply_journal(&self, db: &DsotDatabase, journal_data: &[u8]) -> Result<Uuid> {
+        let mut trx = db.begin_transaction().await?;
+        let id = self.apply_journal_trx(&mut trx, journal_data).await?;
+        trx.commit().await?;
+        Ok(id)
+    }
+
+    pub async fn apply_journals(&self, db: &DsotDatabase, entries_data: &[Vec<u8>]) -> Result<Vec<Uuid>> {
+        let mut trx = db.begin_transaction().await?;
+        let mut ids = Vec::new();
+        for data in entries_data {
+            let id = self.apply_journal_trx(&mut trx, data.as_slice()).await?;
+            ids.push(id);
+        }
+        trx.commit().await?;
+        Ok(ids)
     }
 }

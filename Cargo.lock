@@ -472,6 +472,7 @@ dependencies = [
  "dsot_db_sync",
  "dsot_derive",
  "linkme",
+ "redb",
  "serde",
  "sqlx",
  "thiserror",
