@@ -8,6 +8,31 @@ pub struct Artist {
     pub id: Uuid,
     pub name: String,
     pub sort_name: Option<String>,
+    pub aliases: sqlx::types::Json<Vec<String>>,
+}
+
+impl Artist {
+    pub fn new(id: Uuid, name: String) -> Self {
+        Self {
+            id,
+            name,
+            sort_name: None,
+            aliases: sqlx::types::Json(vec![]),
+        }
+    }
+
+    pub fn with_aliases(mut self, aliases: Vec<String>) -> Self {
+        self.aliases.0 = aliases;
+        self
+    }
+
+    pub fn add_aliase(&mut self, alias: String) {
+        self.aliases.0.push(alias);
+    }
+
+    pub fn set_aliases(&mut self, aliases: Vec<String>) {
+        self.aliases.0 = aliases;
+    }
 }
 
 #[cfg(test)]
@@ -22,6 +47,7 @@ mod tests {
             id: Uuid::now_v7(),
             name: "Artist".into(),
             sort_name: Some("Artist".into()),
+            aliases: sqlx::types::Json(vec![]),
         };
 
         let sql: ArtistSql = input.clone().into();
@@ -41,6 +67,7 @@ mod tests {
             created: Utc::now(),
             deleted: true,
             updated: Utc::now(),
+            aliases: sqlx::types::Json(vec![]),
         };
 
         let artist: Artist = input.clone().into();
@@ -80,47 +107,9 @@ mod tests {
         assert_eq!(changes[1].column, "updated".to_string());
     }
 
-    #[tokio::test]
-    async fn test_repository_crud() {
-        use sqlx::Connection;
-        let mut conn = sqlx::SqliteConnection::connect("sqlite::memory:")
-            .await
-            .unwrap();
-
-        // Run migrations/create table
-        sqlx::query(
-            r#"
-            CREATE TABLE artists (
-                id BLOB PRIMARY KEY NOT NULL,
-                name TEXT NOT NULL,
-                sort_name TEXT,
-                created TEXT NOT NULL,
-                updated TEXT NOT NULL,
-                deleted INTEGER NOT NULL DEFAULT 0
-            ) STRICT;
-
-            CREATE VIRTUAL TABLE artists_fts USING fts5(
-                id UNINDEXED,
-                name,
-                sort_name
-            );
-
-            CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
-                INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
-            END;
-
-            CREATE TRIGGER artists_after_delete AFTER DELETE ON artists BEGIN
-                DELETE FROM artists_fts WHERE id = old.id;
-            END;
-
-            CREATE TRIGGER artists_after_update AFTER UPDATE ON artists BEGIN
-                UPDATE artists_fts SET name = new.name, sort_name = new.sort_name WHERE id = old.id;
-            END;
-            "#,
-        )
-        .execute(&mut conn)
-        .await
-        .unwrap();
+    #[sqlx::test(migrations = "../../migrations")]
+    async fn test_repository_crud(pool: sqlx::SqlitePool) {
+        let mut conn = pool.begin().await.unwrap();
 
         let id = Uuid::now_v7();
         let artist_sql = ArtistSql {
@@ -129,6 +118,7 @@ mod tests {
             sort_name: Some("Artist, Test".to_string()),
             created: Utc::now(),
             updated: Utc::now(),
+            aliases: sqlx::types::Json(vec![]),
             deleted: false,
         };
 
@@ -208,41 +198,10 @@ mod tests {
         assert_eq!(search_results_restored.len(), 1);
     }
 
-    #[tokio::test]
-    async fn test_apply_journal_duplicate_create() {
+    #[sqlx::test(migrations = "../../migrations")]
+    async fn test_apply_journal_duplicate_create(pool: sqlx::SqlitePool) {
         use dsot_db_sync::{DsotDatabase, model::JournalEntry};
         use redb::{Database, backends::InMemoryBackend};
-
-        let pool = sqlx::sqlite::SqlitePool::connect("sqlite::memory:")
-            .await
-            .unwrap();
-
-        // Run migrations/create table
-        sqlx::query(
-            r#"
-            CREATE TABLE artists (
-                id BLOB PRIMARY KEY NOT NULL,
-                name TEXT NOT NULL,
-                sort_name TEXT,
-                created TEXT NOT NULL,
-                updated TEXT NOT NULL,
-                deleted INTEGER NOT NULL DEFAULT 0
-            ) STRICT;
-
-            CREATE VIRTUAL TABLE artists_fts USING fts5(
-                id UNINDEXED,
-                name,
-                sort_name
-            );
-
-            CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
-                INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
-            END;
-            "#,
-        )
-        .execute(&pool)
-        .await
-        .unwrap();
 
         let jrn = Database::builder()
             .create_with_backend(InMemoryBackend::new())
@@ -254,6 +213,7 @@ mod tests {
             id: Uuid::now_v7(),
             name: "Duplicate Artist".to_string(),
             sort_name: Some("Artist, Duplicate".to_string()),
+            aliases: sqlx::types::Json(vec![]),
         };
         let artist_sql: ArtistSql = artist.clone().into();
 
@@ -279,41 +239,10 @@ mod tests {
         assert_eq!(fetched.name, "Duplicate Artist");
     }
 
-    #[tokio::test]
-    async fn test_apply_journals_batch() {
+    #[sqlx::test(migrations = "../../migrations")]
+    async fn test_apply_journals_batch(pool: sqlx::SqlitePool) {
         use dsot_db_sync::{DsotDatabase, RepositoryRegistry, model::JournalEntry};
         use redb::{Database, backends::InMemoryBackend};
-
-        let pool = sqlx::sqlite::SqlitePool::connect("sqlite::memory:")
-            .await
-            .unwrap();
-
-        // Run migrations/create table
-        sqlx::query(
-            r#"
-            CREATE TABLE artists (
-                id BLOB PRIMARY KEY NOT NULL,
-                name TEXT NOT NULL,
-                sort_name TEXT,
-                created TEXT NOT NULL,
-                updated TEXT NOT NULL,
-                deleted INTEGER NOT NULL DEFAULT 0
-            ) STRICT;
-
-            CREATE VIRTUAL TABLE artists_fts USING fts5(
-                id UNINDEXED,
-                name,
-                sort_name
-            );
-
-            CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
-                INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
-            END;
-            "#,
-        )
-        .execute(&pool)
-        .await
-        .unwrap();
 
         let jrn = Database::builder()
             .create_with_backend(InMemoryBackend::new())
@@ -325,6 +254,7 @@ mod tests {
             id: Uuid::now_v7(),
             name: "Artist One".to_string(),
             sort_name: Some("Artist, One".to_string()),
+            aliases: sqlx::types::Json(vec![]),
         };
         let artist_sql1: ArtistSql = artist1.clone().into();
 
@@ -332,6 +262,7 @@ mod tests {
             id: Uuid::now_v7(),
             name: "Artist Two".to_string(),
             sort_name: Some("Artist, Two".to_string()),
+            aliases: sqlx::types::Json(vec![]),
         };
         let artist_sql2: ArtistSql = artist2.clone().into();
 

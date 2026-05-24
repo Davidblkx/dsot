@@ -70,6 +70,16 @@ impl IntoUpdateValue for ::chrono::DateTime<::chrono::Utc> {
     }
 }
 
+impl IntoUpdateValue for ::sqlx::types::Json<Vec<String>> {
+    fn into_update_value(&self) -> UpdateValue {
+        let raw_json = match serde_json::to_string(self) {
+            Ok(json) => json,
+            Err(_) => "[]".to_string(),
+        };
+        UpdateValue::Text(raw_json)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -84,5 +94,13 @@ mod tests {
     fn can_detect_diff_option_string() {
         let diff = UpdateValue::get_if_diff(&Some("v1".to_string()), &Some("v2".to_string()));
         assert_eq!(Some(UpdateValue::Text("v2".to_string())), diff);
+    }
+
+    #[test]
+    fn can_map_json() {
+        let items = vec!["a".to_string(), "b".to_string()];
+        let json: sqlx::types::Json<Vec<String>> = items.into();
+        let target = json.into_update_value();
+        assert_eq!(UpdateValue::Text(r#"["a","b"]"#.to_string()), target);
     }
 }

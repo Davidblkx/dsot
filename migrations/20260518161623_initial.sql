@@ -2,6 +2,7 @@ CREATE TABLE artists (
     id BLOB PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     sort_name TEXT,
+    aliases TEXT NOT NULL DEFAULT '[]',
     created TEXT NOT NULL,
     updated TEXT NOT NULL,
     deleted INTEGER NOT NULL DEFAULT 0
@@ -14,12 +15,19 @@ CREATE INDEX idx_artists_sync ON artists (deleted, updated, created);
 CREATE VIRTUAL TABLE artists_fts USING fts5(
     id UNINDEXED,
     name,
-    sort_name
+    sort_name,
+    aliases,
 );
 
 -- Triggers to keep artists_fts in sync with artists
 CREATE TRIGGER artists_after_insert AFTER INSERT ON artists BEGIN
-    INSERT INTO artists_fts(id, name, sort_name) VALUES (new.id, new.name, new.sort_name);
+    INSERT INTO artists_fts(id, name, sort_name, aliases)
+    VALUES (
+        new.id,
+        new.name,
+        new.sort_name,
+        (SELECT group_concat(value, ' ') FROM json_each(new.aliases))
+    );
 END;
 
 CREATE TRIGGER artists_after_delete AFTER DELETE ON artists BEGIN
@@ -27,5 +35,12 @@ CREATE TRIGGER artists_after_delete AFTER DELETE ON artists BEGIN
 END;
 
 CREATE TRIGGER artists_after_update AFTER UPDATE ON artists BEGIN
-    UPDATE artists_fts SET name = new.name, sort_name = new.sort_name WHERE id = old.id;
+    DELETE FROM artists_fts WHERE id = old.id;
+    INSERT INTO artists_fts(id, name, sort_name, aliases)
+    VALUES (
+        new.id,
+        new.name,
+        new.sort_name,
+        (SELECT group_concat(value, ' ') FROM json_each(new.aliases))
+    );
 END;

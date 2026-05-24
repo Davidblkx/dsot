@@ -21,13 +21,15 @@ redb = { version = "4" }
 rmp-serde = "1"
 rustc-hash = "2"
 serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1.0" }
+serde_json = { version = "1.0", features = ["raw_value"] }
 sqlx = { version = "0.9", features = [
     "macros",
     "uuid",
     "sqlite",
     "chrono",
     "runtime-tokio",
+    "json",
+    "migrate",
 ], default-features = false }
 thiserror = { version = "2" }
 tokio = { version = "1.52", features = ["full"] }
