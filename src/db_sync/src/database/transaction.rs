@@ -13,6 +13,7 @@ impl<'a> DsotDatabaseTransaction<'a> {
     }
 
     pub async fn rollback(self) -> Result<()> {
+        self.journal_trx.abort()?;
         self.sql_trx.rollback().await?;
         Ok(())
     }

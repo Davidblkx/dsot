@@ -2,6 +2,8 @@ use redb::{ReadableDatabase, ReadableTable, TableDefinition};
 use rustc_hash::FxHashSet;
 use uuid::Uuid;
 
+use crate::{database::DsotDatabaseTransaction, model::JournalEntry};
+
 use super::{DsotDatabase, Result};
 
 pub const JOURNAL_TABLE: TableDefinition<[u8; 16], &[u8]> = TableDefinition::new("JOURNAL");
@@ -95,5 +97,34 @@ impl DsotDatabase {
         jrn_trx.commit()?;
 
         Ok(())
+    }
+}
+
+impl<'a> DsotDatabaseTransaction<'a> {
+    /// insert journal entry, returns false if id is duplicated
+    pub fn insert_journal(&mut self, jrn: JournalEntry) -> Result<bool> {
+        let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;
+
+        let id = jrn.id.to_bytes_le();
+        if table.get(id)?.is_some() {
+            return Ok(false);
+        }
+
+        let bytes = jrn.to_bytes()?;
+        table.insert(id, bytes.as_slice())?;
+        Ok(true)
+    }
+
+    pub fn get_entries_since(&mut self, id: &[u8; 16]) -> Result<Vec<Vec<u8>>> {
+        let mut entries = Vec::new();
+        let table = self.journal_trx.open_table(JOURNAL_TABLE)?;
+
+        let items = table.range::<[u8; 16]>(id..)?;
+        for item in items {
+            let (_, v) = item?;
+            entries.push(v.value().to_vec());
+        }
+
+        Ok(entries)
     }
 }

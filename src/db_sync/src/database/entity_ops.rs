@@ -4,7 +4,9 @@ use crate::entity::SyncEntity;
 use crate::model::{JournalEntry, SyncOperation};
 use crate::repo::{ListQuery, SyncEntityRepository};
 
-use super::{DsotDatabase, DsotDatabaseError, Result, journal::JOURNAL_TABLE, DsotDatabaseTransaction};
+use super::{
+    DsotDatabase, DsotDatabaseError, DsotDatabaseTransaction, Result, journal::JOURNAL_TABLE,
+};
 
 impl DsotDatabase {
     /// Tries to get the entity with the given ID. Returns None if entity does not exist, or an error if retrieval fails.
@@ -132,7 +134,7 @@ impl<'a> DsotDatabaseTransaction<'a> {
     /// Inserts the given entity. Returns an error if entity already exists or if creation fails.
     pub async fn insert<R: SyncEntityRepository>(&mut self, value: &R::RepoEntity) -> Result<()> {
         let op = value.op_create()?;
-        self.exec_op::<R>(op).await?;
+        self.create_journal_and_apply_op::<R>(op).await?;
         Ok(())
     }
 
@@ -141,7 +143,7 @@ impl<'a> DsotDatabaseTransaction<'a> {
         match R::try_get(&mut *self.sql_trx, value.get_id()).await? {
             Some(prev) => match value.op_update(&prev) {
                 Some(op) => {
-                    self.exec_op::<R>(op).await?;
+                    self.create_journal_and_apply_op::<R>(op).await?;
                     Ok(true)
                 }
                 None => Ok(false),
@@ -160,7 +162,7 @@ impl<'a> DsotDatabaseTransaction<'a> {
             },
             None => value.op_create()?,
         };
-        self.exec_op::<R>(op).await?;
+        self.create_journal_and_apply_op::<R>(op).await?;
         Ok(true)
     }
 
@@ -177,19 +179,22 @@ impl<'a> DsotDatabaseTransaction<'a> {
     /// Deletes the entity with the given ID, if exists.
     pub async fn delete<R: SyncEntityRepository>(&mut self, id: uuid::Uuid) -> Result<()> {
         let op = SyncOperation::Delete(id);
-        self.exec_op::<R>(op).await?;
+        self.create_journal_and_apply_op::<R>(op).await?;
         Ok(())
     }
 
     /// Restores a deleted entity with the given ID, if exists.
     pub async fn restore<R: SyncEntityRepository>(&mut self, id: uuid::Uuid) -> Result<()> {
         let op = SyncOperation::Restore(id);
-        self.exec_op::<R>(op).await?;
+        self.create_journal_and_apply_op::<R>(op).await?;
         Ok(())
     }
 
     /// Search for entity using https://sqlite.org/fts5.html
-    pub async fn search<R: SyncEntityRepository>(&mut self, query: &str) -> Result<Vec<R::RepoEntity>> {
+    pub async fn search<R: SyncEntityRepository>(
+        &mut self,
+        query: &str,
+    ) -> Result<Vec<R::RepoEntity>> {
         let list = R::search(&mut *self.sql_trx, query.to_string()).await?;
         Ok(list)
     }
@@ -215,10 +220,24 @@ impl<'a> DsotDatabaseTransaction<'a> {
             table.insert(id.to_bytes_le(), bytes.as_slice())?;
         }
 
+        self.safe_apply_op::<R>(op).await?;
+
+        Ok(id)
+    }
+
+    /// Apply table operation, when create, skips if entity already exists
+    /// This doesn't add operation to journal and could cause sync problems
+    pub async fn safe_apply_op<R: SyncEntityRepository>(
+        &mut self,
+        op: SyncOperation,
+    ) -> Result<()> {
         let mut should_exec = true;
         if let SyncOperation::Create(ref data) = op {
             let entity = <R::RepoEntity as SyncEntity>::from_bytes(data)?;
-            if R::try_get(&mut *self.sql_trx, entity.get_id()).await?.is_some() {
+            if R::try_get(&mut *self.sql_trx, entity.get_id())
+                .await?
+                .is_some()
+            {
                 should_exec = false;
             }
         }
@@ -227,10 +246,13 @@ impl<'a> DsotDatabaseTransaction<'a> {
             R::exec_op(&mut *self.sql_trx, op).await?;
         }
 
-        Ok(id)
+        Ok(())
     }
 
-    pub(crate) async fn exec_op<R: SyncEntityRepository>(&mut self, op: SyncOperation) -> Result<Uuid> {
+    pub(crate) async fn create_journal_and_apply_op<R: SyncEntityRepository>(
+        &mut self,
+        op: SyncOperation,
+    ) -> Result<Uuid> {
         let (jrn_id, jrn_bytes) = JournalEntry::create_entry(R::get_table_name(), &op)?;
         {
             let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;

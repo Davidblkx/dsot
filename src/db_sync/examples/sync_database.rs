@@ -133,12 +133,12 @@ async fn main() {
     let items1 = db1.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
     let items2 = db2.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
 
-    println!("Items in db1");
+    println!("Items in db1: {:?}", db1.generate_sync_hash().unwrap());
     for i in items1 {
         println!("{:?}", i);
     }
 
-    println!("Items in db2");
+    println!("Items in db2: {:?}", db2.generate_sync_hash().unwrap());
     for i in items2 {
         println!("{:?}", i);
     }
@@ -158,14 +158,14 @@ async fn sync_dbs(db1: &DsotDatabase, db2: &DsotDatabase) {
 
     for e in miss_entries_in_1 {
         RepositoryRegistry::instance()
-            .apply_journal(&db1, e.as_slice())
+            .apply_journals_bytes(&db1, &[e.as_slice()])
             .await
             .unwrap();
     }
 
     for e in miss_entries_in_2 {
         RepositoryRegistry::instance()
-            .apply_journal(&db2, e.as_slice())
+            .apply_journals_bytes(&db2, &[e.as_slice()])
             .await
             .unwrap();
     }

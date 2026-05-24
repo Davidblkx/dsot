@@ -45,12 +45,12 @@ impl SyncEntityIR {
 
             #impl_repo
 
-            #[::linkme::distributed_slice(::dsot_db_sync::registry::APPLY_JOURNAL_REF)]
-            static #ref_ident: ::dsot_db_sync::registry::ApplyJournalRef =
-                dsot_db_sync::registry::ApplyJournalRef {
+            #[::linkme::distributed_slice(::dsot_db_sync::registry::APPLY_SQL_OPERATION_REF)]
+            static #ref_ident: ::dsot_db_sync::registry::ApplySqlOperationRef =
+                dsot_db_sync::registry::ApplySqlOperationRef {
                     table: #table_name,
-                    apply_journal: |trx, journal| {
-                        Box::pin(async move { trx.apply_journal::<#repo_ident>(journal).await })
+                    apply: |trx, op| {
+                        Box::pin(async move { trx.safe_apply_op::<#repo_ident>(op).await })
                     },
                 };
         }
@@ -172,7 +172,11 @@ impl SyncEntityIR {
         let search_query = format!(
             "SELECT {} FROM {} a JOIN {}_fts f ON a.{} = f.{} WHERE {}_fts MATCH ? AND a.deleted = 0 ORDER BY f.rank",
             select_expr_fts.join(", "),
-            table, table, id_str, id_str, table
+            table,
+            table,
+            id_str,
+            id_str,
+            table
         );
 
         quote! {

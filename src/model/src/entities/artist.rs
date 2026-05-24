@@ -201,16 +201,17 @@ mod tests {
         assert_eq!(fetched_restored.deleted, false);
 
         // Test Search after Restore
-        let search_results_restored = ArtistSqlRepository::search(&mut conn, "Updated*".to_string())
-            .await
-            .unwrap();
+        let search_results_restored =
+            ArtistSqlRepository::search(&mut conn, "Updated*".to_string())
+                .await
+                .unwrap();
         assert_eq!(search_results_restored.len(), 1);
     }
 
     #[tokio::test]
     async fn test_apply_journal_duplicate_create() {
-        use redb::{Database, backends::InMemoryBackend};
         use dsot_db_sync::{DsotDatabase, model::JournalEntry};
+        use redb::{Database, backends::InMemoryBackend};
 
         let pool = sqlx::sqlite::SqlitePool::connect("sqlite::memory:")
             .await
@@ -264,7 +265,10 @@ mod tests {
         let entry = JournalEntry::new("artists", &op);
 
         // 3. Call apply_journal. This should NOT fail because the entity ID is already in the database!
-        let journal_id = db.apply_journal::<ArtistSqlRepository>(entry).await.unwrap();
+        let journal_id = db
+            .apply_journal::<ArtistSqlRepository>(entry)
+            .await
+            .unwrap();
 
         // 4. Verify that the journal entry was saved in redb
         let keys = db.get_journal_keys().unwrap();
@@ -277,8 +281,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_apply_journals_batch() {
-        use redb::{Database, backends::InMemoryBackend};
         use dsot_db_sync::{DsotDatabase, RepositoryRegistry, model::JournalEntry};
+        use redb::{Database, backends::InMemoryBackend};
 
         let pool = sqlx::sqlite::SqlitePool::connect("sqlite::memory:")
             .await
@@ -341,7 +345,7 @@ mod tests {
 
         // Apply multiple journals in batch!
         let journal_ids = RepositoryRegistry::instance()
-            .apply_journals(&db, &[bytes1, bytes2])
+            .apply_journals_bytes(&db, &[bytes1.as_slice(), bytes2.as_slice()])
             .await
             .unwrap();
 
@@ -360,5 +364,3 @@ mod tests {
         assert_eq!(fetched2.name, "Artist Two");
     }
 }
-
-
