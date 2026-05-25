@@ -70,6 +70,12 @@ impl IntoUpdateValue for ::chrono::DateTime<::chrono::Utc> {
     }
 }
 
+impl IntoUpdateValue for ::uuid::Uuid {
+    fn into_update_value(&self) -> UpdateValue {
+        UpdateValue::Blob(self.as_bytes().to_vec())
+    }
+}
+
 impl IntoUpdateValue for ::sqlx::types::Json<Vec<String>> {
     fn into_update_value(&self) -> UpdateValue {
         let raw_json = match serde_json::to_string(self) {

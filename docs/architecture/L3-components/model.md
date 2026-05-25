@@ -30,6 +30,7 @@ pub struct Artist {
     pub id: Uuid,
     pub name: String,
     pub sort_name: Option<String>,
+    pub aliases: Json<Vec<String>>,
 }
 ```
 

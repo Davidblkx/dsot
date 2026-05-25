@@ -99,7 +99,7 @@ impl RepositoryRegistry {
         trx: &'b mut DsotDatabaseTransaction<'a>,
         id: Uuid,
     ) -> Result<()> {
-        let entries = trx.get_entries_since(&id.to_bytes_le())?;
+        let entries = trx.get_entries_since(id.as_bytes())?;
         for jrn in entries {
             let JournalEntry { table, op, .. } = JournalEntry::from_bytes(jrn.as_slice())?;
 

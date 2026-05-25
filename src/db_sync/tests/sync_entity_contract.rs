@@ -144,9 +144,7 @@ fn from_sql_to_src_copies_user_fields_and_drops_metadata() {
 
 fn changes_by_column(op: SyncOperation) -> HashMap<String, UpdateValue> {
     match op {
-        SyncOperation::Update(_, list) => {
-            list.into_iter().map(|c| (c.column, c.value)).collect()
-        }
+        SyncOperation::Update(_, list) => list.into_iter().map(|c| (c.column, c.value)).collect(),
         other => panic!("expected SyncOperation::Update, got {other:?}"),
     }
 }
@@ -181,7 +179,9 @@ async fn insert_then_get_roundtrips_every_field() {
     let row = sample("smoke");
     let id = row.id;
 
-    KitchenSinkSqlRepository::insert(&mut conn, &row).await.unwrap();
+    KitchenSinkSqlRepository::insert(&mut conn, &row)
+        .await
+        .unwrap();
     let fetched = KitchenSinkSqlRepository::get(&mut conn, id).await.unwrap();
 
     assert_eq!(fetched.id, row.id);
@@ -201,11 +201,16 @@ async fn list_returns_inserted_rows() {
 
     let row = sample("listed");
     let id = row.id;
-    KitchenSinkSqlRepository::insert(&mut conn, &row).await.unwrap();
+    KitchenSinkSqlRepository::insert(&mut conn, &row)
+        .await
+        .unwrap();
 
     let rows = KitchenSinkSqlRepository::list(
         &mut conn,
-        ListQuery { count: 10, offset: 0 },
+        ListQuery {
+            count: 10,
+            offset: 0,
+        },
     )
     .await
     .unwrap();
@@ -221,7 +226,9 @@ async fn update_changes_named_column() {
 
     let row = sample("before");
     let id = row.id;
-    KitchenSinkSqlRepository::insert(&mut conn, &row).await.unwrap();
+    KitchenSinkSqlRepository::insert(&mut conn, &row)
+        .await
+        .unwrap();
 
     KitchenSinkSqlRepository::update(
         &mut conn,
@@ -245,9 +252,13 @@ async fn delete_marks_deleted_flag() {
 
     let row = sample("to_delete");
     let id = row.id;
-    KitchenSinkSqlRepository::insert(&mut conn, &row).await.unwrap();
+    KitchenSinkSqlRepository::insert(&mut conn, &row)
+        .await
+        .unwrap();
 
-    KitchenSinkSqlRepository::delete(&mut conn, id).await.unwrap();
+    KitchenSinkSqlRepository::delete(&mut conn, id)
+        .await
+        .unwrap();
 
     let fetched = KitchenSinkSqlRepository::get(&mut conn, id).await.unwrap();
     assert_eq!(fetched.deleted, true);
@@ -260,10 +271,16 @@ async fn restore_unmarks_deleted_flag() {
 
     let row = sample("to_restore");
     let id = row.id;
-    KitchenSinkSqlRepository::insert(&mut conn, &row).await.unwrap();
-    KitchenSinkSqlRepository::delete(&mut conn, id).await.unwrap();
+    KitchenSinkSqlRepository::insert(&mut conn, &row)
+        .await
+        .unwrap();
+    KitchenSinkSqlRepository::delete(&mut conn, id)
+        .await
+        .unwrap();
 
-    KitchenSinkSqlRepository::restore(&mut conn, id).await.unwrap();
+    KitchenSinkSqlRepository::restore(&mut conn, id)
+        .await
+        .unwrap();
 
     let fetched = KitchenSinkSqlRepository::get(&mut conn, id).await.unwrap();
     assert_eq!(fetched.deleted, false);
@@ -288,7 +305,7 @@ async fn apply_journal_with_duplicate_create_is_idempotent() {
         .unwrap();
 
     let keys = db.get_journal_keys().unwrap();
-    assert!(keys.contains(&journal_id.to_bytes_le()));
+    assert!(keys.contains(journal_id.as_bytes()));
 
     let fetched = db.get::<KitchenSinkSqlRepository>(id).await.unwrap();
     assert_eq!(fetched.name, row.name);
@@ -318,8 +335,8 @@ async fn apply_journals_batch_applies_all_entries() {
     assert_eq!(journal_ids.len(), 2);
 
     let keys = db.get_journal_keys().unwrap();
-    assert!(keys.contains(&journal_ids[0].to_bytes_le()));
-    assert!(keys.contains(&journal_ids[1].to_bytes_le()));
+    assert!(keys.contains(&journal_ids[0].as_bytes()));
+    assert!(keys.contains(&journal_ids[1].as_bytes()));
 
     let fetched1 = db.get::<KitchenSinkSqlRepository>(id1).await.unwrap();
     assert_eq!(fetched1.name, row1.name);

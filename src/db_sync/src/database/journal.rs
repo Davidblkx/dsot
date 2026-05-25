@@ -92,7 +92,7 @@ impl DsotDatabase {
         let jrn_trx = self.journal.begin_write()?;
         {
             let mut table = jrn_trx.open_table(JOURNAL_TABLE)?;
-            table.remove(&id.to_bytes_le())?;
+            table.remove(id.as_bytes())?;
         }
         jrn_trx.commit()?;
 
@@ -105,13 +105,13 @@ impl<'a> DsotDatabaseTransaction<'a> {
     pub fn insert_journal(&mut self, jrn: JournalEntry) -> Result<bool> {
         let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;
 
-        let id = jrn.id.to_bytes_le();
-        if table.get(id)?.is_some() {
+        let id = jrn.id.clone();
+        if table.get(id.as_bytes())?.is_some() {
             return Ok(false);
         }
 
         let bytes = jrn.to_bytes()?;
-        table.insert(id, bytes.as_slice())?;
+        table.insert(id.as_bytes(), bytes.as_slice())?;
         Ok(true)
     }
 

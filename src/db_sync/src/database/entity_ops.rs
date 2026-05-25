@@ -217,7 +217,7 @@ impl<'a> DsotDatabaseTransaction<'a> {
         let bytes = entry.to_bytes()?;
         {
             let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;
-            table.insert(id.to_bytes_le(), bytes.as_slice())?;
+            table.insert(id.as_bytes(), bytes.as_slice())?;
         }
 
         self.safe_apply_op::<R>(op).await?;
@@ -256,7 +256,7 @@ impl<'a> DsotDatabaseTransaction<'a> {
         let (jrn_id, jrn_bytes) = JournalEntry::create_entry(R::get_table_name(), &op)?;
         {
             let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;
-            table.insert(jrn_id.to_bytes_le(), jrn_bytes.as_slice())?;
+            table.insert(jrn_id.as_bytes(), jrn_bytes.as_slice())?;
         }
 
         R::exec_op(&mut *self.sql_trx, op).await?;
