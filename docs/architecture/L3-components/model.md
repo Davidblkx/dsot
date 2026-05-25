@@ -36,19 +36,17 @@ pub struct Artist {
 
 ---
 
-## Planned Entities `[PLANNED / ROADMAP]`
-
-The following entities represent the planned schema for media and playlist management.
-
 ### ReleaseGroup (The Abstract Album)
 Represents the logical grouping of releases (e.g., "The Dark Side of the Moon" as a concept).
 
 ```rust
+#[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
+#[table(release_groups)]
 pub struct ReleaseGroup {
-    pub id: Uuid,             // MusicBrainz Release Group ID or generated Uuid
-    pub artist_id: Uuid,      // Links to Artist id
+    pub id: Uuid,
+    pub artist_id: Uuid,
     pub title: String,
-    pub primary_type: String, // Album, Single, EP, Live, etc.
+    pub primary_type: ReleaseGroupType,
 }
 ```
 
@@ -56,13 +54,15 @@ pub struct ReleaseGroup {
 Represents a specific physical or digital pressing of an album (e.g., the 1993 Remaster or a UK Vinyl release).
 
 ```rust
+#[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
+#[table(releases)]
 pub struct Release {
-    pub id: Uuid,             // MusicBrainz Release ID or generated Uuid
+    pub id: Uuid,
     pub release_group_id: Uuid,
     pub title: String,
     pub barcode: Option<String>,
     pub release_date: Option<chrono::NaiveDate>,
-    pub format: String,       // CD, Vinyl, Digital, etc.
+    pub format: String,
     pub label: Option<String>,
 }
 ```
@@ -71,13 +71,21 @@ pub struct Release {
 Represents a unique audio mix or master track.
 
 ```rust
+#[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
+#[table(recordings)]
 pub struct Recording {
-    pub id: Uuid,             // MusicBrainz Recording ID or generated Uuid
+    pub id: Uuid,
     pub title: String,
     pub duration_ms: u32,
-    pub isrc: Option<String>, // International Standard Recording Code
+    pub isrc: Option<String>,
 }
 ```
+
+---
+
+## Planned Entities `[PLANNED / ROADMAP]`
+
+The following entities represent the planned schema for media and playlist management.
 
 ### Track (The Album Position Link)
 Links a specific `Recording` to a position on a `Release`.

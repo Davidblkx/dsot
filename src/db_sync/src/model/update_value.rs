@@ -52,6 +52,12 @@ impl IntoUpdateValue for i64 {
     }
 }
 
+impl IntoUpdateValue for u32 {
+    fn into_update_value(&self) -> UpdateValue {
+        UpdateValue::Integer(*self as i64)
+    }
+}
+
 impl IntoUpdateValue for f64 {
     fn into_update_value(&self) -> UpdateValue {
         UpdateValue::Real(*self)
