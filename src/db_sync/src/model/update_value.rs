@@ -70,6 +70,12 @@ impl IntoUpdateValue for ::chrono::DateTime<::chrono::Utc> {
     }
 }
 
+impl IntoUpdateValue for ::chrono::NaiveDate {
+    fn into_update_value(&self) -> UpdateValue {
+        UpdateValue::Text(self.to_string())
+    }
+}
+
 impl IntoUpdateValue for ::uuid::Uuid {
     fn into_update_value(&self) -> UpdateValue {
         UpdateValue::Blob(self.as_bytes().to_vec())
