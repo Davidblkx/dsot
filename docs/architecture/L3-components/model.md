@@ -130,3 +130,42 @@ pub struct TrackFile {
     pub format: String, // Mp3, Flac, Alac, etc.
 }
 ```
+
+### InboxItem (Unresolved Capture)
+A scratchpad for items the user has captured quickly (a file path, an artist name, a free-form note) but hasn't yet matched against MusicBrainz. Each item carries its typed payload as an opaque msgpack-encoded blob so adding new variants is a code-only change — no migration required.
+
+```rust
+#[derive(Debug, Clone, Default, Deserialize, Serialize, SyncEntity)]
+#[table(inbox_items)]
+pub struct InboxItem {
+    pub id: Uuid,
+    /// msgpack-encoded `InboxValue`. Decode via `InboxItem::value()`.
+    pub value: Vec<u8>,
+    pub status: InboxStatus,
+    /// Set when `status == Resolved`. Caller infers the target table from
+    /// the decoded `InboxValue` kind.
+    pub resolved_id: Option<Uuid>,
+}
+```
+
+The Rust-side typed view of `value`:
+
+```rust
+pub enum InboxValue {
+    File(String),    // path or URI hint
+    Artist(String),  // artist name hint
+    Other(String),   // free-form
+}
+```
+
+Status lifecycle (stored as TEXT; closed set — unknown strings fail to decode):
+
+```rust
+pub enum InboxStatus {
+    Pending,   // default; freshly captured
+    Resolved,  // matched and linked via `resolved_id`
+    Failed,    // tried to match, didn't find anything; kept for retry
+}
+```
+
+Removing an item from view uses the standard `SyncEntity` soft-delete (`deleted = 1`). The `Failed` status is distinct: it records "we tried and didn't find a match", whereas `deleted` records "the user no longer wants to see this".

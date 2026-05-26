@@ -1,4 +1,5 @@
 mod artist;
+mod inbox_item;
 mod recording;
 mod release;
 mod release_group;
@@ -6,6 +7,7 @@ mod track;
 mod track_file;
 
 pub use artist::*;
+pub use inbox_item::*;
 pub use recording::*;
 pub use release::*;
 pub use release_group::*;
