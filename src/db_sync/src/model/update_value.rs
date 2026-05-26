@@ -58,6 +58,18 @@ impl IntoUpdateValue for u32 {
     }
 }
 
+impl IntoUpdateValue for u64 {
+    fn into_update_value(&self) -> UpdateValue {
+        UpdateValue::Integer(*self as i64)
+    }
+}
+
+impl IntoUpdateValue for Vec<u8> {
+    fn into_update_value(&self) -> UpdateValue {
+        UpdateValue::Blob(self.clone())
+    }
+}
+
 impl IntoUpdateValue for f64 {
     fn into_update_value(&self) -> UpdateValue {
         UpdateValue::Real(*self)

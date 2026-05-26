@@ -13,7 +13,7 @@ To ensure seamless synchronization across different user devices without relying
 2.  **Unmatched/Local Media:**
     If a media file is indexed from local tags and cannot be verified via MusicBrainz, the system assigns a generated UUID (e.g. `Uuid::now_v7()`). These records represent local unmatched states. If the user later performs a match lookup, the unmatched local entity is merged into a newly retrieved MBID-anchored entity.
 3.  **TrackFile Binaries:**
-    Personal audio binaries use their **SHA-256 content hash** as their primary key for deduplication. This allows identical files to be deduped across the system even if they have different filenames or local paths.
+    Personal audio binaries dedupe on their **SHA-256 content hash**. Each `TrackFile` still has a regular `Uuid` primary key, but the schema enforces `UNIQUE(file_hash)` so two devices that independently index the same physical file converge to a single row at sync time.
 
 ---
 
@@ -50,6 +50,21 @@ pub struct ReleaseGroup {
 }
 ```
 
+`primary_type` is stored as TEXT. The `Custom(String)` variant is a catch-all: any DB value that doesn't match a known variant decodes into `Custom(...)`, so the application never fails to load a row with an unexpected value (legacy data, future variants this build doesn't know yet, etc.).
+
+```rust
+pub enum ReleaseGroupType {
+    Album,
+    Single,
+    EP,
+    Broadcast,
+    Live,
+    Other,
+    Unknown,         // default; "no classification yet"
+    Custom(String),  // fallback for unrecognized strings
+}
+```
+
 ### Release (The Specific Pressing)
 Represents a specific physical or digital pressing of an album (e.g., the 1993 Remaster or a UK Vinyl release).
 
@@ -81,35 +96,37 @@ pub struct Recording {
 }
 ```
 
----
-
-## Planned Entities `[PLANNED / ROADMAP]`
-
-The following entities represent the planned schema for media and playlist management.
-
 ### Track (The Album Position Link)
-Links a specific `Recording` to a position on a `Release`.
+Links a specific `Recording` to a position on a `Release`. The MusicBrainz Track ID is distinct from the Recording ID — the same recording can appear on multiple releases with different track IDs.
 
 ```rust
+#[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
+#[table(tracks)]
 pub struct Track {
-    pub id: Uuid,             // MusicBrainz Track ID (distinct from Recording ID)
+    pub id: Uuid,
     pub release_id: Uuid,
     pub recording_id: Uuid,
-    pub position: u32,        // Track number (e.g. 1, 2, 3)
-    pub disc_number: u32,     // Multi-disc albums (e.g. 1, 2)
+    pub position: u32,    // track number within the disc
+    pub disc_number: u32, // 1-based; multi-disc releases use 2, 3, ...
     pub title: String,
 }
 ```
 
 ### TrackFile (Local Binary File)
-Links a local physical audio file on the user's filesystem to a domain `Recording`.
+Links a local physical audio file on the user's filesystem to a domain `Recording`. Dedup is enforced by a `UNIQUE(file_hash)` constraint at the schema level rather than by using the hash as a primary key — see the [ID Generation](#id-generation--matching-strategy) section above.
 
 ```rust
+#[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
+#[table(track_files)]
 pub struct TrackFile {
-    pub id: Uuid,            // Generated Uuid
-    pub recording_id: Uuid,  // Links to Recording id
-    pub file_hash: [u8; 32], // SHA-256 hash of the binary file for deduping
-    pub file_size: u64,
-    pub format: String,      // Mp3, Flac, Alac, etc.
+    pub id: Uuid,
+    pub recording_id: Uuid,
+    /// SHA-256 hash of the binary contents (32 bytes). Schema-level UNIQUE.
+    pub file_hash: Vec<u8>,
+    /// File size in bytes. `i64` (not `u64`) because SQLite INTEGER is signed
+    /// and sqlx refuses to encode `u64` to prevent silent overflow on the top
+    /// bit. 2^63 bytes ≈ 9 EB, well past any plausible single-file size.
+    pub file_size: i64,
+    pub format: String, // Mp3, Flac, Alac, etc.
 }
 ```

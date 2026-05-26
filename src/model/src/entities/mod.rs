@@ -2,8 +2,12 @@ mod artist;
 mod recording;
 mod release;
 mod release_group;
+mod track;
+mod track_file;
 
 pub use artist::*;
 pub use recording::*;
 pub use release::*;
 pub use release_group::*;
+pub use track::*;
+pub use track_file::*;
