@@ -1,5 +1,4 @@
 now:
- - Finish add model entities
- - Develop and document the inbox feature
+ - Work on backups
  - Develop and document local files
 maybe later:

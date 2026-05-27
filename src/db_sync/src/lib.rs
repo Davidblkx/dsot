@@ -3,6 +3,7 @@
 pub mod database;
 pub mod dser;
 pub mod entity;
+pub mod manager;
 pub mod model;
 pub mod registry;
 pub mod repo;
