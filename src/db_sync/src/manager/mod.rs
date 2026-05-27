@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+mod backup;
 mod error;
 mod load;
 
@@ -15,7 +16,7 @@ impl DatabaseManager {
         let dir = folder.into();
 
         if !dir.exists() {
-            std::fs::create_dir(&dir)?;
+            std::fs::create_dir_all(&dir)?;
         }
 
         if !dir.is_dir() {

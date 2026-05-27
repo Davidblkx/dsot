@@ -10,5 +10,6 @@ pub mod repo;
 
 pub use database::DsotDatabase;
 pub use entity::{IntoSyncEntity, SyncEntity};
+pub use manager::DatabaseManager;
 pub use registry::RepositoryRegistry;
 pub use repo::SyncEntityRepository;

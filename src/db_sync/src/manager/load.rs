@@ -3,8 +3,8 @@ use sqlx::sqlite::SqlitePoolOptions;
 use super::{DatabaseManager, Result};
 use crate::DsotDatabase;
 
-static DB_NAME: &'static str = "library.sqlite";
-static JOURNAL_NAME: &'static str = "library.journal";
+pub static DB_NAME: &'static str = "library.sqlite";
+pub static JOURNAL_NAME: &'static str = "library.journal";
 
 impl DatabaseManager {
     pub async fn open_database(&self) -> Result<DsotDatabase> {
