@@ -32,6 +32,7 @@ impl RepositoryRegistry {
             let mut repos = HashMap::new();
 
             for r in APPLY_SQL_OPERATION_REF {
+                log::trace!("Registering repository for table '{}'", r.table);
                 repos.insert(r.table, r.apply);
             }
 
@@ -55,6 +56,7 @@ impl RepositoryRegistry {
         }
 
         let ids = self.apply_journals(db, journals).await?;
+        log::trace!("Applied {} journal entries", ids.len());
         Ok(ids)
     }
 
@@ -67,6 +69,8 @@ impl RepositoryRegistry {
         if entries.len() == 0 {
             return Ok(Vec::new());
         }
+
+        log::debug!("apply_journals: {} candidate entries", entries.len());
 
         let mut trx = db.begin_transaction().await?;
         let mut ids = Vec::new();
@@ -82,12 +86,15 @@ impl RepositoryRegistry {
             }
         }
 
+        log::debug!("apply_journals: {} new entries; replaying from {}", ids.len(), first_id);
+
         match self.apply_from_id(&mut trx, first_id).await {
             Ok(_) => {
                 trx.commit().await?;
                 Ok(ids)
             }
             Err(e) => {
+                log::warn!("apply_journals failed during replay: {}; rolling back", e);
                 trx.rollback().await?;
                 Err(e)
             }
@@ -100,12 +107,15 @@ impl RepositoryRegistry {
         id: Uuid,
     ) -> Result<()> {
         let entries = trx.get_entries_since(id.as_bytes())?;
+        log::trace!("apply_from_id: replaying {} entries from {}", entries.len(), id);
         for jrn in entries {
             let JournalEntry { table, op, .. } = JournalEntry::from_bytes(jrn.as_slice())?;
 
             if let Some(apply) = self.repos.get(table.as_str()) {
+                log::trace!("dispatching journal op to '{}'", table);
                 apply(trx, op).await?;
             } else {
+                log::error!("no repository registered for table '{}'", table);
                 return Err(DsotDatabaseError::RepositoryNotFound(table));
             }
         }

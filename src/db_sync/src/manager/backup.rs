@@ -17,16 +17,28 @@ pub struct DatabaseBackup {
 impl DatabaseBackup {
     pub fn create(root: PathBuf) -> Result<Self> {
         let id = Uuid::now_v7();
+        log::info!("Creating backup {} in {}", id, root.display());
         let bck = Self { id, root };
 
         std::fs::create_dir_all(bck.root.join(BACKUP_FOLDER))?;
+        log::debug!(
+            "Copying db {} -> {}",
+            bck.get_db_path().display(),
+            bck.get_backup_db_path().display()
+        );
         std::fs::copy(bck.get_db_path(), bck.get_backup_db_path())?;
+        log::debug!(
+            "Copying journal {} -> {}",
+            bck.get_journal_path().display(),
+            bck.get_backup_journal_path().display()
+        );
         std::fs::copy(bck.get_journal_path(), bck.get_backup_journal_path())?;
 
         Ok(bck)
     }
 
     pub fn restore(&self) -> Result<()> {
+        log::info!("Restoring backup {} into {}", self.id, self.root.display());
         std::fs::copy(self.get_backup_db_path(), self.get_db_path())?;
         std::fs::copy(self.get_backup_journal_path(), self.get_journal_path())?;
 
@@ -35,10 +47,11 @@ impl DatabaseBackup {
 
     pub fn list_backups(root: &PathBuf) -> Vec<DatabaseBackup> {
         let bck_folder = root.join(BACKUP_FOLDER);
+        log::debug!("Listing backups in {}", bck_folder.display());
 
         let mut ids = HashSet::new();
 
-        if let Ok(entries) = std::fs::read_dir(bck_folder) {
+        if let Ok(entries) = std::fs::read_dir(&bck_folder) {
             for entry in entries.flatten() {
                 if let Some(file_name) = entry.file_name().to_str() {
                     if let Some(id) = file_name.rsplit_once("__").map(|(_, after)| after) {
@@ -46,6 +59,8 @@ impl DatabaseBackup {
                     }
                 }
             }
+        } else {
+            log::debug!("No backup folder at {}", bck_folder.display());
         }
 
         let mut bck_list = Vec::new();
@@ -57,9 +72,12 @@ impl DatabaseBackup {
             };
             if bck.is_valid() {
                 bck_list.push(bck);
+            } else {
+                log::warn!("Skipping invalid backup {} in {}", bck.id, root.display());
             }
         }
 
+        log::debug!("Found {} valid backups", bck_list.len());
         bck_list
     }
 

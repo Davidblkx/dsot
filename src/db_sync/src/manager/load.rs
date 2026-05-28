@@ -9,14 +9,17 @@ pub static JOURNAL_NAME: &'static str = "library.journal";
 impl DatabaseManager {
     pub async fn open_database(&self) -> Result<DsotDatabase> {
         let db_connect_str = format!("sqlite://{}", self.get_db_path());
+        log::info!("Opening sqlite database at {}", self.get_db_path());
 
         let pool = SqlitePoolOptions::new()
             .max_connections(10)
             .connect(&db_connect_str)
             .await?;
 
+        log::debug!("Running migrations");
         sqlx::migrate!("../../migrations").run(&pool).await?;
 
+        log::info!("Opening journal at {}", self.get_journal_path());
         let journal = redb::Database::create(self.get_journal_path())?;
 
         Ok(DsotDatabase { journal, sql: pool })

@@ -206,8 +206,19 @@ impl<'a> DsotDatabaseTransaction<'a> {
     ) -> Result<Uuid> {
         let id = entry.id;
         let op = entry.op.clone();
+        log::debug!(
+            "apply_journal entry={} table='{}' op={}",
+            id,
+            entry.table,
+            op_kind(&op)
+        );
 
         if &entry.table != R::get_table_name() {
+            log::warn!(
+                "table mismatch on apply_journal: entry='{}' repo='{}'",
+                entry.table,
+                R::get_table_name()
+            );
             return Err(DsotDatabaseError::TableMissmatchError(
                 entry.table,
                 R::get_table_name(),
@@ -238,11 +249,21 @@ impl<'a> DsotDatabaseTransaction<'a> {
                 .await?
                 .is_some()
             {
+                log::debug!(
+                    "safe_apply_op: skipping Create for existing {} in '{}'",
+                    entity.get_id(),
+                    R::get_table_name()
+                );
                 should_exec = false;
             }
         }
 
         if should_exec {
+            log::trace!(
+                "safe_apply_op: executing {} on '{}'",
+                op_kind(&op),
+                R::get_table_name()
+            );
             R::exec_op(&mut *self.sql_trx, op).await?;
         }
 
@@ -254,6 +275,12 @@ impl<'a> DsotDatabaseTransaction<'a> {
         op: SyncOperation,
     ) -> Result<Uuid> {
         let (jrn_id, jrn_bytes) = JournalEntry::create_entry(R::get_table_name(), &op)?;
+        log::trace!(
+            "Journaling {} on '{}' as entry {}",
+            op_kind(&op),
+            R::get_table_name(),
+            jrn_id
+        );
         {
             let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;
             table.insert(jrn_id.as_bytes(), jrn_bytes.as_slice())?;
@@ -261,5 +288,14 @@ impl<'a> DsotDatabaseTransaction<'a> {
 
         R::exec_op(&mut *self.sql_trx, op).await?;
         Ok(jrn_id)
+    }
+}
+
+fn op_kind(op: &SyncOperation) -> &'static str {
+    match op {
+        SyncOperation::Create(_) => "Create",
+        SyncOperation::Update(_, _) => "Update",
+        SyncOperation::Delete(_) => "Delete",
+        SyncOperation::Restore(_) => "Restore",
     }
 }

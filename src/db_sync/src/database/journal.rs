@@ -89,6 +89,7 @@ impl DsotDatabase {
     }
 
     pub(crate) fn remove_journal_entry(&self, id: Uuid) -> Result<()> {
+        log::trace!("Removing journal entry {}", id);
         let jrn_trx = self.journal.begin_write()?;
         {
             let mut table = jrn_trx.open_table(JOURNAL_TABLE)?;
@@ -107,11 +108,14 @@ impl<'a> DsotDatabaseTransaction<'a> {
 
         let id = jrn.id.clone();
         if table.get(id.as_bytes())?.is_some() {
+            log::trace!("Skipping duplicate journal entry {}", id);
             return Ok(false);
         }
 
+        let table_name = jrn.table.clone();
         let bytes = jrn.to_bytes()?;
         table.insert(id.as_bytes(), bytes.as_slice())?;
+        log::trace!("Inserted journal entry {} for table '{}'", id, table_name);
         Ok(true)
     }
 

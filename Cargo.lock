@@ -445,6 +445,7 @@ dependencies = [
  "chrono",
  "dsot_derive",
  "linkme",
+ "log",
  "redb",
  "rmp-serde",
  "rustc-hash",
