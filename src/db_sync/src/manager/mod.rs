@@ -4,6 +4,7 @@ mod backup;
 mod error;
 mod load;
 
+pub use backup::DatabaseBackup;
 pub use error::{DatabaseManagerError, Result};
 
 #[derive(Debug)]
