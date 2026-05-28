@@ -128,6 +128,7 @@ pub struct TrackFile {
     /// bit. 2^63 bytes ≈ 9 EB, well past any plausible single-file size.
     pub file_size: i64,
     pub format: String, // Mp3, Flac, Alac, etc.
+    pub uri: String, // Path or URL to the file on the user's system. Opaque to the domain model.
 }
 ```
 

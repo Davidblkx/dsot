@@ -1,12 +1,10 @@
 CREATE TABLE track_files (
     id BLOB PRIMARY KEY NOT NULL,
     recording_id BLOB NOT NULL,
-    -- SHA-256 of the binary contents. UNIQUE enforces the dedup story:
-    -- two devices indexing the same physical file end up referring to the
-    -- same row regardless of which Uuid each generated locally.
     file_hash BLOB NOT NULL UNIQUE,
     file_size INTEGER NOT NULL,
     format TEXT NOT NULL,
+    uri TEXT NOT NULL,
     created TEXT NOT NULL,
     updated TEXT NOT NULL,
     deleted INTEGER NOT NULL DEFAULT 0
