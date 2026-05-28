@@ -13,6 +13,7 @@ graph TD
         DbSync[dsot_db_sync]
         Derive[dsot_derive]
         MB[dsot_music_brainz]
+        Config[dsot_config]
     end
 
     subgraph Storage [Local Storage Layer]
@@ -26,6 +27,7 @@ graph TD
 
     Client -->|Invokes CRUD & Search| DbSync
     Client -->|Uses models| Model
+    Client -->|Loads configuration| Config
     
     DbSync -->|Serializes/Deserializes| Model
     Derive -.->|Generates SyncEntity & Repo logic for| Model
@@ -59,3 +61,7 @@ graph TD
 ### 4. `dsot_music_brainz` (External Metadata Client)
 *   **Responsibility:** Provides a type-safe API client to query the MusicBrainz database.
 *   **Technology:** `reqwest`, `serde_json`, Lucene query-builder utilities.
+
+### 5. `dsot_config` (Flexible Configuration Management)
+*   **Responsibility:** Loads, parses, merges, and overrides multi-source, multi-layer application settings (defaults, files, custom paths, env).
+*   **Technology:** `bakunin_config`, `dirs`, `thiserror`.

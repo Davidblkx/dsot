@@ -2,9 +2,11 @@ use std::path::PathBuf;
 
 use bakunin_config::{BakuninConfig, Value};
 
+mod error;
 mod loader;
 mod options;
 
+pub use error::{DsotConfigError, Result};
 pub use options::ConfigOptions;
 
 #[derive(Debug)]
