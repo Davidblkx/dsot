@@ -1,0 +1,13 @@
+
+[package]
+name = "dsot_config"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+bakunin_config = { workspace = true }
+log = { workspace = true }
+thiserror = { workspace = true }
