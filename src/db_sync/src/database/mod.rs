@@ -13,11 +13,16 @@ pub use transaction::DsotDatabaseTransaction;
 pub struct DsotDatabase {
     pub(crate) journal: Database,
     pub(crate) sql: SqlitePool,
+    pub(crate) id: String,
 }
 
 impl DsotDatabase {
     pub fn new(journal: redb::Database, sql: SqlitePool) -> Self {
-        Self { journal, sql }
+        Self {
+            journal,
+            sql,
+            id: "db".to_string(),
+        }
     }
 
     pub async fn begin_transaction(&self) -> Result<DsotDatabaseTransaction<'_>> {
@@ -27,5 +32,14 @@ impl DsotDatabase {
             journal_trx,
             sql_trx,
         })
+    }
+
+    pub fn with_id<T: Into<String>>(mut self, id: T) -> Self {
+        self.id = id.into();
+        self
+    }
+
+    pub fn get_id(&self) -> &str {
+        &self.id
     }
 }

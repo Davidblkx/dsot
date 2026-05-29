@@ -7,6 +7,7 @@ pub mod manager;
 pub mod model;
 pub mod registry;
 pub mod repo;
+pub mod sync;
 
 pub use database::DsotDatabase;
 pub use entity::{IntoSyncEntity, SyncEntity};

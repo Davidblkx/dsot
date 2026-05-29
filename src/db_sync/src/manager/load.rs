@@ -1,6 +1,6 @@
 use sqlx::sqlite::SqlitePoolOptions;
 
-use super::{DatabaseManager, Result};
+use super::{DatabaseManager, DatabaseManagerError, Result};
 use crate::DsotDatabase;
 
 pub static DB_NAME: &'static str = "library.sqlite";
@@ -22,7 +22,18 @@ impl DatabaseManager {
         log::info!("Opening journal at {}", self.get_journal_path());
         let journal = redb::Database::create(self.get_journal_path())?;
 
-        Ok(DsotDatabase { journal, sql: pool })
+        let id = self
+            .dir
+            .file_name()
+            .ok_or(DatabaseManagerError::PathIsNotAFolder)?
+            .to_string_lossy()
+            .into_owned();
+
+        Ok(DsotDatabase {
+            journal,
+            sql: pool,
+            id,
+        })
     }
 
     pub fn get_db_path(&self) -> String {

@@ -1,4 +1,5 @@
-use dsot_db_sync::{DsotDatabase, RepositoryRegistry};
+use dsot_db_sync::DsotDatabase;
+use dsot_db_sync::sync::{SyncHandshakeRequest, SyncStartRequest};
 use dsot_derive::SyncEntity;
 use redb::{Database, backends::InMemoryBackend};
 use serde::{Deserialize, Serialize};
@@ -190,28 +191,24 @@ async fn main() {
 }
 
 async fn sync_dbs(db1: &DsotDatabase, db2: &DsotDatabase) {
-    let keys1 = db1.get_journal_keys().unwrap();
+    let sync_hash = db1.generate_sync_hash().unwrap();
 
-    let miss_keys_in_2 = db2.get_keys_not_in_journal(keys1.as_slice()).unwrap();
-    let miss_entries_in_1 = db2
-        .get_journal_entries_not_in_array(keys1.as_slice())
+    let status = db2
+        .sync_handshake(SyncHandshakeRequest {
+            id: db1.get_id().to_string(),
+            sync: sync_hash,
+        })
         .unwrap();
 
-    let miss_entries_in_2 = db1
-        .get_journal_entries_in_array(miss_keys_in_2.as_slice())
-        .unwrap();
-
-    for e in miss_entries_in_1 {
-        RepositoryRegistry::instance()
-            .apply_journals_bytes(&db1, &[e.as_slice()])
-            .await
-            .unwrap();
+    if !status.need_sync {
+        return;
     }
 
-    for e in miss_entries_in_2 {
-        RepositoryRegistry::instance()
-            .apply_journals_bytes(&db2, &[e.as_slice()])
-            .await
-            .unwrap();
+    let keys = db1.get_journal_keys().unwrap();
+
+    let sync = db2.start_sync(&SyncStartRequest { keys }).unwrap();
+    let sync = db1.sync(&sync).await.unwrap();
+    if !sync.is_empty() {
+        let _ = db2.sync(&sync).await.unwrap();
     }
 }
