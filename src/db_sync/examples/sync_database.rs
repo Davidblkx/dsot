@@ -188,6 +188,17 @@ async fn main() {
     for i in items2 {
         println!("{:?}", i);
     }
+
+    let sync_hash = db1.generate_sync_hash().unwrap();
+
+    let status = db2
+        .sync_handshake(SyncHandshakeRequest {
+            id: db1.get_id().to_string(),
+            sync: sync_hash,
+        })
+        .unwrap();
+
+    println!("Sync status: {:?}", status)
 }
 
 async fn sync_dbs(db1: &DsotDatabase, db2: &DsotDatabase) {
