@@ -21,7 +21,8 @@ src/db_sync/src/
 ├── dser.rs           # EntityMessagePack — rmp-serde wrapper
 ├── entity.rs         # SyncEntity, IntoSyncEntity traits
 ├── registry.rs       # Distributed-slice registry of per-table apply functions
-└── repo.rs           # SyncEntityRepository trait + ListQuery + RepositoryError
+├── repo.rs           # SyncEntityRepository trait + ListQuery + RepositoryError
+└── sync.rs           # Database synchronization protocol & message types
 ```
 
 ---
@@ -132,18 +133,36 @@ A single redb table, `JOURNAL_TABLE`, keyed by the journal entry's `Uuid` (`[u8;
 
 DSOT is local-first: each device owns a full SQLite database and a full journal. Devices reconcile by exchanging *journal entries*, not row snapshots, so a per-column edit on one device round-trips as a per-column edit on another.
 
-### Design (target protocol)
+### Protocol Engine (`sync.rs`)
 
-When two nodes handshake:
+The crate implements a complete synchronization protocol engine to coordinate state reconciliation between nodes.
 
-1. **State hash.** Each side computes `generate_sync_hash()` — a `BLAKE3` digest over the in-order keys of its journal table. Identical digest ⇒ identical journals ⇒ nothing to do.
-2. **Key exchange.** On mismatch, each side sends its full key list (each key is 16 bytes — cheap). `get_keys_not_in_journal(remote_keys)` and `get_journal_entries_not_in_array(remote_keys)` identify which entries each side needs to receive vs. send.
-3. **Payload exchange.** Each side ships the missing `JournalEntry` bytes.
-4. **Apply.** Each side calls `RepositoryRegistry::instance().apply_journals_bytes(...)`, which decodes the entries, dedupes against the local journal, replays the resulting ops inside one transaction, and rolls back on any failure.
+#### Core Message Types
+
+*   **`SyncHandshakeRequest`**: Sent by a node initiating sync. Contains the database identifier (`id: String`) and the sender's current state hash (`sync: [u8; 32]`), which is a `BLAKE3` digest over the sorted keys of its journal.
+*   **`SyncHandshakeResponse`**: Informs the sender whether a synchronization is required (`need_sync: bool`) and whether the database/device IDs match (`id_match: bool`).
+*   **`SyncStartRequest`**: Sent by a node to begin the entry exchange, carrying its complete set of journal keys (`keys: Vec<[u8; 16]>`).
+*   **`SyncExchange`**: Transports missing database elements:
+    *   `keys: Vec<[u8; 16]>`: Keys that this node is missing locally but the remote has.
+    *   `entries: Vec<Vec<u8>>`: Serialized journal entries that the remote is missing but this node has.
+
+#### Reconciliation Protocol Flow
+
+When two nodes reconcile, the synchronization engine executes the following logical steps:
+
+1.  **State Handshake:** The initiating node sends its `SyncHandshakeRequest`. The receiver validates the database identifier and computes `generate_sync_hash()`. If the hashes match, both databases are in lockstep and sync completes.
+2.  **Key Exchange Start:** If a mismatch is detected, a `SyncStartRequest` is sent containing the local node's journal keys.
+3.  **Exchange Generation:** The remote node calls `start_sync(req)` to generate a `SyncExchange`. It compares the key list, determines which entries it is missing (asking for their keys in `keys`), and packages up all entries the local node is missing in `entries`.
+4.  **Symmetric Merging:** The local node calls `sync(exchange)`. It:
+    *   Applies the incoming journal entries from `entries` inside a single transaction using `RepositoryRegistry::apply_journals_bytes`.
+    *   Retrieves and returns the journal entries corresponding to the keys requested by the remote node in the final returned `SyncExchange`.
+5.  **Final Apply:** The remote node receives the remaining missing entries and applies them, bringing both nodes to perfect convergence.
 
 ### Status
 
-The journal-side primitives (`generate_sync_hash`, `get_journal_keys`, `get_keys_not_in_journal`, `get_journal_entries_not_in_array`, `get_journal_entries_in_array`, `apply_journals_bytes`) are implemented and covered by integration tests. The **handshake coordinator** — the transport, peer discovery, and protocol that drives the four steps above — is not yet in this crate and is tracked as future work (`TODO.md`).
+The synchronization state comparison, key exchange, payload exchange, and transaction replay primitives are fully implemented and verified via unit/integration tests in `sync_entity_contract.rs`. 
+
+The external **transport coordinator** — the discovery layer, connection management, and transport protocol (e.g. over Iroh, WebSockets, or libp2p) that handles the networking socket calls to drive these protocol methods — is implemented externally to this crate.
 
 ### `RepositoryRegistry` (`registry.rs`)
 
@@ -213,19 +232,25 @@ Entities with no natural text to index still need an FTS table to exist for the 
 
 ### `DsotDatabase` (`database/mod.rs`)
 
-The runtime handle. Wraps a `redb::Database` (journal) and a `sqlx::SqlitePool` (SQL). Exposes per-entity convenience methods that begin a transaction, journal + apply one op, and commit — `insert`, `update`, `upsert`, `delete`, `restore`, `apply_journal`, plus the read-only `get` / `try_get` / `list` / `search`. Use these for single-op flows.
+The runtime handle. Wraps a `redb::Database` (journal) and a `sqlx::SqlitePool` (SQL).
+*   **Identity:** Carries an `id: String` representing the database identity. Can be customized on creation using `.with_id(id)` and retrieved using `.get_id()`.
+*   **Convenience APIs:** Exposes per-entity methods that begin a transaction, apply + journal one operation, and commit atomically: `insert`, `update`, `upsert`, `delete`, `restore`, and `apply_journal`.
+*   **Read-Only APIs:** Exposes connection pool accessors for read actions: `get`, `try_get`, `list`, and FTS5 `search`.
+*   **Sync APIs:** Exposes core protocol steps: `sync_handshake`, `start_sync`, and `sync`.
 
 ### `DsotDatabaseTransaction` (`database/transaction.rs`)
 
-Returned from `DsotDatabase::begin_transaction()` when several ops need to commit (or roll back) atomically. Holds a `redb::WriteTransaction` and a `sqlx::Transaction<Sqlite>` in lockstep. Same per-entity methods as `DsotDatabase` minus the auto-commit. Always call `commit().await` or `rollback().await`.
+Returned from `DsotDatabase::begin_transaction()` when multiple operations must commit or roll back atomically. Holds a `redb::WriteTransaction` and a `sqlx::Transaction<Sqlite>` in lockstep. It provides the same per-entity mutation methods as `DsotDatabase` (minus the auto-committing behavior). The transaction must be finalized by calling `commit().await` or `rollback().await`.
 
 ### `DatabaseManager` (`manager/`)
 
-Lightweight entry point that owns a directory on disk:
+A lightweight entry point that owns and manages a physical database directory on disk:
 
-- `open_folder(path)` ensures the directory exists.
-- `open_database()` connects to `<dir>/library.sqlite`, runs `sqlx::migrate!("../../migrations")`, opens `<dir>/library.journal` via redb, and returns a `DsotDatabase`.
-- `create_backup()` copies the live `.sqlite` and `.journal` files into `<dir>/backups/` with a `<name>__<uuid>` suffix, and `DatabaseBackup::restore()` copies them back.
+*   `open_folder(path)`: Ensures the directory exists and validates that it is a directory.
+*   `open_database()`: Connects to `<dir>/library.sqlite`, runs the embedded `sqlx` migrations (`sqlx::migrate!("../../migrations")`), opens the transactional key/value journal `<dir>/library.journal` using `redb`, and returns an initialized `DsotDatabase`.
+*   `create_backup()`: Safely copies the live `.sqlite` and `.journal` files into `<dir>/backups/` with a `<name>__<uuid>` (UUID v7) suffix.
+*   `get_backups()`: Scans the backups directory, verifying both `.sqlite` and `.journal` backup files exist (`is_valid()`), and returns a list of available `DatabaseBackup` items.
+*   `DatabaseBackup::restore()`: Overwrites the active active database and journal files with the backup files.
 
 Used by application code as the single "open the database" call site.
 
