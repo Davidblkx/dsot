@@ -15,10 +15,10 @@ DSOT is a local-first music management and streaming application designed to all
 
 The project is structured as a Cargo workspace with four main crates:
 
-1.  **`dsot_model` ([src/model](file:///projects/refactor/src/model))**: Defines the core domain entities (such as `Artist`) and shared models.
-2.  **`dsot_db_sync` ([src/db_sync](file:///projects/refactor/src/db_sync))**: Implements database persistence using SQLite (`sqlx`) and transactional operation journaling using `redb`.
-3.  **`dsot_derive` ([src/derive](file:///projects/refactor/src/derive))**: A procedural macro library generating serialization mapping, synchronization behaviors, and repository implementations (`#[derive(SyncEntity)]`) for domain entities.
-4.  **`dsot_music_brainz` ([src/music_brainz](file:///projects/refactor/src/music_brainz))**: A type-safe client library to query and lookup entities via the MusicBrainz API.
+1.  **`dsot_model` ([src/modules/model](./src/modules/model))**: Defines the core domain entities (such as `Artist`) and shared models.
+2.  **`dsot_db_sync` ([src/modules/db_sync](./src/modules/db_sync))**: Implements database persistence using SQLite (`sqlx`) and transactional operation journaling using `redb`.
+3.  **`dsot_derive` ([src/modules/derive](./src/modules/derive))**: A procedural macro library generating serialization mapping, synchronization behaviors, and repository implementations (`#[derive(SyncEntity)]`) for domain entities.
+4.  **`dsot_music_brainz` ([src/modules/music_brainz](./src/modules/music_brainz))**: A type-safe client library to query and lookup entities via the MusicBrainz API.
 
 ---
 

@@ -41,7 +41,7 @@ mod tests {
         DsotDatabase::new(journal, pool)
     }
 
-    #[sqlx::test(migrations = "../../migrations")]
+    #[sqlx::test(migrations = "../../../migrations")]
     async fn test_recording_crud_and_search(pool: SqlitePool) {
         let db = setup_database(pool);
         let id = Uuid::now_v7();

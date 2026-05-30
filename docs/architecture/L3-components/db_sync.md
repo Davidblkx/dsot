@@ -14,7 +14,7 @@ The crate doesn't define any concrete entities — each entity lives in `dsot_mo
 ## Crate layout
 
 ```
-src/db_sync/src/
+src/modules/db_sync/src/
 ├── database/         # DsotDatabase + transactions + journal + per-entity ops
 ├── manager/          # On-disk folder lifecycle: open, migrate, backup/restore
 ├── model/            # SyncOperation, JournalEntry, UpdateValue, IntoUpdateValue
@@ -247,7 +247,7 @@ Returned from `DsotDatabase::begin_transaction()` when multiple operations must 
 A lightweight entry point that owns and manages a physical database directory on disk:
 
 *   `open_folder(path)`: Ensures the directory exists and validates that it is a directory.
-*   `open_database()`: Connects to `<dir>/library.sqlite`, runs the embedded `sqlx` migrations (`sqlx::migrate!("../../migrations")`), opens the transactional key/value journal `<dir>/library.journal` using `redb`, and returns an initialized `DsotDatabase`.
+*   `open_database()`: Connects to `<dir>/library.sqlite`, runs the embedded `sqlx` migrations (`sqlx::migrate!("../../../migrations")`), opens the transactional key/value journal `<dir>/library.journal` using `redb`, and returns an initialized `DsotDatabase`.
 *   `create_backup()`: Safely copies the live `.sqlite` and `.journal` files into `<dir>/backups/` with a `<name>__<uuid>` (UUID v7) suffix.
 *   `get_backups()`: Scans the backups directory, verifying both `.sqlite` and `.journal` backup files exist (`is_valid()`), and returns a list of available `DatabaseBackup` items.
 *   `DatabaseBackup::restore()`: Overwrites the active active database and journal files with the backup files.

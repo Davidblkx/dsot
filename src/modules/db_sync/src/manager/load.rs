@@ -17,7 +17,7 @@ impl DatabaseManager {
             .await?;
 
         log::debug!("Running migrations");
-        sqlx::migrate!("../../migrations").run(&pool).await?;
+        sqlx::migrate!("../../../migrations").run(&pool).await?;
 
         log::info!("Opening journal at {}", self.get_journal_path());
         let journal = redb::Database::create(self.get_journal_path())?;

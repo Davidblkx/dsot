@@ -19,7 +19,7 @@ use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
 use uuid::Uuid;
 
 // Covers every column type currently supported by `IntoUpdateValue`
-// (see src/db_sync/src/model/update_value.rs). `Vec<u8>` is intentionally
+// (see src/modules/db_sync/src/model/update_value.rs). `Vec<u8>` is intentionally
 // omitted: `UpdateValue::Blob` exists but no `IntoUpdateValue for Vec<u8>`
 // impl does, so the macro can't compile op_update for Blob fields yet.
 #[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
