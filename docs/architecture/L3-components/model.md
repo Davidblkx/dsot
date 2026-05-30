@@ -12,8 +12,8 @@ To ensure seamless synchronization across different user devices without relying
     When metadata is queried and matched from public databases (like MusicBrainz), the entity's primary key `id` stores the official MusicBrainz UUID (MBID). Because these IDs are globally unique and deterministic, when multiple devices independently look up and add the same artist or album, their local databases will naturally merge the metadata during sync because the IDs match perfectly.
 2.  **Unmatched/Local Media:**
     If a media file is indexed from local tags and cannot be verified via MusicBrainz, the system assigns a generated UUID (e.g. `Uuid::now_v7()`). These records represent local unmatched states. If the user later performs a match lookup, the unmatched local entity is merged into a newly retrieved MBID-anchored entity.
-3.  **TrackFile Binaries:**
-    Personal audio binaries dedupe on their **SHA-256 content hash**. Each `TrackFile` still has a regular `Uuid` primary key, but the schema enforces `UNIQUE(file_hash)` so two devices that independently index the same physical file converge to a single row at sync time.
+3.  **TrackFile Ownership:**
+    Instead of tracking local physical audio file paths globally (which are format- and device-specific), each `TrackFile` is simplified to `{ id, recording_id }` and globally synced. This serves as the global ownership/catalog link indicating that the user owns a file for this `Recording` in their library, while physical file properties are kept locally per-device.
 
 ---
 
@@ -112,8 +112,8 @@ pub struct Track {
 }
 ```
 
-### TrackFile (Local Binary File)
-Links a local physical audio file on the user's filesystem to a domain `Recording`. Dedup is enforced by a `UNIQUE(file_hash)` constraint at the schema level rather than by using the hash as a primary key — see the [ID Generation](#id-generation--matching-strategy) section above.
+### TrackFile (Ownership/Catalog Link)
+Represents a link indicating that the user has/owns a file for a specific `Recording` globally in their collection, which might not be downloaded or present on this specific device.
 
 ```rust
 #[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
@@ -121,14 +121,6 @@ Links a local physical audio file on the user's filesystem to a domain `Recordin
 pub struct TrackFile {
     pub id: Uuid,
     pub recording_id: Uuid,
-    /// SHA-256 hash of the binary contents (32 bytes). Schema-level UNIQUE.
-    pub file_hash: Vec<u8>,
-    /// File size in bytes. `i64` (not `u64`) because SQLite INTEGER is signed
-    /// and sqlx refuses to encode `u64` to prevent silent overflow on the top
-    /// bit. 2^63 bytes ≈ 9 EB, well past any plausible single-file size.
-    pub file_size: i64,
-    pub format: String, // Mp3, Flac, Alac, etc.
-    pub uri: String, // Path or URL to the file on the user's system. Opaque to the domain model.
 }
 ```
 
