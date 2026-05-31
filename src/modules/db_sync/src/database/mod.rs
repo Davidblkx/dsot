@@ -42,4 +42,12 @@ impl DsotDatabase {
     pub fn get_id(&self) -> &str {
         &self.id
     }
+
+    pub async fn close(self) -> Result<()> {
+        let DsotDatabase { sql, .. } = self;
+
+        sql.close().await;
+
+        Ok(())
+    }
 }

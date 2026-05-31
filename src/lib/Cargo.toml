@@ -7,3 +7,5 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+dsot_db_sync = { path = "../modules/db_sync" }
+log = { workspace = true }

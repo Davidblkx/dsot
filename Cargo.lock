@@ -535,6 +535,10 @@ dependencies = [
 [[package]]
 name = "dsot_lib"
 version = "0.1.0"
+dependencies = [
+ "dsot_db_sync",
+ "log",
+]
 
 [[package]]
 name = "dsot_model"
