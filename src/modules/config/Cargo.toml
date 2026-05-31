@@ -12,3 +12,4 @@ bakunin_config = { workspace = true }
 dirs = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
+serde = { workspace = true }

@@ -500,6 +500,7 @@ dependencies = [
  "bakunin_config",
  "dirs",
  "log",
+ "serde",
  "thiserror 2.0.18",
 ]
 
@@ -536,8 +537,10 @@ dependencies = [
 name = "dsot_lib"
 version = "0.1.0"
 dependencies = [
+ "dsot_config",
  "dsot_db_sync",
  "log",
+ "serde",
 ]
 
 [[package]]

@@ -8,4 +8,6 @@ repository.workspace = true
 
 [dependencies]
 dsot_db_sync = { path = "../modules/db_sync" }
+dsot_config = { path = "../modules/config" }
 log = { workspace = true }
+serde = { workspace = true }

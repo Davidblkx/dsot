@@ -10,9 +10,10 @@ pub static GLOBAL_FILE_LAYER_NAME: &'static str = "global";
 pub static LOCAL_FILE_LAYER_NAME: &'static str = "local";
 pub static CUSTOM_FILE_LAYER_NAME: &'static str = "custom";
 
-impl DsotConfig {
-    pub fn load(options: ConfigOptions, base_value: Value) -> Result<DsotConfig> {
-        let mut handler = BakuninConfig::new().with_memory_layer("base", base_value.clone());
+impl<'a, T: serde::Deserialize<'a> + serde::Serialize + Default> DsotConfig<T> {
+    pub fn load(options: ConfigOptions, base_value: T) -> Result<DsotConfig<T>> {
+        let value = Value::serialize(base_value)?;
+        let mut handler = BakuninConfig::new().with_memory_layer("base", value.clone());
 
         if options.search {
             let global_search = FileFinder::new(CONFIG_FILE_NAME)
@@ -34,7 +35,7 @@ impl DsotConfig {
         if options.create {
             if let Some(cfg) = handler.get_layer(GLOBAL_FILE_LAYER_NAME) {
                 if !cfg.has_value() {
-                    cfg.write_value(&base_value)?;
+                    cfg.write_value(&value)?;
                 }
             }
         }
@@ -50,8 +51,14 @@ impl DsotConfig {
         let inner = handler.build_value(true)?;
 
         Ok(Self {
-            data_location: load_data_folder(inner.get("data_folder")),
-            user: inner.get("user").into_string_or("main".to_string()),
+            data_dir: load_data_folder(inner.get("data_dir")),
+            value: match inner.clone().deserialize::<T>() {
+                Ok(v) => v,
+                Err(e) => {
+                    ::log::warn!("Invalid config file: {}", e);
+                    T::default()
+                }
+            },
             handler,
             inner,
         })
