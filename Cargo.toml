@@ -6,7 +6,8 @@ members = [
     "src/modules/music_brainz",
     "src/modules/model",
     "src/modules/config",
-    "src/lib"
+    "src/lib",
+    "src/desktop",
 ]
 resolver = "2"
 
@@ -20,6 +21,7 @@ repository = "https://github.com/Davidblkx/dsot"
 bakunin_config = "1.0.0"
 blake3 = { version = "1" }
 chrono = { version = "0.4", features = ["serde"] }
+dioxus = { version = "0.7", features = ["router"] }
 dirs = "6"
 env_logger = { version = "0.11" }
 linkme = "0.3"

@@ -3,12 +3,14 @@ use dsot_config::{ConfigOptions, DsotConfig, DsotConfigError};
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct ConfigValue {
     user: String,
+    token: String,
 }
 
 impl Default for ConfigValue {
     fn default() -> Self {
         Self {
             user: "main".into(),
+            token: uuid::Uuid::now_v7().to_string(),
         }
     }
 }
