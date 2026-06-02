@@ -10,6 +10,7 @@ repository.workspace = true
 
 [dependencies]
 dioxus = { workspace = true }
+dsot_lib = { path = "../lib" }
 
 [features]
 default = ["desktop"]
