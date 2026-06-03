@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use bakunin_config::{BakuninConfig, Value};
+use bakunin_config::{BakuninConfig, Value, config_layer::ConfigLayer};
 
 mod error;
 mod loader;
@@ -8,6 +8,8 @@ mod options;
 
 pub use error::{DsotConfigError, Result};
 pub use options::ConfigOptions;
+
+use crate::loader::GLOBAL_FILE_LAYER_NAME;
 
 #[derive(Debug, Clone)]
 pub struct DsotConfig<T> {
@@ -31,6 +33,10 @@ impl<T> DsotConfig<T> {
         }
 
         val.clone()
+    }
+
+    pub fn get_config_layer(&self) -> Option<&Box<dyn ConfigLayer + Sync + Send>> {
+        self.handler.get_layer(GLOBAL_FILE_LAYER_NAME)
     }
 }
 

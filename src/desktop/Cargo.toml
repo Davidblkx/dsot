@@ -9,8 +9,12 @@ repository.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = { workspace = true }
+bakunin_config = { workspace = true }
 dioxus = { workspace = true }
 dsot_lib = { path = "../lib" }
+log = { workspace = true }
+serde = { workspace = true }
 
 [features]
 default = ["desktop"]

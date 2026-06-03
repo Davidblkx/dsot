@@ -10,6 +10,7 @@ repository.workspace = true
 dsot_db_sync = { path = "../modules/db_sync" }
 dsot_config = { path = "../modules/config" }
 fern = { workspace = true }
+humantime = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }

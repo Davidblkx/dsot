@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, time::SystemTime};
 
 #[derive(Debug)]
 pub enum LogLevel {
@@ -45,6 +45,15 @@ impl Into<log::LevelFilter> for LogLevel {
 
 pub fn init_log(level: LogLevel, file: Option<PathBuf>) -> Result<(), fern::InitError> {
     let mut dispatch = fern::Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "[{} {} {}] {}",
+                humantime::format_rfc3339_seconds(SystemTime::now()),
+                record.level(),
+                record.target(),
+                message
+            ))
+        })
         .level(level.into())
         .chain(std::io::stdout());
 
