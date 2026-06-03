@@ -352,9 +352,9 @@ dependencies = [
 
 [[package]]
 name = "bakunin_config"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7855263d394b4c36e4cf6483ac74a4f0c5e3f1c28ef8bf00f66a00da84dfa0ee"
+checksum = "e8691d3487833d0ec35d46f6776d4c62d8383a14864e69a9721f4ea335b17ad0"
 dependencies = [
  "directories",
  "log",

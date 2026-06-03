@@ -9,7 +9,7 @@ mod options;
 pub use error::{DsotConfigError, Result};
 pub use options::ConfigOptions;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DsotConfig<T> {
     pub data_dir: PathBuf,
     pub value: T,

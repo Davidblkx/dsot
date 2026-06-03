@@ -18,7 +18,7 @@ license = "MIT"
 repository = "https://github.com/Davidblkx/dsot"
 
 [workspace.dependencies]
-bakunin_config = "1.0.0"
+bakunin_config = "1.0.1"
 blake3 = { version = "1" }
 chrono = { version = "0.4", features = ["serde"] }
 dioxus = { version = "0.7", features = ["router"] }

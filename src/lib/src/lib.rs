@@ -14,6 +14,7 @@ pub enum DsotStateInitError {
     ConfigError(#[from] dsot_config::DsotConfigError),
 }
 
+#[derive(Clone)]
 pub struct DsotState {
     pub config: dsot_config::DsotConfig<configs::ConfigValue>,
     pub user_manager: user_manager::UserManager,

@@ -11,11 +11,13 @@ const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
 fn main() {
-    // TODO: save state
-    let _ = dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
+    let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
-    });
+    }) {
+        Ok(s) => s,
+        Err(e) => panic!("Failed to initialize state: {}", e),
+    };
 
     let menu = Menu::new();
 
@@ -23,7 +25,10 @@ fn main() {
         .with_window(WindowBuilder::new().with_title("DSOT"))
         .with_menu(menu);
 
-    LaunchBuilder::desktop().with_cfg(cfg).launch(App);
+    LaunchBuilder::desktop()
+        .with_context(state)
+        .with_cfg(cfg)
+        .launch(App);
 }
 
 #[component]

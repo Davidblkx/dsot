@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use dsot_config::{ConfigOptions, DsotConfig, DsotConfigError};
 
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct ConfigValue {
     pub user: String,
     pub token: String,

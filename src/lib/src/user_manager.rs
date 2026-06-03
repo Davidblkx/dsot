@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use dsot_db_sync::DatabaseManager;
 
+#[derive(Clone)]
 pub struct UserManager {
     dir: PathBuf,
 }
