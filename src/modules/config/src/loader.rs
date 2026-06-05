@@ -50,8 +50,11 @@ impl<'a, T: serde::Deserialize<'a> + serde::Serialize + Default> DsotConfig<T> {
 
         let inner = handler.build_value(true)?;
 
+        let data_dir = load_data_folder(inner.get("data_dir"));
+        log::trace!("Using data_dir: {}", data_dir.display());
+
         Ok(Self {
-            data_dir: load_data_folder(inner.get("data_dir")),
+            data_dir,
             value: match inner.clone().deserialize::<T>() {
                 Ok(v) => v,
                 Err(e) => {

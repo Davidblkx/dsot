@@ -6,6 +6,7 @@ use dioxus::{
 mod layout;
 mod routes;
 mod views;
+mod widgets;
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");

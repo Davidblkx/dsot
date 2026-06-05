@@ -7,7 +7,7 @@ mod load;
 pub use backup::DatabaseBackup;
 pub use error::{DatabaseManagerError, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DatabaseManager {
     pub(crate) dir: PathBuf,
 }

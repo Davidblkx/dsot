@@ -9,6 +9,7 @@ repository.workspace = true
 [dependencies]
 dsot_db_sync = { path = "../modules/db_sync" }
 dsot_config = { path = "../modules/config" }
+dsot_model = { path = "../modules/model" }
 fern = { workspace = true }
 humantime = { workspace = true }
 log = { workspace = true }

@@ -1,4 +1,5 @@
 now:
- - config loader
- - Develop and document local files
+    - work on android app
+    - create sync between devices
 maybe later:
+    - Develop and document local files

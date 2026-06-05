@@ -8,7 +8,7 @@ pub static JOURNAL_NAME: &'static str = "library.journal";
 
 impl DatabaseManager {
     pub async fn open_database(&self) -> Result<DsotDatabase> {
-        let db_connect_str = format!("sqlite://{}", self.get_db_path());
+        let db_connect_str = format!("sqlite://{}?mode=rwc", self.get_db_path());
         log::info!("Opening sqlite database at {}", self.get_db_path());
 
         let pool = SqlitePoolOptions::new()

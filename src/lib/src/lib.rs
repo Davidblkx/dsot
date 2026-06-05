@@ -4,6 +4,11 @@ pub mod configs;
 pub mod logger;
 pub mod user_manager;
 
+pub use dsot_config;
+pub use dsot_db_sync;
+pub use dsot_model;
+pub use uuid;
+
 #[derive(Debug, thiserror::Error)]
 pub enum DsotStateInitError {
     #[error("Error initializing logger: {0}")]
@@ -12,12 +17,15 @@ pub enum DsotStateInitError {
     IoError(#[from] std::io::Error),
     #[error("Config error: {0}")]
     ConfigError(#[from] dsot_config::DsotConfigError),
+    #[error("Error opening user db: {0}")]
+    OpenDBError(#[from] dsot_db_sync::manager::DatabaseManagerError),
 }
 
 #[derive(Clone)]
 pub struct DsotState {
     pub config: dsot_config::DsotConfig<configs::ConfigValue>,
     pub user_manager: user_manager::UserManager,
+    pub db: dsot_db_sync::DatabaseManager,
 }
 
 pub struct DsotStateInitOptions {
@@ -51,7 +59,7 @@ impl DsotState {
         }
 
         let config = configs::load_config(&options.config_file)?;
-        let user_manager = user_manager::UserManager::open(&config.value.user)?;
+        let user_manager = user_manager::UserManager::open(&config.data_dir)?;
 
         if !options.debug {
             logger::init_log(
@@ -60,9 +68,12 @@ impl DsotState {
             )?;
         }
 
+        let db = user_manager.open_user_db(&config.value.user.as_str())?;
+
         Ok(DsotState {
             config,
             user_manager,
+            db,
         })
     }
 }

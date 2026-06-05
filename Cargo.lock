@@ -1862,6 +1862,7 @@ version = "0.1.0"
 dependencies = [
  "dsot_config",
  "dsot_db_sync",
+ "dsot_model",
  "fern",
  "humantime",
  "log",
