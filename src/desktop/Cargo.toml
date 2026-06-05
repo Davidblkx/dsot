@@ -17,7 +17,7 @@ log = { workspace = true }
 serde = { workspace = true }
 
 [features]
-default = ["desktop"]
+default = ["mobile"]
 web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
 mobile = ["dioxus/mobile"]
