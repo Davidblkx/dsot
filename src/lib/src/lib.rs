@@ -55,12 +55,16 @@ impl DsotStateInitOptions {
 impl DsotState {
     pub fn init(options: DsotStateInitOptions) -> Result<Self, DsotStateInitError> {
         if options.debug {
-            // let date_now = chrono::Local::now().format("%Y_%m_%d_%H_%M").to_string();
-            // let file = match sysdirs::temp_dir() {
-            //     Some(p) => Some(p.join(format!("dsot_logs.{}.txt", date_now))),
-            //     None => None,
-            // };
-            logger::init_log(logger::LogLevel::Trace, None)?;
+            let file = if !options.is_mobile {
+                let date_now = chrono::Local::now().format("%Y_%m_%d_%H_%M").to_string();
+                match sysdirs::temp_dir() {
+                    Some(p) => Some(p.join(format!("dsot_logs.{}.txt", date_now))),
+                    None => None,
+                }
+            } else {
+                None
+            };
+            logger::init_log(logger::LogLevel::Trace, file)?;
         }
 
         let config = if options.is_mobile {
