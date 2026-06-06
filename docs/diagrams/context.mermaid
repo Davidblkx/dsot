@@ -1,0 +1,11 @@
+graph TD
+    User[Music Collector]
+    DSOT[DSOT System]
+    MB[MusicBrainz API]
+    P2P[Other DSOT Nodes via Iroh - PLANNED]
+    FS[Local Filesystem]
+
+    User -->|Manages library| DSOT
+    DSOT -->|Fetches metadata| MB
+    DSOT -->|Syncs data| P2P
+    DSOT -->|Indexes files| FS

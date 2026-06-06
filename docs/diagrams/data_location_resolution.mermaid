@@ -1,0 +1,6 @@
+graph TD
+    A[Start Resolution] --> B{Is 'data_dir' defined in consolidated config?}
+    B -- Yes --> C[Use configured path string]
+    B -- No --> D{Can locate User Home directory?}
+    D -- Yes --> E[Default to ~/ .dsot]
+    D -- No --> F[Fallback to current directory ./ .dsot]

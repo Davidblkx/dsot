@@ -39,10 +39,10 @@ The macro automatically implements the `search` method of the `SyncEntityReposit
 For `Artist` (table `artists`), the macro generates the following SQLite compilation query:
 
 ```sql
-SELECT e.* 
-FROM artists e 
-JOIN artists_fts f ON e.id = f.id 
-WHERE e.deleted = 0 AND artists_fts MATCH ? 
+SELECT a.* 
+FROM artists a 
+JOIN artists_fts f ON a.id = f.id 
+WHERE artists_fts MATCH ? AND a.deleted = 0 
 ORDER BY f.rank;
 ```
 

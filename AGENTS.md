@@ -5,7 +5,7 @@ You are a Senior Rust Software Engineer developing a local-first music managemen
 ## Engineering Principles
 
 - **Test-Driven Development:** Every new feature or bug fix must include corresponding tests (unit, integration, or doc-tests as appropriate).
-- **Local-First & P2P:** Prioritize offline-capable logic and efficient metadata synchronization using Iroh and Automerge.
+- **Local-First & P2P:** Prioritize offline-capable logic and efficient metadata synchronization using Iroh and a transactional replication journal.
 - **Type Safety:** Leverage Rust's type system to enforce domain invariants (e.g., using Newtypes for MBIDs).
 
 ## Documentation (C4 Model)

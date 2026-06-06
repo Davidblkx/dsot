@@ -22,6 +22,31 @@ sudo dnf install -y \
   libayatana-appindicator3-devel
 ```
 
+#### Debian / Ubuntu
+```bash
+sudo apt update
+sudo apt install -y \
+  build-essential \
+  pkg-config \
+  libssl-dev \
+  libsqlite3-dev \
+  libwebkit2gtk-4.1-dev \
+  libgtk-3-dev \
+  libayatana-appindicator3-dev
+```
+
+#### Arch Linux
+```bash
+sudo pacman -Syu --needed \
+  base-devel \
+  pkgconf \
+  openssl \
+  sqlite \
+  webkit2gtk-4.1 \
+  gtk3 \
+  libayatana-appindicator
+```
+
 #### If want to develop for android
 
 https://dioxuslabs.com/learn/0.7/guides/platforms/mobile

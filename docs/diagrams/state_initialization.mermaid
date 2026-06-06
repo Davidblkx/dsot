@@ -1,0 +1,18 @@
+graph TD
+    A[Start state init] --> B{Debug mode enabled?}
+    B -- Yes --> C[Initialize Trace Logger to temp directory]
+    B -- No --> D[Skip early logger]
+    
+    C --> E[Load Config via dsot_config]
+    D --> E
+    
+    E --> F[Open / Initialize UserManager]
+    F --> G{Debug mode enabled?}
+    
+    G -- No --> H[Initialize final Logger from Config log_file / log_level]
+    G -- Yes --> I[Skip final logger redirection]
+    
+    H --> J[Open active user database via DatabaseManager]
+    I --> J
+    
+    J --> K[Return hydated DsotState]

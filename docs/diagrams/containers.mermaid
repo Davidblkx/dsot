@@ -1,0 +1,33 @@
+graph TD
+    subgraph Cargo Workspace [DSOT Crate Containers]
+        DesktopApp[dsot_desktop]
+        Lib[dsot_lib]
+        Model[dsot_model]
+        DbSync[dsot_db_sync]
+        Derive[dsot_derive]
+        MB[dsot_music_brainz]
+        Config[dsot_config]
+    end
+
+    subgraph Storage [Local Storage Layer]
+        SQLite[(SQLite DB + FTS5)]
+        Redb[(redb Sync Journal)]
+    end
+
+    subgraph Remote [External API Services]
+        MusicBrainzAPI[MusicBrainz API]
+    end
+
+    DesktopApp -->|Uses state & configurations| Lib
+    Lib -->|Invokes CRUD & Search| DbSync
+    Lib -->|Uses models| Model
+    Lib -->|Loads configuration| Config
+    
+    DbSync -->|Serializes/Deserializes| Model
+    Derive -.->|Generates SyncEntity & Repo logic for| Model
+    
+    DbSync -->|Executes SQLite queries & triggers FTS5| SQLite
+    DbSync -->|Logs transactional SyncOperations| Redb
+    
+    DesktopApp -->|Fetches metadata| MB
+    MB -->|JSON Web Requests| MusicBrainzAPI

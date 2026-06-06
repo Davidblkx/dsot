@@ -12,12 +12,12 @@ The configuration engine is built on top of the **`bakunin_config`** library, al
 The consolidated configuration instance returned after resolving all configuration sources.
 
 ```rust
-#[derive(Debug)]
-pub struct DsotConfig {
+#[derive(Debug, Clone)]
+pub struct DsotConfig<T> {
     /// Resolved absolute path to the directory where DSOT databases and local state are stored.
-    pub data_location: PathBuf,
-    /// Name of the active user profile (defaults to "main").
-    pub user: String,
+    pub data_dir: PathBuf,
+    /// Typed configuration values loaded from the source.
+    pub value: T,
     /// Evaluated and merged dynamic configuration value tree.
     pub inner: Value,
     /// The underlying configuration manager engine.
@@ -39,6 +39,8 @@ pub struct ConfigOptions {
     pub use_env: bool,
     /// An optional, explicit path to a custom configuration file (takes precedence over search matches).
     pub config_path: Option<String>,
+    /// If true, reads global configuration directly from the data directory (ignoring search options).
+    pub from_data_dir: bool,
 }
 ```
 
@@ -48,6 +50,7 @@ pub struct ConfigOptions {
 *   `.auto_detect()`: Enables search and discovery across standard file locations.
 *   `.use_env()`: Configures the loader to read env overrides.
 *   `.with_config_path(path)`: Specifies a manual target configuration path.
+*   `.from_data_dir()`: Configures the loader to read from data_dir.
 
 ---
 
@@ -70,11 +73,11 @@ Files matching the base name `.dsot` are resolved by `bakunin_config::file_finde
 
 ## Data Location Resolution Strategy
 
-A core invariant of the local-first design is locating the local repository (SQLite database, FTS5 indices, and synchronization logs). The `data_location` directory is determined dynamically using the consolidated configuration value tree via a robust fallback ladder:
+A core invariant of the local-first design is locating the local repository (SQLite database, FTS5 indices, and synchronization logs). The `data_dir` directory is determined dynamically using the consolidated configuration value tree via a robust fallback ladder:
 
 ```mermaid
 graph TD
-    A[Start Resolution] --> B{Is 'data_folder' defined in consolidated config?}
+    A[Start Resolution] --> B{Is 'data_dir' defined in consolidated config?}
     B -- Yes --> C[Use configured path string]
     B -- No --> D{Can locate User Home directory?}
     D -- Yes --> E[Default to ~/ .dsot]

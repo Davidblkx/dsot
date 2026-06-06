@@ -6,9 +6,9 @@ This document describes the high-level container structure of the DSOT applicati
 
 ```mermaid
 graph TD
-    Client[External Client CLI / App]
-    
     subgraph Cargo Workspace [DSOT Crate Containers]
+        DesktopApp[dsot_desktop]
+        Lib[dsot_lib]
         Model[dsot_model]
         DbSync[dsot_db_sync]
         Derive[dsot_derive]
@@ -25,9 +25,10 @@ graph TD
         MusicBrainzAPI[MusicBrainz API]
     end
 
-    Client -->|Invokes CRUD & Search| DbSync
-    Client -->|Uses models| Model
-    Client -->|Loads configuration| Config
+    DesktopApp -->|Uses state & configurations| Lib
+    Lib -->|Invokes CRUD & Search| DbSync
+    Lib -->|Uses models| Model
+    Lib -->|Loads configuration| Config
     
     DbSync -->|Serializes/Deserializes| Model
     Derive -.->|Generates SyncEntity & Repo logic for| Model
@@ -35,7 +36,7 @@ graph TD
     DbSync -->|Executes SQLite queries & triggers FTS5| SQLite
     DbSync -->|Logs transactional SyncOperations| Redb
     
-    Client -->|Fetches metadata| MB
+    DesktopApp -->|Fetches metadata| MB
     MB -->|JSON Web Requests| MusicBrainzAPI
 ```
 
@@ -65,3 +66,11 @@ graph TD
 ### 5. `dsot_config` (Flexible Configuration Management)
 *   **Responsibility:** Loads, parses, merges, and overrides multi-source, multi-layer application settings (defaults, files, custom paths, env).
 *   **Technology:** `bakunin_config`, `dirs`, `thiserror`.
+
+### 6. `dsot_lib` (Orchestration & State Management)
+*   **Responsibility:** Integrates user management, logging, database connections, and application-wide configuration into a unified state container (`DsotState`).
+*   **Technology:** `dsot_db_sync`, `dsot_config`, `dsot_model`, `sysdirs`, `fern`.
+
+### 7. `dsot_desktop` (Multi-Platform Client Interface)
+*   **Responsibility:** Renders the Dioxus-based user interface for managing libraries and syncing metadata. Runs natively on both desktop and mobile layouts.
+*   **Technology:** `dioxus`, `dsot_lib`.

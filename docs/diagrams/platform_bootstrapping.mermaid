@@ -1,0 +1,16 @@
+graph TD
+    A[main.rs] --> B{Cargo Feature Flag?}
+    B -->|feature = 'desktop'| C[init::init_app -> init_desktop]
+    B -->|feature = 'mobile'| D[init::init_app -> init_mobile]
+    
+    C --> E[Initialize DsotState with is_mobile = false]
+    D --> F[Initialize DsotState with is_mobile = true]
+    
+    E --> G[Configure Window Title & Menu]
+    F --> H[Configure Mobile Webview Options]
+    
+    G --> I[Launch Dioxus App Context]
+    H --> I
+    
+    I --> J[Inject DsotState into Context]
+    J --> K[Mount base stylesheet and Router]
