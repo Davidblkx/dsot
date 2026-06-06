@@ -9,7 +9,7 @@ repository.workspace = true
 
 [dependencies]
 bakunin_config = { workspace = true }
-dirs = { workspace = true }
+sysdirs = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }

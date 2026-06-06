@@ -15,7 +15,14 @@ impl<'a, T: serde::Deserialize<'a> + serde::Serialize + Default> DsotConfig<T> {
         let value = Value::serialize(base_value)?;
         let mut handler = BakuninConfig::new().with_memory_layer("base", value.clone());
 
-        if options.search {
+        if options.from_data_dir {
+            if let Some(dir) = sysdirs::data_dir() {
+                let path = dir.join(format!("{}.toml", CONFIG_FILE_NAME));
+                handler.add_file_layer(GLOBAL_FILE_LAYER_NAME, path)?;
+            } else {
+                log::warn!("No data directory found, falling back to search");
+            }
+        } else if options.search {
             let global_search = FileFinder::new(CONFIG_FILE_NAME)
                 .with_supported_extensions()
                 .with_user_home()
@@ -71,7 +78,7 @@ impl<'a, T: serde::Deserialize<'a> + serde::Serialize + Default> DsotConfig<T> {
 fn load_data_folder(v: Value) -> PathBuf {
     match v.try_into_string() {
         Ok(path) => PathBuf::from(path),
-        _ => match dirs::home_dir() {
+        _ => match sysdirs::home_dir() {
             Some(home) => home.join(CONFIG_FILE_NAME),
             None => PathBuf::from("./").join(CONFIG_FILE_NAME),
         },

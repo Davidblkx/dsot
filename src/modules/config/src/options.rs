@@ -11,6 +11,8 @@ pub struct ConfigOptions {
     /// Path to the configuration file, if combined with `search` it will be last in priority,
     /// so it will override any found configuration values.
     pub config_path: Option<String>,
+    /// Global config is read from data_dir (ignores search options)
+    pub from_data_dir: bool,
 }
 
 impl ConfigOptions {
@@ -35,6 +37,11 @@ impl ConfigOptions {
 
     pub fn with_config_path(mut self, path: String) -> Self {
         self.config_path = Some(path);
+        self
+    }
+
+    pub fn from_data_dir(mut self) -> Self {
+        self.from_data_dir = true;
         self
     }
 }

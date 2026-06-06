@@ -23,7 +23,6 @@ bakunin_config = "1.0.1"
 blake3 = { version = "1" }
 chrono = { version = "0.4", features = ["serde"] }
 dioxus = { version = "0.7", features = ["router"] }
-dirs = "6"
 env_logger = { version = "0.11" }
 fern = { version = "0.7" }
 humantime = { version = "2" }
@@ -45,6 +44,7 @@ sqlx = { version = "0.9", features = [
     "json",
     "migrate",
 ], default-features = false }
+sysdirs = { version = "0.9", features = ["android-auto"] }
 thiserror = { version = "2" }
 tokio = { version = "1.52", features = ["full"] }
 url = { version = "2.5" }

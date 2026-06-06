@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 pub mod configs;
 pub mod logger;
 pub mod user_manager;
@@ -31,6 +29,7 @@ pub struct DsotState {
 pub struct DsotStateInitOptions {
     pub debug: bool,
     pub config_file: Option<String>,
+    pub is_mobile: bool,
 }
 
 impl DsotStateInitOptions {
@@ -38,6 +37,7 @@ impl DsotStateInitOptions {
         Self {
             debug: false,
             config_file: None,
+            is_mobile: false,
         }
     }
 
@@ -55,10 +55,19 @@ impl DsotStateInitOptions {
 impl DsotState {
     pub fn init(options: DsotStateInitOptions) -> Result<Self, DsotStateInitError> {
         if options.debug {
-            logger::init_log(logger::LogLevel::Trace, Some(PathBuf::from("./logs.txt")))?;
+            // let date_now = chrono::Local::now().format("%Y_%m_%d_%H_%M").to_string();
+            // let file = match sysdirs::temp_dir() {
+            //     Some(p) => Some(p.join(format!("dsot_logs.{}.txt", date_now))),
+            //     None => None,
+            // };
+            logger::init_log(logger::LogLevel::Trace, None)?;
         }
 
-        let config = configs::load_config(&options.config_file)?;
+        let config = if options.is_mobile {
+            configs::load_mobile_config()?
+        } else {
+            configs::load_config(&options.config_file)?
+        };
         let user_manager = user_manager::UserManager::open(&config.data_dir)?;
 
         if !options.debug {

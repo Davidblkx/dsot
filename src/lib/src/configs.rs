@@ -37,3 +37,11 @@ pub fn load_config(
 
     Ok(config)
 }
+
+pub fn load_mobile_config() -> Result<DsotConfig<ConfigValue>, DsotConfigError> {
+    let options = ConfigOptions::new().from_data_dir().create_if_missing();
+
+    let config: DsotConfig<ConfigValue> = DsotConfig::load(options, ConfigValue::default())?;
+
+    Ok(config)
+}

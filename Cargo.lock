@@ -1809,9 +1809,9 @@ name = "dsot_config"
 version = "0.1.0"
 dependencies = [
  "bakunin_config",
- "dirs",
  "log",
  "serde",
+ "sysdirs",
  "thiserror 2.0.18",
 ]
 
@@ -1860,6 +1860,7 @@ dependencies = [
 name = "dsot_lib"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "dsot_config",
  "dsot_db_sync",
  "dsot_model",
@@ -1867,6 +1868,7 @@ dependencies = [
  "humantime",
  "log",
  "serde",
+ "sysdirs",
  "thiserror 2.0.18",
  "uuid",
 ]
@@ -5971,6 +5973,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
+]
+
+[[package]]
+name = "sysdirs"
+version = "0.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7578b3743c69fccacb467648b3755cbee8fcef4cc9a4c8d75b0211cc082e1d20"
+dependencies = [
+ "jni 0.21.1",
+ "ndk-context",
 ]
 
 [[package]]

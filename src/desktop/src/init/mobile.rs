@@ -7,6 +7,7 @@ pub fn init_mobile() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
+        is_mobile: true,
     }) {
         Ok(s) => s,
         Err(e) => panic!("Failed to initialize state: {}", e),

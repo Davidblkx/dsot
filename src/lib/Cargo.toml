@@ -7,6 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+chrono = { workspace = true }
 dsot_db_sync = { path = "../modules/db_sync" }
 dsot_config = { path = "../modules/config" }
 dsot_model = { path = "../modules/model" }
@@ -15,4 +16,5 @@ humantime = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
 serde = { workspace = true }
+sysdirs = { workspace = true }
 uuid = { workspace = true }
