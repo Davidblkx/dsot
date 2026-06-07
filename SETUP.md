@@ -52,6 +52,15 @@ sudo pacman -Syu --needed \
 https://dioxuslabs.com/learn/0.7/guides/platforms/mobile
 https://v2.tauri.app/start/prerequisites/#configure-for-mobile-targets
 
+```nushell
+$env.JAVA_HOME = '/opt/android/jbr'
+$env.ANDROID_HOME = $"($env.HOME)/Android/Sdk"
+$env.NDK_HOME = (ls $"($env.HOME)/Android/Sdk/ndk" | last | get name)
+
+$env.PATH ++= [$"($env.ANDROID_HOME)/platform-tools"]
+$env.PATH ++= [$"($env.ANDROID_HOME)/emulator"]
+```
+
 ---
 
 ### 2. Install Rust Toolchain
