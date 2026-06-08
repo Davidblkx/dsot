@@ -1,4 +1,4 @@
-use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 
 use super::{DatabaseManager, DatabaseManagerError, Result};
 use crate::DsotDatabase;
@@ -8,12 +8,15 @@ pub static JOURNAL_NAME: &'static str = "library.journal";
 
 impl DatabaseManager {
     pub async fn open_database(&self) -> Result<DsotDatabase> {
-        let db_connect_str = format!("sqlite://{}?mode=rwc", self.get_db_path());
         log::info!("Opening sqlite database at {}", self.get_db_path());
+        let db_options = SqliteConnectOptions::new()
+            .filename(self.get_db_path())
+            .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
+            .create_if_missing(true);
 
         let pool = SqlitePoolOptions::new()
             .max_connections(10)
-            .connect(&db_connect_str)
+            .connect_with(db_options)
             .await?;
 
         log::debug!("Running migrations");

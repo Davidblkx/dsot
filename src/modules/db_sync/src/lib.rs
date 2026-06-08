@@ -5,6 +5,7 @@ pub mod dser;
 pub mod entity;
 pub mod manager;
 pub mod model;
+pub mod protocol;
 pub mod registry;
 pub mod repo;
 pub mod sync;

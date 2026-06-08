@@ -2,13 +2,13 @@ use crate::RepositoryRegistry;
 
 use super::{DsotDatabase, database::Result};
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct SyncHandshakeRequest {
     pub id: String,
     pub sync: [u8; 32],
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct SyncHandshakeResponse {
     pub need_sync: bool,
     pub id_match: bool,
@@ -30,12 +30,12 @@ impl SyncHandshakeResponse {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct SyncStartRequest {
     pub keys: Vec<[u8; 16]>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct SyncExchange {
     pub keys: Vec<[u8; 16]>,
     pub entries: Vec<Vec<u8>>,

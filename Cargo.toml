@@ -26,6 +26,8 @@ dioxus = { version = "0.7", features = ["router"] }
 env_logger = { version = "0.11" }
 fern = { version = "0.7" }
 humantime = { version = "2" }
+iroh = { version = "1.0.0-rc.1" }
+futures-util = { version = "0.3" }
 linkme = "0.3"
 log = { version = "0.4" }
 paste = { version = "1.0.15" }
@@ -47,6 +49,7 @@ sqlx = { version = "0.9", features = [
 sysdirs = { version = "0.9", features = ["android-auto"] }
 thiserror = { version = "2" }
 tokio = { version = "1.52", features = ["full"] }
+tokio-util = { version = "0.7" }
 url = { version = "2.5" }
 urlencoding = { version = "2.1" }
 uuid = { version = "1", features = ["v4", "v7", "serde"] }
