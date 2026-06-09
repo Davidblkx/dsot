@@ -1,3 +1,7 @@
+mod execute;
+mod handler;
+mod model;
+
 use crate::RepositoryRegistry;
 
 use super::{DsotDatabase, database::Result};

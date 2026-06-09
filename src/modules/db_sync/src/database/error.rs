@@ -22,4 +22,6 @@ pub enum DsotDatabaseError {
     TableMissmatchError(String, &'static str),
     #[error("Repository not available for table: {0}")]
     RepositoryNotFound(String),
+    #[error("Sync error: {0}")]
+    SyncError(String),
 }

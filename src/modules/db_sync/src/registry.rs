@@ -40,6 +40,15 @@ impl RepositoryRegistry {
         })
     }
 
+    /// Insert journals if new, to a transaction
+    pub async fn apply<'a, 't>(
+        &self,
+        trx: &'a DsotDatabaseTransaction<'t>,
+        entries: &[&[u8]],
+    ) -> Result<()> {
+        todo!()
+    }
+
     /// Insert journals if new, and reconstruct sql database
     pub async fn apply_journals_bytes(
         &self,
@@ -86,7 +95,11 @@ impl RepositoryRegistry {
             }
         }
 
-        log::debug!("apply_journals: {} new entries; replaying from {}", ids.len(), first_id);
+        log::debug!(
+            "apply_journals: {} new entries; replaying from {}",
+            ids.len(),
+            first_id
+        );
 
         match self.apply_from_id(&mut trx, first_id).await {
             Ok(_) => {
@@ -107,7 +120,11 @@ impl RepositoryRegistry {
         id: Uuid,
     ) -> Result<()> {
         let entries = trx.get_entries_since(id.as_bytes())?;
-        log::trace!("apply_from_id: replaying {} entries from {}", entries.len(), id);
+        log::trace!(
+            "apply_from_id: replaying {} entries from {}",
+            entries.len(),
+            id
+        );
         for jrn in entries {
             let JournalEntry { table, op, .. } = JournalEntry::from_bytes(jrn.as_slice())?;
 

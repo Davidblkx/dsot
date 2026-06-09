@@ -76,6 +76,10 @@ impl DsotDatabase {
     pub fn get_journal_entries_in_array(&self, keys: &[[u8; 16]]) -> Result<Vec<Vec<u8>>> {
         let mut entries = Vec::new();
 
+        if keys.is_empty() {
+            return Ok(entries);
+        }
+
         let reader = self.journal.begin_read()?;
         let table = reader.open_table(JOURNAL_TABLE)?;
 
