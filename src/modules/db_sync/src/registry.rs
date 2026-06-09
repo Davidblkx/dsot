@@ -43,10 +43,36 @@ impl RepositoryRegistry {
     /// Insert journals if new, to a transaction
     pub async fn apply<'a, 't>(
         &self,
-        trx: &'a DsotDatabaseTransaction<'t>,
+        trx: &'a mut DsotDatabaseTransaction<'t>,
         entries: &[&[u8]],
     ) -> Result<()> {
-        todo!()
+        if entries.is_empty() {
+            return Ok(());
+        }
+
+        let mut journals = Vec::new();
+        for jrn_bytes in entries {
+            journals.push(JournalEntry::from_bytes(jrn_bytes)?);
+        }
+
+        let mut first_id = Uuid::max();
+
+        for journal in journals {
+            let id = journal.id;
+            if trx.insert_journal(journal)? {
+                if id < first_id {
+                    first_id = id;
+                }
+            }
+        }
+
+        match self.apply_from_id(trx, first_id).await {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                log::warn!("apply_journals failed during replay: {}; rolling back", e);
+                Err(e)
+            }
+        }
     }
 
     /// Insert journals if new, and reconstruct sql database

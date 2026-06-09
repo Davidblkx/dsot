@@ -1,5 +1,4 @@
 use dsot_db_sync::DsotDatabase;
-use dsot_db_sync::sync::{SyncHandshakeRequest, SyncStartRequest};
 use dsot_derive::SyncEntity;
 use redb::{Database, backends::InMemoryBackend};
 use serde::{Deserialize, Serialize};
@@ -16,6 +15,8 @@ pub struct MyEntity {
 
 #[tokio::main]
 async fn main() {
+    println!("Starting");
+
     let sql1 = sqlx::sqlite::SqlitePool::connect("sqlite::memory:?cache=shared")
         .await
         .unwrap();
@@ -145,6 +146,8 @@ async fn main() {
     let db1 = DsotDatabase::new(jrn1, sql1);
     let db2 = DsotDatabase::new(jrn2, sql2);
 
+    println!("DB Created!");
+
     let mut e1: MyEntitySql = MyEntity {
         id: Uuid::now_v7(),
         name: "ent1".to_string(),
@@ -169,12 +172,23 @@ async fn main() {
     e2.sort_name = Some("tomato".to_string());
     db2.update::<MyEntitySqlRepository>(&e2).await.unwrap();
 
-    sync_dbs(&db1, &db2).await;
+    println!("Syncing db2 to db1...");
+    let db2_sync_handler = db2.create_sync_handler().await.unwrap();
+    println!("Created handler, syncing...");
+    db1.start_remote_sync(&db2_sync_handler).await.unwrap();
+    println!("db1 completed, commit 2...");
+    db2_sync_handler.commit().await.unwrap();
+    println!(
+        "Sync completed, db2 hash: {:?}",
+        db2.generate_sync_hash().unwrap()
+    );
 
     e2.sort_name = Some("tomatossss".to_string());
     db2.update::<MyEntitySqlRepository>(&e2).await.unwrap();
 
-    sync_dbs(&db2, &db1).await;
+    let db2_sync_handler = db2.create_sync_handler().await.unwrap();
+    db1.start_remote_sync(&db2_sync_handler).await.unwrap();
+    db2_sync_handler.commit().await.unwrap();
 
     let items1 = db1.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
     let items2 = db2.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
@@ -187,39 +201,5 @@ async fn main() {
     println!("Items in db2: {:?}", db2.generate_sync_hash().unwrap());
     for i in items2 {
         println!("{:?}", i);
-    }
-
-    let sync_hash = db1.generate_sync_hash().unwrap();
-
-    let status = db2
-        .sync_handshake(SyncHandshakeRequest {
-            id: db1.get_id().to_string(),
-            sync: sync_hash,
-        })
-        .unwrap();
-
-    println!("Sync status: {:?}", status)
-}
-
-async fn sync_dbs(db1: &DsotDatabase, db2: &DsotDatabase) {
-    let sync_hash = db1.generate_sync_hash().unwrap();
-
-    let status = db2
-        .sync_handshake(SyncHandshakeRequest {
-            id: db1.get_id().to_string(),
-            sync: sync_hash,
-        })
-        .unwrap();
-
-    if !status.need_sync {
-        return;
-    }
-
-    let keys = db1.get_journal_keys().unwrap();
-
-    let sync = db2.start_sync(&SyncStartRequest { keys }).unwrap();
-    let sync = db1.sync(&sync).await.unwrap();
-    if !sync.is_empty() {
-        let _ = db2.sync(&sync).await.unwrap();
     }
 }
