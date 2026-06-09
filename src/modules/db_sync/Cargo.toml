@@ -10,17 +10,19 @@ repository.workspace = true
 [dependencies]
 blake3 = { workspace = true }
 chrono = { workspace = true }
-linkme = { workspace = true }
+futures-util = { workspace = true }
 iroh = { workspace = true }
+linkme = { workspace = true }
+log = { workspace = true }
+redb = { workspace = true }
 rmp-serde = { workspace = true }
 rustc-hash = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sqlx = { workspace = true }
 thiserror = { workspace = true }
+tokio-util = { workspace = true }
 uuid = { workspace = true }
-redb = { workspace = true }
-log = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true }

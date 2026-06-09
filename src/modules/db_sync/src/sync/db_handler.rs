@@ -1,7 +1,11 @@
 use std::cell::RefCell;
 
 use super::SyncHandler;
-use crate::{DsotDatabase, database::DsotDatabaseTransaction, database::Result, sync::SyncMessage};
+use crate::{
+    DsotDatabase,
+    database::{DsotDatabaseTransaction, Result},
+    sync::{Handshake, HandshakeResponse, SyncMessage},
+};
 
 pub struct DsotDatabaseSyncHandler<'a> {
     trx: RefCell<DsotDatabaseTransaction<'a>>,
@@ -37,14 +41,14 @@ impl<'a> SyncHandler for DsotDatabaseSyncHandler<'a> {
         true
     }
 
-    async fn handshake(&self, id: String, hash: super::SyncHash) -> bool {
-        if id != self.db.id {
-            return false;
+    async fn handshake(&self, req: &Handshake) -> HandshakeResponse {
+        if req.id != self.db.id {
+            return HandshakeResponse::fail_match();
         }
 
         match self.trx.borrow().generate_sync_hash() {
-            Ok(current_hash) => current_hash != hash,
-            Err(_) => false,
+            Ok(current_hash) => HandshakeResponse::need(current_hash != req.hash),
+            Err(_) => HandshakeResponse::error(),
         }
     }
 

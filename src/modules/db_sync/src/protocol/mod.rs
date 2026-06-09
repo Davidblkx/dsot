@@ -3,7 +3,7 @@ use iroh::protocol::ProtocolHandler;
 use crate::DatabaseManager;
 
 mod error;
-mod messages;
+mod sync;
 
 pub const DB_SYNC_PROTOCOL_ALPN: &[u8] = b"/dsot/db_sync/1";
 

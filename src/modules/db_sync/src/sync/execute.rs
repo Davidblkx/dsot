@@ -1,19 +1,25 @@
 use crate::{
     DsotDatabase, RepositoryRegistry,
     database::{DsotDatabaseError, DsotDatabaseTransaction, Result},
-    sync::SyncMessage,
+    sync::{Handshake, SyncMessage},
 };
 
 use super::handler::SyncHandler;
 
 impl DsotDatabase {
+    pub fn create_handshake(&self) -> Result<Handshake> {
+        Ok(Handshake {
+            id: self.id.clone(),
+            hash: self.generate_sync_hash()?,
+        })
+    }
+
     pub async fn start_remote_sync<T: SyncHandler>(&self, handler: &T) -> Result<()> {
         log::info!("Starting sync {} width {}", self.id, handler.name());
-        let need_sync = handler
-            .handshake(self.id.clone(), self.generate_sync_hash()?)
-            .await;
 
-        if !need_sync {
+        let res = handler.handshake(&self.create_handshake()?).await;
+
+        if !res.need_sync {
             log::info!("No sync needed");
             return Ok(());
         }
