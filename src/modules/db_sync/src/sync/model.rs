@@ -3,6 +3,7 @@ pub type SyncKey = [u8; 16];
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub enum SyncMessage {
+    Start(Vec<SyncKey>),
     Exchange {
         request_entries: Vec<SyncKey>,
         available_keys: Vec<SyncKey>,
@@ -33,6 +34,7 @@ impl ToString for SyncMessage {
             ),
             Self::Complete => "Complete".to_string(),
             Self::Fail(message) => format!("Fail({})", message.clone()),
+            Self::Start(keys) => format!("Start({})", keys.len()),
         }
     }
 }

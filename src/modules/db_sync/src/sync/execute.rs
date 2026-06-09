@@ -18,23 +18,21 @@ impl DsotDatabase {
             return Ok(());
         }
 
-        let mut req = SyncMessage::Exchange {
-            request_entries: vec![],
-            available_keys: self.get_journal_keys()?,
-            requested_entries: vec![],
-        };
+        let mut req = SyncMessage::Start(self.get_journal_keys()?);
 
         let mut trx = self.begin_transaction().await?;
 
         while handler.is_open() {
+            println!("Sending to remote: {}", req.to_string());
             let response = handler.sync(&req).await;
 
+            println!("Received from remote: {}", response.to_string());
             if matches!(response, SyncMessage::Complete) {
                 trx.commit().await?;
                 return Ok(());
             }
 
-            req = self.remote_sync(&mut trx, &response).await?;
+            req = trx.remote_sync(&response).await?;
         }
 
         trx.rollback().await?;
@@ -43,13 +41,21 @@ impl DsotDatabase {
             "Connection was closed".to_string(),
         ));
     }
+}
 
-    pub async fn remote_sync<'a, 'b>(
-        &self,
-        trx: &'a mut DsotDatabaseTransaction<'b>,
-        message: &SyncMessage,
-    ) -> Result<SyncMessage> {
+impl<'b> DsotDatabaseTransaction<'b> {
+    pub async fn remote_sync(&mut self, message: &SyncMessage) -> Result<SyncMessage> {
         match message {
+            SyncMessage::Start(available_keys) => {
+                // Lookup keys that are not in the journal (need to be requested)
+                let keys_to_request = self.get_keys_not_in_journal(&available_keys)?;
+
+                Ok(SyncMessage::Exchange {
+                    request_entries: keys_to_request,
+                    available_keys: self.get_journal_keys()?,
+                    requested_entries: vec![],
+                })
+            }
             SyncMessage::Exchange {
                 request_entries,
                 available_keys,
@@ -59,7 +65,7 @@ impl DsotDatabase {
                 let entries_to_insert: Vec<&[u8]> =
                     requested_entries.iter().map(|v| v.as_slice()).collect();
                 RepositoryRegistry::instance()
-                    .apply(trx, &entries_to_insert)
+                    .apply(self, &entries_to_insert)
                     .await?;
 
                 // Lookup requested entries to send back

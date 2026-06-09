@@ -106,6 +106,53 @@ impl DsotDatabase {
 }
 
 impl<'a> DsotDatabaseTransaction<'a> {
+    /// Returns all keys currently stored in the journal.
+    pub fn get_journal_keys(&self) -> Result<Vec<[u8; 16]>> {
+        let table = self.journal_trx.open_table(JOURNAL_TABLE)?;
+        let mut keys = Vec::new();
+
+        for item in table.iter()? {
+            let (key, _) = item?;
+            keys.push(key.value());
+        }
+
+        Ok(keys)
+    }
+
+    /// Returns all keys that are not currently stored in the journal.
+    pub fn get_keys_not_in_journal(&self, keys: &[[u8; 16]]) -> Result<Vec<[u8; 16]>> {
+        let mut missing_keys = Vec::new();
+
+        let table = self.journal_trx.open_table(JOURNAL_TABLE)?;
+
+        for k in keys {
+            if table.get(k)?.is_none() {
+                missing_keys.push(*k);
+            }
+        }
+
+        Ok(missing_keys)
+    }
+
+    /// Returns all journal entries that are in the key list.
+    pub fn get_journal_entries_in_array(&self, keys: &[[u8; 16]]) -> Result<Vec<Vec<u8>>> {
+        let mut entries = Vec::new();
+
+        if keys.is_empty() {
+            return Ok(entries);
+        }
+
+        let table = self.journal_trx.open_table(JOURNAL_TABLE)?;
+
+        for k in keys {
+            if let Some(v) = table.get(k)? {
+                entries.push(v.value().to_vec());
+            }
+        }
+
+        Ok(entries)
+    }
+
     /// insert journal entry, returns false if id is duplicated
     pub fn insert_journal(&mut self, jrn: JournalEntry) -> Result<bool> {
         let mut table = self.journal_trx.open_table(JOURNAL_TABLE)?;

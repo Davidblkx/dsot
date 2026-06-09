@@ -49,9 +49,8 @@ impl<'a> SyncHandler for DsotDatabaseSyncHandler<'a> {
     }
 
     async fn sync(&self, state: &SyncMessage) -> SyncMessage {
-        println!("Handling sync message: {}", state.to_string());
         let mut trx = self.trx.borrow_mut();
-        match self.db.remote_sync(&mut trx, state).await {
+        match trx.remote_sync(state).await {
             Err(err) => SyncMessage::Fail(err.to_string()),
             Ok(response) => response,
         }

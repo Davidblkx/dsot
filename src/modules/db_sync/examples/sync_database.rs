@@ -172,23 +172,73 @@ async fn main() {
     e2.sort_name = Some("tomato".to_string());
     db2.update::<MyEntitySqlRepository>(&e2).await.unwrap();
 
-    println!("Syncing db2 to db1...");
+    println!("---------------------------------------");
+
+    println!("Db1: {:?}", db1.generate_sync_hash().unwrap());
+    println!("Db2: {:?}", db2.generate_sync_hash().unwrap());
+
     let db2_sync_handler = db2.create_sync_handler().await.unwrap();
-    println!("Created handler, syncing...");
     db1.start_remote_sync(&db2_sync_handler).await.unwrap();
-    println!("db1 completed, commit 2...");
     db2_sync_handler.commit().await.unwrap();
-    println!(
-        "Sync completed, db2 hash: {:?}",
-        db2.generate_sync_hash().unwrap()
-    );
+
+    println!("Db1: {:?}", db1.generate_sync_hash().unwrap());
+    println!("Db2: {:?}", db2.generate_sync_hash().unwrap());
+
+    let items1 = db1.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
+    let items2 = db2.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
+
+    println!("Items in db1: {:?}", db1.generate_sync_hash().unwrap());
+    for i in items1 {
+        println!("{:?}", i);
+    }
+
+    println!("Items in db2: {:?}", db2.generate_sync_hash().unwrap());
+    for i in items2 {
+        println!("{:?}", i);
+    }
 
     e2.sort_name = Some("tomatossss".to_string());
     db2.update::<MyEntitySqlRepository>(&e2).await.unwrap();
 
+    println!("---------------------------------------");
+
+    println!("Db1: {:?}", db1.generate_sync_hash().unwrap());
+    println!("Db2: {:?}", db2.generate_sync_hash().unwrap());
+
     let db2_sync_handler = db2.create_sync_handler().await.unwrap();
     db1.start_remote_sync(&db2_sync_handler).await.unwrap();
     db2_sync_handler.commit().await.unwrap();
+
+    println!("Db1: {:?}", db1.generate_sync_hash().unwrap());
+    println!("Db2: {:?}", db2.generate_sync_hash().unwrap());
+
+    let items1 = db1.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
+    let items2 = db2.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
+
+    println!("Items in db1: {:?}", db1.generate_sync_hash().unwrap());
+    for i in items1 {
+        println!("{:?}", i);
+    }
+
+    println!("Items in db2: {:?}", db2.generate_sync_hash().unwrap());
+    for i in items2 {
+        println!("{:?}", i);
+    }
+
+    e2.sort_name = Some("klaus!!".to_string());
+    db1.update::<MyEntitySqlRepository>(&e2).await.unwrap();
+
+    println!("---------------------------------------");
+
+    println!("Db1: {:?}", db1.generate_sync_hash().unwrap());
+    println!("Db2: {:?}", db2.generate_sync_hash().unwrap());
+
+    let db2_sync_handler = db2.create_sync_handler().await.unwrap();
+    db1.start_remote_sync(&db2_sync_handler).await.unwrap();
+    db2_sync_handler.commit().await.unwrap();
+
+    println!("Db1: {:?}", db1.generate_sync_hash().unwrap());
+    println!("Db2: {:?}", db2.generate_sync_hash().unwrap());
 
     let items1 = db1.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
     let items2 = db2.list::<MyEntitySqlRepository>(10, 0).await.unwrap();
