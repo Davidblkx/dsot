@@ -1,19 +1,7 @@
-use thiserror::Error;
-use uuid::Uuid;
+pub type RepositoryError = crate::DBSyncError;
+pub type Result<T> = std::result::Result<T, crate::DBSyncError>;
 
-use crate::{SyncEntity, dser::MessagePackError};
-
-#[derive(Error, Debug)]
-pub enum RepositoryError {
-    #[error("entity [{0}] not found: {1}")]
-    EntityNotFound(&'static str, Uuid),
-    #[error("Database error: {0}")]
-    DatabaseError(#[from] sqlx::Error),
-    #[error("{0}")]
-    SerializationError(#[from] MessagePackError),
-}
-
-pub type Result<T> = std::result::Result<T, RepositoryError>;
+use crate::SyncEntity;
 
 #[derive(Debug, Clone, Copy)]
 pub struct ListQuery {

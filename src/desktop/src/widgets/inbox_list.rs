@@ -60,7 +60,7 @@ struct DisplayItem {
 }
 
 impl TryFrom<&InboxItemSql> for DisplayItem {
-    type Error = dsot_lib::dsot_db_sync::dser::MessagePackError;
+    type Error = dsot_lib::dsot_db_sync::DBSyncError;
 
     fn try_from(v: &InboxItemSql) -> std::prelude::v1::Result<Self, Self::Error> {
         let value: InboxItem = v.clone().into();

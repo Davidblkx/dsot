@@ -3,7 +3,7 @@ use std::sync::Mutex;
 use iroh::endpoint::{Connection, RecvStream, SendStream};
 use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
 
-use super::error::SyncResult;
+use super::SyncResult;
 use crate::{
     dser::EntityMessagePack,
     sync::{Handshake, HandshakeResponse, SyncHandler, SyncMessage},

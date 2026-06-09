@@ -1,7 +1,8 @@
 use std::borrow::Cow;
 
 use dsot_db_sync::{
-    dser::{EntityMessagePack, MessagePackError},
+    DBSyncError,
+    dser::EntityMessagePack,
     model::{IntoUpdateValue, UpdateValue},
 };
 use dsot_derive::SyncEntity;
@@ -102,7 +103,7 @@ pub struct InboxItem {
 
 impl InboxItem {
     /// Capture a new pending item. Encodes `value` via msgpack.
-    pub fn new(value: InboxValue) -> Result<Self, MessagePackError> {
+    pub fn new(value: InboxValue) -> Result<Self, DBSyncError> {
         Ok(Self {
             id: Uuid::now_v7(),
             value: EntityMessagePack::serialize(&value)?,
@@ -112,7 +113,7 @@ impl InboxItem {
     }
 
     /// Decode the payload into its typed form.
-    pub fn value(&self) -> Result<InboxValue, MessagePackError> {
+    pub fn value(&self) -> Result<InboxValue, DBSyncError> {
         EntityMessagePack::deserialize(&self.value)
     }
 

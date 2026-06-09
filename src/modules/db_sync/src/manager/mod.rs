@@ -1,11 +1,12 @@
 use std::path::PathBuf;
 
 mod backup;
-mod error;
 mod load;
 
 pub use backup::DatabaseBackup;
-pub use error::{DatabaseManagerError, Result};
+
+pub type DatabaseManagerError = crate::DBSyncError;
+pub type Result<T> = std::result::Result<T, crate::DBSyncError>;
 
 #[derive(Debug, Clone)]
 pub struct DatabaseManager {

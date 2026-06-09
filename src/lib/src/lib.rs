@@ -16,7 +16,7 @@ pub enum DsotStateInitError {
     #[error("Config error: {0}")]
     ConfigError(#[from] dsot_config::DsotConfigError),
     #[error("Error opening user db: {0}")]
-    OpenDBError(#[from] dsot_db_sync::manager::DatabaseManagerError),
+    OpenDBError(#[from] dsot_db_sync::DBSyncError),
 }
 
 #[derive(Clone)]

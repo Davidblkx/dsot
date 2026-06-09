@@ -2,7 +2,8 @@ use iroh::protocol::ProtocolHandler;
 
 use crate::DatabaseManager;
 
-mod error;
+pub type SyncDatabaseError = crate::DBSyncError;
+pub type SyncResult<T> = std::result::Result<T, crate::DBSyncError>;
 mod sync;
 
 pub const DB_SYNC_PROTOCOL_ALPN: &[u8] = b"/dsot/db_sync/1";

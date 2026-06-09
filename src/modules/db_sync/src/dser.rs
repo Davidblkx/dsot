@@ -1,9 +1,8 @@
 use serde::de::DeserializeOwned;
-use thiserror::Error;
 
 pub struct EntityMessagePack;
 
-pub type Result<T> = ::core::result::Result<T, MessagePackError>;
+pub type Result<T> = ::core::result::Result<T, crate::DBSyncError>;
 
 impl EntityMessagePack {
     pub fn deserialize<T: DeserializeOwned>(data: &[u8]) -> Result<T> {
@@ -15,12 +14,4 @@ impl EntityMessagePack {
         let value = rmp_serde::to_vec(&data)?;
         Ok(value)
     }
-}
-
-#[derive(Error, Debug)]
-pub enum MessagePackError {
-    #[error("error deserializing: {0}")]
-    DeserializeError(#[from] rmp_serde::decode::Error),
-    #[error("error serializing: {0}")]
-    SerializeError(#[from] rmp_serde::encode::Error),
 }

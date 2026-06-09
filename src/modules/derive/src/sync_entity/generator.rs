@@ -285,7 +285,7 @@ impl SyncEntityIR {
 
                     match value {
                         Some(v) => Ok(v),
-                        None => Err(::dsot_db_sync::repo::RepositoryError::EntityNotFound(
+                        None => Err(::dsot_db_sync::DBSyncError::EntityNotFound(
                             stringify!(#sql_entity_ident),
                             id.clone(),
                         )),

@@ -254,10 +254,13 @@ A lightweight entry point that owns and manages a physical database directory on
 
 Used by application code as the single "open the database" call site.
 
----
-
 ## Errors
 
-- `DsotDatabaseError` (`database/error.rs`) — the union of redb storage/transaction/commit/table errors, sqlx errors, msgpack errors, `RepositoryError`, plus the two journal-specific cases `TableMissmatchError` (journal entry's `table` field doesn't match the repository it was dispatched to) and `RepositoryNotFound` (no registered repository for a table seen in a journal entry).
-- `RepositoryError` (`repo.rs`) — `EntityNotFound`, sqlx error, msgpack error.
-- `DatabaseManagerError` (`manager/error.rs`) — IO, sqlx, redb open, migration.
+- `DBSyncError` (`src/error.rs`) — the single, consolidated error enum for the crate. It represents the union of all errors that can occur within database synchronization and management, including:
+  - `redb` storage, transaction, commit, table, and database errors.
+  - `sqlx` / SQLite errors.
+  - Serialization / Deserialization (`rmp_serde`) errors.
+  - Standard IO errors.
+  - SQLx migration errors.
+  - Entity-specific errors (e.g. `EntityNotFound`, `TableMissmatchError`, `RepositoryNotFound`).
+  - Sync-specific errors (`SyncError`, `PathIsNotAFolder`).

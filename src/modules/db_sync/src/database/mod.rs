@@ -2,11 +2,11 @@ use redb::Database;
 use sqlx::SqlitePool;
 
 mod entity_ops;
-mod error;
 mod journal;
 mod transaction;
 
-pub use error::{DsotDatabaseError, Result};
+pub type DsotDatabaseError = crate::DBSyncError;
+pub type Result<T> = std::result::Result<T, crate::DBSyncError>;
 pub use transaction::DsotDatabaseTransaction;
 
 #[derive(Debug)]

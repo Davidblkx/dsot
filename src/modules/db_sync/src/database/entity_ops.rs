@@ -17,8 +17,7 @@ impl DsotDatabase {
         let mut conn = self
             .sql
             .acquire()
-            .await
-            .map_err(DsotDatabaseError::DatabaseError)?;
+            .await?;
         let row = R::try_get(&mut *conn, id).await?;
         Ok(row)
     }
@@ -28,8 +27,7 @@ impl DsotDatabase {
         let mut conn = self
             .sql
             .acquire()
-            .await
-            .map_err(DsotDatabaseError::DatabaseError)?;
+            .await?;
         let row = R::get(&mut *conn, id).await?;
         Ok(row)
     }
@@ -68,8 +66,7 @@ impl DsotDatabase {
         let mut conn = self
             .sql
             .acquire()
-            .await
-            .map_err(DsotDatabaseError::DatabaseError)?;
+            .await?;
         let res = R::list(&mut *conn, ListQuery { count, offset }).await?;
         Ok(res)
     }
