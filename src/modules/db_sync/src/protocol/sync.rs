@@ -6,7 +6,7 @@ use tokio_util::codec::{FramedRead, FramedWrite, LengthDelimitedCodec};
 use super::error::SyncResult;
 use crate::{
     dser::EntityMessagePack,
-    sync::{Handshake, HandshakeResponse, SyncHandler},
+    sync::{Handshake, HandshakeResponse, SyncHandler, SyncMessage},
 };
 
 pub struct RemoteSync {
@@ -28,7 +28,7 @@ impl RemoteSync {
     }
 
     async fn innser_handshake(&self, req: &Handshake) -> SyncResult<HandshakeResponse> {
-        let frame = EntityMessagePack::serialize(req)?;
+        Ok(HandshakeResponse::error())
     }
 }
 
@@ -51,10 +51,7 @@ impl SyncHandler for RemoteSync {
         }
     }
 
-    fn sync(
-        &self,
-        state: &crate::sync::SyncMessage,
-    ) -> impl Future<Output = crate::sync::SyncMessage> {
-        todo!()
+    async fn sync(&self, state: &SyncMessage) -> SyncMessage {
+        SyncMessage::Complete
     }
 }
