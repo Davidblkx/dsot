@@ -1,6 +1,6 @@
 use super::handler::SyncBridge;
 use super::model::*;
-use crate::{DsotDatabase, Result, database::DsotDatabaseTransaction};
+use crate::{DsotDatabase, RepositoryRegistry, Result, database::DsotDatabaseTransaction};
 
 pub struct DatabaseSyncBridge<'a> {
     pub db: &'a DsotDatabase,
@@ -50,6 +50,57 @@ impl<'a> DatabaseSyncBridge<'a> {
             Ok(DataExchange::Begin(keys).to_message())
         }
     }
+
+    async fn exchange_data(&mut self, msg: &DataExchange) -> Result<DataExchangeMessage> {
+        match msg {
+            DataExchange::Begin(remote_keys) => {
+                let to_request = self.trx.get_keys_not_in_journal(remote_keys)?;
+
+                Ok(DataExchange::Trade {
+                    keys: self.trx.get_journal_keys()?,
+                    request: to_request,
+                    entries: vec![],
+                }
+                .to_message())
+            }
+            DataExchange::Validate(remote_hash) => {
+                let hash = self.trx.generate_sync_hash()?;
+                if remote_hash == &hash {
+                    Ok(DataExchangeMessage::Complete)
+                } else {
+                    Ok(DataExchange::Begin(self.trx.get_journal_keys()?).to_message())
+                }
+            }
+            DataExchange::Trade {
+                keys,
+                request,
+                entries,
+            } => {
+                // Insert new entries
+                let entries_to_insert: Vec<&[u8]> = entries.iter().map(|v| v.as_slice()).collect();
+                RepositoryRegistry::instance()
+                    .apply(&mut self.trx, &entries_to_insert)
+                    .await?;
+                self.should_commit = true;
+
+                // Lookup requested entries to send back
+                let entries_to_send = self.trx.get_journal_entries_in_array(&request)?;
+                // Lookup keys that are not in the journal (need to be requested)
+                let keys_to_request = self.trx.get_keys_not_in_journal(&keys)?;
+
+                if entries_to_send.is_empty() && keys_to_request.is_empty() {
+                    Ok(DataExchange::Validate(self.trx.generate_sync_hash()?).to_message())
+                } else {
+                    Ok(DataExchange::Trade {
+                        keys: self.trx.get_journal_keys()?,
+                        request: keys_to_request,
+                        entries: entries_to_send,
+                    }
+                    .to_message())
+                }
+            }
+        }
+    }
 }
 
 impl<'a> SyncBridge for DatabaseSyncBridge<'a> {
@@ -96,6 +147,14 @@ impl<'a> SyncBridge for DatabaseSyncBridge<'a> {
     }
 
     async fn send_data(&mut self, msg: &super::model::DataExchangeMessage) -> DataExchangeMessage {
-        DataExchangeMessage::Complete
+        match msg {
+            DataExchangeMessage::InProgress(data) => self.exchange_data(data).await.flat(),
+            SyncMessage::Complete => DataExchangeMessage::Complete,
+            SyncMessage::Error(e) => {
+                ::log::warn!("Handshake error: {:?}", e);
+                self.should_commit = false;
+                DataExchangeMessage::Complete
+            }
+        }
     }
 }
