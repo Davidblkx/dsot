@@ -48,8 +48,21 @@ impl ProtocolHandler for DBSyncProtocol {
             }
         };
 
-        SyncHandler::sync(&mut remote_bridge, &mut local_bridge)
-            .await
-            .map_err(|e| AcceptError::from_err(e))
+        match SyncHandler::sync(&mut remote_bridge, &mut local_bridge).await {
+            Ok(_) => {
+                local_bridge
+                    .close()
+                    .await
+                    .map_err(|e| AcceptError::from_err(e))?;
+                Ok(())
+            }
+            Err(e) => {
+                local_bridge
+                    .close()
+                    .await
+                    .map_err(|e| AcceptError::from_err(e))?;
+                Err(AcceptError::from_err(e))
+            }
+        }
     }
 }

@@ -18,11 +18,19 @@ src/modules/db_sync/src/
 ├── database/         # DsotDatabase + transactions + journal + per-entity ops
 ├── manager/          # On-disk folder lifecycle: open, migrate, backup/restore
 ├── model/            # SyncOperation, JournalEntry, UpdateValue, IntoUpdateValue
+├── sync/             # Database synchronization protocol & message types (V1)
+│   ├── mod.rs        # Re-exports V1 sync interfaces
+│   └── v1/
+│       ├── db_sync_bridge.rs  # DatabaseSyncBridge wrapping database transitions
+│       ├── handler.rs         # SyncBridge trait + SyncHandler execution loop
+│       ├── iroh_protocol.rs   # DBSyncProtocol implementing Iroh's ProtocolHandler
+│       ├── iroh_sync_bridge.rs # IrohSyncBridge wrapping Iroh endpoints/streams
+│       └── model.rs           # Handshake, DataExchange, and SyncMessage models
 ├── dser.rs           # EntityMessagePack — rmp-serde wrapper
 ├── entity.rs         # SyncEntity, IntoSyncEntity traits
+├── error.rs          # DBSyncError — central error enum for the crate
 ├── registry.rs       # Distributed-slice registry of per-table apply functions
-├── repo.rs           # SyncEntityRepository trait + ListQuery + RepositoryError
-└── sync.rs           # Database synchronization protocol & message types
+└── repo.rs           # SyncEntityRepository trait + ListQuery + RepositoryError (alias)
 ```
 
 ---
@@ -75,7 +83,7 @@ The macro implementation reads the `#[table(name)]` attribute on the source stru
 
 `exec_op` dispatches a `SyncOperation` to the right concrete method (`Create` → `insert`, `Update` → `update`, `Delete` → `delete`, `Restore` → `restore`) and is the routine the journal replay uses.
 
-`RepositoryError` covers `EntityNotFound`, `DatabaseError` (sqlx), and `SerializationError` (msgpack).
+`RepositoryError` is a type alias pointing to `DBSyncError`, which covers `EntityNotFound`, `DatabaseError` (sqlx), and `SerializationError` (msgpack).
 
 ---
 
@@ -133,34 +141,69 @@ A single redb table, `JOURNAL_TABLE`, keyed by the journal entry's `Uuid` (`[u8;
 
 DSOT is local-first: each device owns a full SQLite database and a full journal. Devices reconcile by exchanging *journal entries*, not row snapshots, so a per-column edit on one device round-trips as a per-column edit on another.
 
-### Protocol Engine (`sync.rs`)
+### Protocol Engine (`sync/v1/`)
 
-The crate implements a complete synchronization protocol engine to coordinate state reconciliation between nodes.
+The crate implements a complete synchronization protocol engine using the Iroh network protocol under the ALPN `b"/dsot/db_sync/1"`. It coordinates state reconciliation between nodes using a modular bridge design built around the `SyncBridge` trait.
 
-#### Core Message Types
+#### Core Message Types (`sync/v1/model.rs`)
 
-*   **`SyncHandshakeRequest`**: Sent by a node initiating sync. Contains the database identifier (`id: String`) and the sender's current state hash (`sync: [u8; 32]`), which is a `BLAKE3` digest over the sorted keys of its journal.
-*   **`SyncHandshakeResponse`**: Informs the sender whether a synchronization is required (`need_sync: bool`) and whether the database/device IDs match (`id_match: bool`).
-*   **`SyncStartRequest`**: Sent by a node to begin the entry exchange, carrying its complete set of journal keys (`keys: Vec<[u8; 16]>`).
-*   **`SyncExchange`**: Transports missing database elements:
-    *   `keys: Vec<[u8; 16]>`: Keys that this node is missing locally but the remote has.
-    *   `entries: Vec<Vec<u8>>`: Serialized journal entries that the remote is missing but this node has.
+*   **`SyncMessage<T>`**: Outermost message wrapper. Can be `InProgress(T)`, `Complete`, or `Error(Option<String>)`.
+*   **`HandshakeMessage`** / **`Handshake`**: Message sent during initial session establishment:
+    *   `Hello(String)`: Sent by the initiating node containing its database identifier.
+    *   `Ack(SyncHash)`: Acknowledgment containing the node's current state hash (a `BLAKE3` digest over its sorted journal keys).
+*   **`DataExchangeMessage`** / **`DataExchange`**: Exchanged to reconcile different states:
+    *   `Begin(Vec<SyncKey>)`: Initiates key exchange with a list of all journal keys (`[u8; 16]`) present locally.
+    *   `Trade { keys, request, entries }`: The key exchange workhorse. Contains the sender's current journal keys, the keys requested from the remote node (`request`), and the serialized journal entries (`Vec<u8>`) requested by the remote node in the previous step.
+    *   `Validate(SyncHash)`: Sent when a node believes it is fully synchronized, prompting the receiver to verify hashes.
+
+#### Modular Bridge Architecture
+
+The sync subsystem decouples network transport from the database state transitions:
+
+```mermaid
+classDiagram
+    class SyncBridge {
+        <<interface>>
+        +read_handshake() HandshakeMessage
+        +send_handshake(msg) HandshakeMessage
+        +complete_handshake(msg) DataExchangeMessage
+        +send_data(msg) DataExchangeMessage
+    }
+    class DatabaseSyncBridge {
+        +trx DsotDatabaseTransaction
+        +should_commit bool
+        +close() bool
+    }
+    class IrohSyncBridge {
+        +reader FramedRead
+        +writer FramedWrite
+    }
+    SyncBridge <|.. DatabaseSyncBridge
+    SyncBridge <|.. IrohSyncBridge
+```
+
+*   **`SyncBridge`**: The trait defining the protocol operations.
+*   **`DatabaseSyncBridge`**: Wraps a local `DsotDatabase` and a transaction. Implements `SyncBridge` to compute state hashes, evaluate differences, apply remote journal entries, and retrieve requested entries from storage.
+*   **`IrohSyncBridge`**: Wraps an `iroh::endpoint::Connection`. Implements `SyncBridge` to send and receive framed MessagePack payloads over the network.
+*   **`SyncHandler`**: Coordinates the protocol execution between any two implementations of `SyncBridge` via the `SyncHandler::sync` function:
+    ```rust
+    pub async fn sync<SA: SyncBridge, SB: SyncBridge>(a: &mut SA, b: &mut SB) -> Result<()>
+    ```
+*   **`DBSyncProtocol`**: Implements Iroh's `ProtocolHandler`. When a connection is accepted, it instantiates both an `IrohSyncBridge` (remote) and a `DatabaseSyncBridge` (local), runs `SyncHandler::sync` to reconcile them, and calls `local_bridge.close()` at the end to commit or rollback the transaction based on success or error.
 
 #### Reconciliation Protocol Flow
 
-When two nodes reconcile, the synchronization engine executes the following logical steps:
+When two nodes reconcile via `SyncHandler::sync`, the following flow occurs:
 
-1.  **State Handshake:** The initiating node sends its `SyncHandshakeRequest`. The receiver validates the database identifier and computes `generate_sync_hash()`. If the hashes match, both databases are in lockstep and sync completes.
-2.  **Key Exchange Start:** If a mismatch is detected, a `SyncStartRequest` is sent containing the local node's journal keys.
-3.  **Exchange Generation:** The remote node calls `start_sync(req)` to generate a `SyncExchange`. It compares the key list, determines which entries it is missing (asking for their keys in `keys`), and packages up all entries the local node is missing in `entries`.
-4.  **Symmetric Merging:** The local node calls `sync(exchange)`. It:
-    *   Applies the incoming journal entries from `entries` inside a single transaction using `RepositoryRegistry::apply_journals_bytes`.
-    *   Retrieves and returns the journal entries corresponding to the keys requested by the remote node in the final returned `SyncExchange`.
-5.  **Final Apply:** The remote node receives the remaining missing entries and applies them, bringing both nodes to perfect convergence.
+1.  **State Handshake:** The initiating node sends `Handshake::Hello(db_id)`. The receiver validates the ID and responds with `Handshake::Ack(hash_B)`. If the hash matches the initiating node's local hash, both databases are already in sync and the session completes.
+2.  **Key Exchange Start:** If hashes mismatch, the initiator sends `DataExchange::Begin(keys_A)`.
+3.  **Exchange Trade:** The receiver compares `keys_A` with its local keys, computes the set difference of keys it is missing, and replies with `DataExchange::Trade` containing its own `keys_B`, the list of requested keys, and any entries the remote is missing.
+4.  **Symmetric Merging:** The initiator receives the `Trade` message, applies the incoming entries in a single transaction via `RepositoryRegistry::instance().apply()`, computes the keys it is missing, fetches the journal entries requested by the remote, and sends another `Trade` message.
+5.  **Final Validation:** Once no missing entries or keys are left to request, the nodes send `DataExchange::Validate(hash)` to confirm their state hashes match. Upon successful validation, both nodes transition to `Complete`.
 
 ### Status
 
-The synchronization state comparison, key exchange, payload exchange, and transaction replay primitives are fully implemented and verified via unit/integration tests in `sync_entity_contract.rs`. 
+The synchronization state comparison, key exchange, payload exchange, and transaction replay primitives are fully implemented and verified via unit/integration tests in `sync_entity_contract.rs` and the `sync_database` example.
 
 The external **transport coordinator** — the discovery layer, connection management, and transport protocol (e.g. over Iroh, WebSockets, or libp2p) that handles the networking socket calls to drive these protocol methods — is implemented externally to this crate.
 
@@ -236,7 +279,6 @@ The runtime handle. Wraps a `redb::Database` (journal) and a `sqlx::SqlitePool` 
 *   **Identity:** Carries an `id: String` representing the database identity. Can be customized on creation using `.with_id(id)` and retrieved using `.get_id()`.
 *   **Convenience APIs:** Exposes per-entity methods that begin a transaction, apply + journal one operation, and commit atomically: `insert`, `update`, `upsert`, `delete`, `restore`, and `apply_journal`.
 *   **Read-Only APIs:** Exposes connection pool accessors for read actions: `get`, `try_get`, `list`, and FTS5 `search`.
-*   **Sync APIs:** Exposes core protocol steps: `sync_handshake`, `start_sync`, and `sync`.
 
 ### `DsotDatabaseTransaction` (`database/transaction.rs`)
 
@@ -256,7 +298,7 @@ Used by application code as the single "open the database" call site.
 
 ## Errors
 
-- `DBSyncError` (`src/error.rs`) — the single, consolidated error enum for the crate. It represents the union of all errors that can occur within database synchronization and management, including:
+- `DBSyncError` (`src/modules/db_sync/src/error.rs`) — the single, consolidated error enum for the crate. It represents the union of all errors that can occur within database synchronization and management, including:
   - `redb` storage, transaction, commit, table, and database errors.
   - `sqlx` / SQLite errors.
   - Serialization / Deserialization (`rmp_serde`) errors.
