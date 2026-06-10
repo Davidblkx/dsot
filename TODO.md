@@ -1,6 +1,6 @@
 now:
     - create sync between devices: in progress
-        - finish iroh protocol using sync
+        - integrate iroh into lib and apps
 maybe later:
     - Develop and document local files
     - Design a way to cache a full db and clean journal
