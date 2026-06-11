@@ -8,6 +8,8 @@ pub struct ConfigValue {
     pub token: String,
     pub log_level: Option<String>,
     pub log_file: Option<PathBuf>,
+    pub use_network: bool,
+    pub network_config: dsot_network::NetworkConfig,
 }
 
 impl Default for ConfigValue {
@@ -17,6 +19,8 @@ impl Default for ConfigValue {
             token: uuid::Uuid::now_v7().to_string(),
             log_level: None,
             log_file: None,
+            use_network: true,
+            network_config: dsot_network::NetworkConfig::default(),
         }
     }
 }

@@ -2140,6 +2140,7 @@ dependencies = [
  "dsot_config",
  "dsot_db_sync",
  "dsot_model",
+ "dsot_network",
  "fern",
  "humantime",
  "log",
@@ -2163,6 +2164,22 @@ dependencies = [
  "sqlx",
  "thiserror 2.0.18",
  "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "dsot_network"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "dsot_db_sync",
+ "futures-util",
+ "iroh",
+ "log",
+ "serde",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-util",
  "uuid",
 ]
 

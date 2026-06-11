@@ -16,9 +16,15 @@ pub struct DBSyncProtocol {
     get_manager: fn(id: &str) -> crate::Result<DatabaseManager>,
 }
 
+impl DBSyncProtocol {
+    pub fn new(get_manager: fn(id: &str) -> crate::Result<DatabaseManager>) -> Self {
+        Self { get_manager }
+    }
+}
+
 impl ProtocolHandler for DBSyncProtocol {
     async fn accept(&self, connection: Connection) -> Result<(), iroh::protocol::AcceptError> {
-        let mut remote_bridge = IrohSyncBridge::create(connection).await?;
+        let mut remote_bridge = IrohSyncBridge::create_active(connection).await?;
 
         let db = match (self.get_manager)(remote_bridge.id.as_str()) {
             Ok(manager) => match manager.open_database().await {

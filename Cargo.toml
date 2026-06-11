@@ -1,13 +1,14 @@
 
 [workspace]
 members = [
+    "src/desktop",
+    "src/lib",
+    "src/modules/config",
     "src/modules/db_sync",
     "src/modules/derive",
-    "src/modules/music_brainz",
     "src/modules/model",
-    "src/modules/config",
-    "src/lib",
-    "src/desktop",
+    "src/modules/music_brainz",
+    "src/modules/network",
 ]
 resolver = "2"
 

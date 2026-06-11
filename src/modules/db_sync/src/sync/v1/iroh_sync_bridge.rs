@@ -16,18 +16,11 @@ pub struct IrohSyncBridge {
 }
 
 impl IrohSyncBridge {
-    pub async fn create(conn: Connection) -> Result<Self, AcceptError> {
-        let (stream_writer, stream_reader) = conn.accept_bi().await?;
+    /// Creates an Iroh sync bridge, that awits for the remote server to be the one starting the handshake
+    pub async fn create_active(conn: Connection) -> Result<Self, AcceptError> {
+        let mut bridge = IrohSyncBridge::create_passive(conn).await?;
 
-        let reader = FramedRead::new(stream_reader, LengthDelimitedCodec::new());
-        let writer = FramedWrite::new(stream_writer, LengthDelimitedCodec::new());
-
-        let mut bridge = Self {
-            reader,
-            writer,
-            id: "".to_string(),
-        };
-
+        // Waits for the remote server to start the handshake
         let id = match bridge.read_handshake_from_stream().await {
             Err(e) => {
                 return Err(AcceptError::from_err(e));
@@ -44,6 +37,20 @@ impl IrohSyncBridge {
         bridge.id = id;
 
         Ok(bridge)
+    }
+
+    /// Creates an Iroh sync bridge from a passive connection, that will wait for the remote server to start the handshake
+    pub async fn create_passive(conn: Connection) -> Result<Self, AcceptError> {
+        let (stream_writer, stream_reader) = conn.accept_bi().await?;
+
+        let reader = FramedRead::new(stream_reader, LengthDelimitedCodec::new());
+        let writer = FramedWrite::new(stream_writer, LengthDelimitedCodec::new());
+
+        Ok(Self {
+            reader,
+            writer,
+            id: "".to_string(),
+        })
     }
 
     pub async fn read_handshake_from_stream(&mut self) -> crate::Result<HandshakeMessage> {

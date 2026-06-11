@@ -1,5 +1,6 @@
 pub mod configs;
 pub mod logger;
+pub mod network;
 pub mod user_manager;
 
 pub use dsot_config;
@@ -17,13 +18,18 @@ pub enum DsotStateInitError {
     ConfigError(#[from] dsot_config::DsotConfigError),
     #[error("Error opening user db: {0}")]
     OpenDBError(#[from] dsot_db_sync::DBSyncError),
+    #[error("Error creating network: {0}")]
+    NetworkError(#[from] dsot_network::DsotNetworkError),
 }
+
+pub type DsotStateConfig = dsot_config::DsotConfig<configs::ConfigValue>;
 
 #[derive(Clone)]
 pub struct DsotState {
-    pub config: dsot_config::DsotConfig<configs::ConfigValue>,
+    pub config: DsotStateConfig,
     pub user_manager: user_manager::UserManager,
     pub db: dsot_db_sync::DatabaseManager,
+    pub network: Option<dsot_network::DsotNetwork>,
 }
 
 pub struct DsotStateInitOptions {
@@ -53,7 +59,7 @@ impl DsotStateInitOptions {
 }
 
 impl DsotState {
-    pub fn init(options: DsotStateInitOptions) -> Result<Self, DsotStateInitError> {
+    pub async fn init(options: DsotStateInitOptions) -> Result<Self, DsotStateInitError> {
         if options.debug {
             let file = if !options.is_mobile {
                 let date_now = chrono::Local::now().format("%Y_%m_%d_%H_%M").to_string();
@@ -83,10 +89,24 @@ impl DsotState {
 
         let db = user_manager.open_user_db(&config.value.user.as_str())?;
 
+        let network = if config.value.use_network {
+            Some(
+                dsot_network::DsotNetwork::init(&dsot_network::NetworkInitOptions {
+                    data_folder: config.data_dir.clone(),
+                    config: config.value.network_config.clone(),
+                    manager: move |e| user_manager.open_user_db(e),
+                })
+                .await?,
+            )
+        } else {
+            None
+        };
+
         Ok(DsotState {
             config,
             user_manager,
             db,
+            network,
         })
     }
 }
