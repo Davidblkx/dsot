@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use dsot_db_sync::DatabaseManager;
+use dsot_db_sync::{DatabaseManager, manager::DatabaseManagerProvider};
 
 #[derive(Clone)]
 pub struct UserManager {
@@ -42,5 +42,11 @@ impl UserManager {
 
     pub fn open_user_db(&self, user: &str) -> dsot_db_sync::manager::Result<DatabaseManager> {
         DatabaseManager::open_folder(self.dir.join(user))
+    }
+}
+
+impl DatabaseManagerProvider for UserManager {
+    fn provide(&self, id: &str) -> dsot_db_sync::manager::Result<DatabaseManager> {
+        self.open_user_db(id)
     }
 }

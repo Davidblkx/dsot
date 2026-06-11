@@ -1,6 +1,7 @@
 use std::path::PathBuf;
+use std::sync::Arc;
 
-use dsot_db_sync::{DatabaseManager, Result};
+use dsot_db_sync::manager::DatabaseManagerProvider;
 
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct NetworkConfig {
@@ -21,9 +22,17 @@ impl Default for NetworkConfig {
     }
 }
 
-#[derive(Debug)]
 pub struct NetworkInitOptions {
     pub data_folder: PathBuf,
     pub config: NetworkConfig,
-    pub manager: fn(id: &str) -> Result<DatabaseManager>,
+    pub manager: Arc<dyn DatabaseManagerProvider + Send + Sync>,
+}
+
+impl std::fmt::Debug for NetworkInitOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("NetworkInitOptions")
+            .field("data_folder", &self.data_folder)
+            .field("config", &self.config)
+            .finish()
+    }
 }

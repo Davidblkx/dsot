@@ -2,8 +2,6 @@ pub mod configs;
 pub mod logger;
 pub mod user_manager;
 
-use std::path::PathBuf;
-
 pub use dsot_config;
 pub use dsot_db_sync;
 pub use dsot_model;
@@ -92,14 +90,10 @@ impl DsotState {
 
         let network = if config.value.use_network {
             Some(
-                dsot_network::DsotNetwork::init(&dsot_network::NetworkInitOptions {
+                dsot_network::DsotNetwork::init(dsot_network::NetworkInitOptions {
                     data_folder: config.data_dir.clone(),
                     config: config.value.network_config.clone(),
-                    manager: move |e| {
-                        let manager = user_manager::UserManager::open(&PathBuf::from("value"))?;
-                        let db = manager.open_user_db(e)?;
-                        Ok(db)
-                    },
+                    manager: std::sync::Arc::new(user_manager.clone()),
                 })
                 .await?,
             )

@@ -7,7 +7,7 @@ use super::{DsotNetwork, NetworkInitOptions, Result};
 const KEY_NAME: &'static str = "dsot_network.key";
 
 impl DsotNetwork {
-    pub async fn init(options: &NetworkInitOptions) -> Result<DsotNetwork> {
+    pub async fn init(options: NetworkInitOptions) -> Result<DsotNetwork> {
         let key = Self::load_key(&options).await?;
 
         let endpoint = Endpoint::builder(iroh::endpoint::presets::N0)

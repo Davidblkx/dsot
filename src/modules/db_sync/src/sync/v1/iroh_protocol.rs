@@ -1,4 +1,4 @@
-use crate::{DatabaseManager, manager::DatabaseManagerProvider, sync::SyncBridge};
+use crate::{manager::DatabaseManagerProvider, sync::SyncBridge};
 
 use super::model::*;
 use super::{
@@ -11,14 +11,20 @@ use iroh::{
 
 pub const DSOT_DB_SYNC_ALPN_V1: &[u8] = b"/dsot/db_sync/1";
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct DBSyncProtocol {
-    get_manager: fn(id: &str) -> crate::Result<DatabaseManager>,
+    provider: std::sync::Arc<dyn DatabaseManagerProvider + Send + Sync>,
+}
+
+impl std::fmt::Debug for DBSyncProtocol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DBSyncProtocol").finish()
+    }
 }
 
 impl DBSyncProtocol {
-    pub fn new(get_manager: fn(id: &str) -> crate::Result<DatabaseManager>) -> Self {
-        Self { get_manager }
+    pub fn new(provider: std::sync::Arc<dyn DatabaseManagerProvider + Send + Sync>) -> Self {
+        Self { provider }
     }
 }
 
@@ -26,7 +32,7 @@ impl ProtocolHandler for DBSyncProtocol {
     async fn accept(&self, connection: Connection) -> Result<(), iroh::protocol::AcceptError> {
         let mut remote_bridge = IrohSyncBridge::create_active(connection).await?;
 
-        let db = match (self.get_manager)(remote_bridge.id.as_str()) {
+        let db = match self.provider.provide(remote_bridge.id.as_str()) {
             Ok(manager) => match manager.open_database().await {
                 Ok(db) => db,
                 Err(e) => {
