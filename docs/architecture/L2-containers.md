@@ -7,7 +7,7 @@ This document describes the high-level container structure of the DSOT applicati
 ```mermaid
 graph TD
     subgraph Cargo Workspace [DSOT Crate Containers]
-        DesktopApp[dsot_desktop]
+        DesktopApp[dsot_app]
         Lib[dsot_lib]
         Model[dsot_model]
         DbSync[dsot_db_sync]
@@ -71,6 +71,6 @@ graph TD
 *   **Responsibility:** Integrates user management, logging, database connections, and application-wide configuration into a unified state container (`DsotState`).
 *   **Technology:** `dsot_db_sync`, `dsot_config`, `dsot_model`, `sysdirs`, `fern`.
 
-### 7. `dsot_desktop` (Multi-Platform Client Interface)
+### 7. `dsot_app` (Multi-Platform Client Interface)
 *   **Responsibility:** Renders the Dioxus-based user interface for managing libraries and syncing metadata. Runs natively on both desktop and mobile layouts.
 *   **Technology:** `dioxus`, `dsot_lib`.

@@ -2078,6 +2078,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8b14ccef22fc6f5a8f4d7d768562a182c04ce9a3b3157b91390b52ddfdf1a76"
 
 [[package]]
+name = "dsot_app"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bakunin_config",
+ "dioxus",
+ "dsot_lib",
+ "log",
+ "serde",
+ "tokio",
+]
+
+[[package]]
 name = "dsot_config"
 version = "0.1.0"
 dependencies = [
@@ -2118,19 +2131,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
-]
-
-[[package]]
-name = "dsot_desktop"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "bakunin_config",
- "dioxus",
- "dsot_lib",
- "log",
- "serde",
- "tokio",
 ]
 
 [[package]]

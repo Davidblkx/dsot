@@ -138,5 +138,5 @@ cargo test
 ### Running the Desktop App
 
 ```bash
-dx serve --package dsot_desktop
+dx serve --package dsot_app
 ```

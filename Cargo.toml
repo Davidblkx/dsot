@@ -1,7 +1,7 @@
 
 [workspace]
 members = [
-    "src/desktop",
+    "src/app",
     "src/lib",
     "src/modules/config",
     "src/modules/db_sync",

@@ -3,7 +3,7 @@
 [web.app]
 
 # HTML title tag content
-title = "dsot_desktop"
+title = "dsot_app"
 
 # include `assets` in web platform
 [web.resource]

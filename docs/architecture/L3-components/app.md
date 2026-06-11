@@ -1,6 +1,6 @@
-# Multi-Platform UI Client (`dsot_desktop`)
+# Multi-Platform UI Client (`dsot_app`)
 
-The `dsot_desktop` crate implements the graphical client interface for DSOT. Developed using the **Dioxus** framework, it provides a fast, native user interface that targets desktop (GTK Webview) and mobile webviews from a single codebase.
+The `dsot_app` crate implements the graphical client interface for DSOT. Developed using the **Dioxus** framework, it provides a fast, native user interface that targets desktop (GTK Webview) and mobile webviews from a single codebase.
 
 ---
 
@@ -16,7 +16,7 @@ The `dsot_desktop` crate implements the graphical client interface for DSOT. Dev
 ## Crate Layout & Key Components
 
 ```
-src/desktop/src/
+src/app/src/
 ├── init/             # Platform-specific launch hooks (desktop.rs, mobile.rs)
 ├── views/            # High-level route pages (home, config, inbox)
 ├── widgets/          # Reusable UI components (inbox_add, inbox_list)
