@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Debug, path::PathBuf};
 
 mod backup;
 mod load;
@@ -11,6 +11,10 @@ pub type Result<T> = std::result::Result<T, crate::DBSyncError>;
 #[derive(Debug, Clone)]
 pub struct DatabaseManager {
     pub(crate) dir: PathBuf,
+}
+
+pub trait DatabaseManagerProvider {
+    fn provide(&self, id: &str) -> Result<DatabaseManager>;
 }
 
 impl DatabaseManager {

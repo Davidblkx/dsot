@@ -3,12 +3,14 @@ use dioxus::{mobile::Config, prelude::*};
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
-pub fn init_mobile() {
+pub async fn init_mobile() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
         is_mobile: true,
-    }) {
+    })
+    .await
+    {
         Ok(s) => s,
         Err(e) => panic!("Failed to initialize state: {}", e),
     };

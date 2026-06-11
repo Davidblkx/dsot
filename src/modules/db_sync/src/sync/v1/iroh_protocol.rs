@@ -1,4 +1,4 @@
-use crate::{DatabaseManager, sync::SyncBridge};
+use crate::{DatabaseManager, manager::DatabaseManagerProvider, sync::SyncBridge};
 
 use super::model::*;
 use super::{

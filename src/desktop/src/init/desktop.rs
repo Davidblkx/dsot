@@ -6,12 +6,14 @@ use dioxus::{
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
-pub fn init_desktop() {
+pub async fn init_desktop() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
         is_mobile: false,
-    }) {
+    })
+    .await
+    {
         Ok(s) => s,
         Err(e) => panic!("Failed to initialize state: {}", e),
     };

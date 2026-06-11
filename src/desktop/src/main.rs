@@ -4,6 +4,7 @@ mod routes;
 mod views;
 mod widgets;
 
-fn main() {
-    init::init_app();
+#[tokio::main]
+async fn main() {
+    init::init_app().await;
 }

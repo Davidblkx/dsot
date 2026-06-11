@@ -2130,6 +2130,7 @@ dependencies = [
  "dsot_lib",
  "log",
  "serde",
+ "tokio",
 ]
 
 [[package]]

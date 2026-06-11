@@ -1,15 +1,16 @@
 #[cfg(feature = "desktop")]
 mod desktop;
 
-#[cfg(feature = "mobile")]
+#[cfg(not(feature = "desktop"))]
 mod mobile;
 
 #[cfg(feature = "desktop")]
-pub fn init_app() {
-    desktop::init_desktop();
+pub async fn init_app() {
+    desktop::init_desktop().await;
 }
 
-#[cfg(feature = "mobile")]
-pub fn init_app() {
-    mobile::init_mobile();
+#[cfg(not(feature = "desktop"))]
+pub async fn init_app() {
+    mobile::init_mobile().await;
 }
+
