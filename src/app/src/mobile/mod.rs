@@ -1,16 +1,16 @@
-use dioxus::{
-    desktop::{Config, WindowBuilder, muda::Menu},
-    prelude::*,
-};
+mod layout;
+mod routes;
+
+use dioxus::{mobile::Config, prelude::*};
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 
-pub async fn init_desktop() {
+pub async fn init() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
-        is_mobile: false,
+        is_mobile: true,
     })
     .await
     {
@@ -18,15 +18,11 @@ pub async fn init_desktop() {
         Err(e) => panic!("Failed to initialize state: {}", e),
     };
 
-    let menu = Menu::new();
+    let config = Config::default();
 
-    let cfg = Config::default()
-        .with_window(WindowBuilder::new().with_title("DSOT"))
-        .with_menu(menu);
-
-    LaunchBuilder::desktop()
+    LaunchBuilder::mobile()
         .with_context(state)
-        .with_cfg(cfg)
+        .with_cfg(config)
         .launch(App);
 }
 
@@ -35,6 +31,6 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
-        Router::<crate::routes::Routes> {}
+        Router::<routes::Routes> {}
     }
 }
