@@ -1,5 +1,6 @@
 mod layout;
 mod routes;
+mod widgets;
 
 use dioxus::{
     desktop::{Config, WindowBuilder, muda::Menu},
@@ -7,7 +8,8 @@ use dioxus::{
 };
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
-const MAIN_CSS: Asset = asset!("/assets/main.css");
+
+const UI_STYLES: &[Asset] = &[asset!("/assets/styles/root.css")];
 
 pub async fn init() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
@@ -24,7 +26,11 @@ pub async fn init() {
     let menu = Menu::new();
 
     let cfg = Config::default()
-        .with_window(WindowBuilder::new().with_title("DSOT"))
+        .with_window(
+            WindowBuilder::new()
+                .with_title("DSOT")
+                .with_decorations(false),
+        )
         .with_menu(menu);
 
     LaunchBuilder::desktop()
@@ -37,7 +43,9 @@ pub async fn init() {
 fn App() -> Element {
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
+        for style in UI_STYLES {
+            document::Link { rel: "stylesheet", href: *style }
+        }
         Router::<routes::Routes> {}
     }
 }

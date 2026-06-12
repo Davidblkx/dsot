@@ -1,4 +1,5 @@
 [application]
+asset_dir = "assets"
 
 [web.app]
 
@@ -19,3 +20,15 @@ script = []
 # Javascript code file
 # serve: [dev-server] only
 script = []
+
+[bundle]
+
+identifier = "com.dpires.dsot"
+publisher = "dpires"
+
+icon = [
+    "assets/imgs/icon_256.png",
+    "assets/imgs/icon.ico",
+    "assets/imgs/icon_256.icns",
+    "assets/imgs/icon.icns",
+]

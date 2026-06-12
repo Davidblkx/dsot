@@ -1,10 +1,13 @@
 use dioxus::prelude::*;
 
 use super::routes::Routes;
+use super::widgets::DesktopTopBar;
 
 #[component]
 pub fn Layout() -> Element {
     rsx! {
+        DesktopTopBar {  }
+
         div {
             id: "navbar",
             Link {

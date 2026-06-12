@@ -1,0 +1,65 @@
+# Treat common binary files as binary (prevents line-ending conversion and text diffs)
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.tiff binary
+*.bmp binary
+*.psd binary
+
+# Audio
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.flac binary
+*.m4a binary
+*.aac binary
+*.opus binary
+
+# Video
+*.mp4 binary
+*.mov binary
+*.avi binary
+*.mkv binary
+*.webm binary
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+
+# Archives / Compressed Files
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+*.bz2 binary
+*.xz binary
+
+# Documents
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+
+# Compiled / Executables / Libraries
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.bin binary
+*.a binary
+*.o binary
+*.lib binary
+
+# Database Files
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
