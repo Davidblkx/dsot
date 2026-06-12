@@ -18,7 +18,7 @@ jobs:
       - name: Fetch from Codeberg and Push to GitHub
         run: |
           # Add Codeberg as a remote
-          git remote add https://codeberg.org/dpires/dsot.git
+          git remote add codeberg https://codeberg.org/dpires/dsot.git
 
           # Fetch all branches and tags from Codeberg
           git fetch codeberg +refs/heads/*:refs/remotes/codeberg/* +refs/tags/*:refs/tags/*
