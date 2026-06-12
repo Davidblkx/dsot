@@ -1,0 +1,27 @@
+name: Sync from codeberg
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch from Codeberg and Push to GitHub
+        run: |
+          # Add Codeberg as a remote
+          git remote add https://codeberg.org/dpires/dsot.git
+
+          # Fetch all branches and tags from Codeberg
+          git fetch codeberg +refs/heads/*:refs/remotes/codeberg/* +refs/tags/*:refs/tags/*
+
+          # Force push the fetched refs back to GitHub's origin
+          git push origin +refs/remotes/codeberg/*:refs/heads/* +refs/tags/*:refs/tags/* --prune
