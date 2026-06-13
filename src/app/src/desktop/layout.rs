@@ -1,7 +1,9 @@
 use dioxus::prelude::*;
 
 use super::routes::Routes;
-use super::widgets::{DesktopFooter, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar};
+use super::widgets::{
+    DesktopFooter, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar, ResizeBox,
+};
 
 #[component]
 pub fn Layout() -> Element {
@@ -30,5 +32,7 @@ pub fn Layout() -> Element {
         DesktopRightPanel {  }
 
         DesktopFooter {  }
+
+        ResizeBox {  }
     }
 }
