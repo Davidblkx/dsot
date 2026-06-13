@@ -1,6 +1,8 @@
 use dioxus::desktop::use_window;
 use dioxus::prelude::*;
 
+static CSS: Asset = asset!("/assets/styles/desktop/widgets/topbar.css");
+
 #[component]
 pub fn DesktopTopBar() -> Element {
     let win = use_window();
@@ -10,6 +12,7 @@ pub fn DesktopTopBar() -> Element {
     let win_close = win.clone();
 
     rsx! {
+        document::Link { rel: "stylesheet", href: CSS }
         header {
             "data-component": "desktop_topbar",
             onmousedown: move |_| {

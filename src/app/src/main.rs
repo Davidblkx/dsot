@@ -1,3 +1,4 @@
+mod assets;
 mod views;
 mod widgets;
 

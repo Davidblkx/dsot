@@ -1,6 +1,88 @@
-body {
-    background-color: #0f1116;
-    color: #ffffff;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+@font-face {
+    font-family: "Tanker";
+    src: url("/assets/Tanker-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Satoshi";
+    src: url("/assets/Satoshi-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-display: swap;
+    font-style: normal;
+}
+
+@layer base {
+    :root {
+        /* --- Brand Colors (Input) --- */
+        --color-primary: #f9cd6e;
+        --color-secondary: #846350;
+        --color-accent: #e1a195;
+
+        /* --- Surface & Backgrounds (Derived from inputs) --- */
+        --color-bg-main: #2d2c32; /* Base canvas background */
+        --color-bg-surface: #38363d; /* Cards, containers, sidebars */
+        --color-bg-surface-elevated: #514e55; /* Hover states, tooltips, dropdowns */
+
+        /* --- Borders & Dividers --- */
+        --color-border: #f9cd6e33; /* Primary color with 20% opacity for subtle, modern separation */
+        --color-border-muted: #514e55; /* Low-contrast divider */
+
+        /* --- Text Hierarchy --- */
+        --color-text-primary: #dadada; /* High contrast body/headings */
+        --color-text-secondary: #989898; /* Muted secondary text */
+        --color-text-muted: #6e6b73; /* Disabled text, placeholders */
+
+        /* --- Generated Status Colors (Harmonized with primary/accent palette) --- */
+        --color-success: #81c784; /* Soft dark-mode green */
+        --color-warning: #f9cd6e; /* Reusing primary yellow for warnings */
+        --color-danger: #e1a195; /* Reusing accent pink/red for errors */
+        --color-info: #64b5f6; /* Soft dark-mode blue */
+
+        /* --- Spacing Scale (Compact & Dense) --- */
+        --space-xs: 0.25rem; /* 4px */
+        --space-sm: 0.5rem; /* 8px */
+        --space-md: 0.75rem; /* 12px */
+        --space-lg: 1rem; /* 16px */
+        --space-xl: 1.5rem; /* 24px */
+
+        /* --- Border Radius (Sharp & Modern) --- */
+        --radius-sm: 2px; /* Checkboxes, badges */
+        --radius-md: 4px; /* Buttons, inputs, card components */
+        --radius-lg: 6px; /* Main panels, modals */
+        --radius-full: 9999px; /* Pill tags, avatars */
+
+        /* --- Font Families --- */
+        --font-brand: "Tanker", sans-serif;
+        --font-body: "Satoshi", sans-serif;
+
+        /* --- Font Weights --- */
+        /* Satoshi-Light is typically 300, but we scale up for hierarchy */
+        --weight-light: 300; /* Default body weight (Satoshi-Light) */
+        --weight-normal: 400; /* Text readability / UI elements */
+        --weight-medium: 500; /* Buttons, table headers */
+        --weight-bold: 700; /* Section headers / Emphasized text */
+        --weight-brand: 400; /* Tanker-Regular default */
+
+        /* --- Font Sizes (Compact, Proportional Scale) --- */
+        --font-size-xs: 0.75rem; /* 12px - Captions, metadata, badges */
+        --font-size-sm: 0.8125rem; /* 13px - Standard UI text, menus, sidebars */
+        --font-size-md: 0.875rem; /* 14px - Primary body text, input fields */
+        --font-size-lg: 1rem; /* 16px - Subheadings, card titles */
+        --font-size-xl: 1.25rem; /* 20px - Section headers */
+        --font-size-xxl: 1.75rem; /* 28px - Display titles, brand assets (Tanker) */
+
+        /* --- Line Heights (Ensures tight, modern scannability) --- */
+        --line-height-none: 1;
+        --line-height-tight: 1.25; /* Headings and brand font */
+        --line-height-base: 1.4; /* Balanced for Satoshi-Light readability */
+        --line-height-loose: 1.6; /* Dense text blocks */
+
+        /* --- Letter Spacing (Tracking) --- */
+        --letter-spacing-tight: -0.02em; /* Use on large Tanker headers */
+        --letter-spacing-normal: 0em; /* Default for Satoshi */
+        --letter-spacing-wide: 0.05em; /* Use on all-caps sub-labels/badges */
+    }
 }

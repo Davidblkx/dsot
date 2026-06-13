@@ -9,7 +9,10 @@ use dioxus::{
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 
-const UI_STYLES: &[Asset] = &[asset!("/assets/styles/root.css")];
+const UI_STYLES: &[Asset] = &[
+    asset!("/assets/styles/root.css"),
+    asset!("/assets/styles/desktop/layout.css"),
+];
 
 pub async fn init() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {

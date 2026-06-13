@@ -1,0 +1,82 @@
+@layer layout {
+    :root {
+        --desktop-left-panel-width: 200px;
+        --desktop-right-panel-width: 200px;
+    }
+
+    html {
+        /* Defines 1rem = 16px (browser default) */
+        font-size: 16px;
+
+        /* Ensures padding/borders don't expand element sizes */
+        box-sizing: border-box;
+
+        /* Disables overflow scrolling */
+        overflow: hidden;
+
+        /* Fill screen */
+        width: 100%;
+        height: 100%;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: inherit;
+    }
+
+    body {
+        /* Apply typography configuration */
+        font-family: var(--font-body);
+        font-size: var(--font-size-md);
+        font-weight: var(--weight-light);
+        line-height: var(--line-height-base);
+        letter-spacing: var(--letter-spacing-normal);
+
+        /* Apply theme palette */
+        color: var(--color-text-primary);
+        background-color: var(--color-bg-main);
+
+        /* Reset margins for app layout */
+        margin: 0;
+        padding: 0;
+
+        /* Subpixel smoothing for light text on dark backgrounds */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+
+        /* Optimize text rendering speed over precision for UI performance */
+        text-rendering: optimizeSpeed;
+
+        /* Disables overflow scrolling */
+        overflow: hidden;
+
+        /* Fill screen */
+        width: 100%;
+        height: 100%;
+
+        /* App default layout */
+        display: grid;
+        grid-template:
+            "topbar topbar topbar" 30px
+            "left main right" auto
+            "footer footer footer" 30px / var(--desktop-left-panel-width)
+            auto var(--desktop-right-panel-width);
+    }
+
+    [data-component="desktop_left_panel"] {
+        grid-area: left;
+    }
+
+    [data-component="desktop_main"] {
+        grid-area: main;
+    }
+
+    [data-component="desktop_right_panel"] {
+        grid-area: right;
+    }
+
+    [data-component="desktop_footer"] {
+        grid-area: footer;
+    }
+}

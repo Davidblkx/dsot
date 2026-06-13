@@ -1,15 +1,17 @@
 use dioxus::prelude::*;
 
 use super::routes::Routes;
-use super::widgets::DesktopTopBar;
+use super::widgets::{DesktopFooter, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar};
 
 #[component]
 pub fn Layout() -> Element {
     rsx! {
         DesktopTopBar {  }
 
-        div {
-            id: "navbar",
+        DesktopLeftPanel {  }
+
+        main {
+            "data-component": "desktop_main",
             Link {
                 to: Routes::HomeView,
                 "Home"
@@ -22,8 +24,11 @@ pub fn Layout() -> Element {
                 to: Routes::InboxView,
                 "Inbox"
             }
+            Outlet::<Routes> {}
         }
 
-        Outlet::<Routes> {}
+        DesktopRightPanel {  }
+
+        DesktopFooter {  }
     }
 }

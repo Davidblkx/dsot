@@ -1,0 +1,7 @@
+@layer topbar {
+    [data-component="desktop_topbar"] {
+        grid-area: topbar;
+        display: flex;
+        flex-direction: row;
+    }
+}
