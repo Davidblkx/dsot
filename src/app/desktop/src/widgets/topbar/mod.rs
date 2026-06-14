@@ -5,7 +5,7 @@ mod brand;
 mod buttons;
 mod fav;
 
-static CSS: Asset = asset!("/assets/styles/desktop/widgets/topbar.css");
+static CSS: Asset = asset!("/assets/styles/widgets/topbar.css");
 
 #[component]
 pub fn DesktopTopBar() -> Element {

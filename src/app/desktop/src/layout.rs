@@ -16,18 +16,6 @@ pub fn Layout() -> Element {
 
         main {
             "data-component": "desktop_main",
-            Link {
-                to: Routes::HomeView,
-                "Home"
-            }
-            Link {
-                to: Routes::ConfigView,
-                "Config"
-            }
-            Link {
-                to: Routes::InboxView,
-                "Inbox"
-            }
             Outlet::<Routes> {}
         }
 

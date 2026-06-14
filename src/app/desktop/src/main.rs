@@ -1,3 +1,4 @@
+mod helpers;
 mod layout;
 mod routes;
 mod widgets;
@@ -9,7 +10,7 @@ use dioxus::{
 
 const UI_STYLES: &[Asset] = &[
     dsot_shared_ui::assets::ROOT_CSS,
-    asset!("/assets/styles/desktop/layout.css"),
+    asset!("/assets/styles/layout.css"),
 ];
 
 #[tokio::main]
@@ -43,6 +44,8 @@ async fn main() {
 
 #[component]
 fn App() -> Element {
+    helpers::max_state::track_state();
+
     rsx! {
         document::Link { rel: "icon", href: dsot_shared_ui::assets::FAVICON }
         for style in UI_STYLES {

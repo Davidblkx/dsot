@@ -17,8 +17,12 @@ use uuid::Uuid;
 pub enum InboxValue {
     /// A local file path or URI the user wants to import.
     File(String),
-    /// An artist name to match against MusicBrainz.
+    /// An artist name to match against metadata provider.
     Artist(String),
+    /// An album name to match against metadata provider.
+    Album(String),
+    /// A link to a resource
+    Link(String),
     /// Free-form catch-all.
     Other(String),
 }
@@ -172,7 +176,11 @@ mod tests {
 
     #[test]
     fn inbox_status_db_str_roundtrips() {
-        for s in [InboxStatus::Pending, InboxStatus::Resolved, InboxStatus::Failed] {
+        for s in [
+            InboxStatus::Pending,
+            InboxStatus::Resolved,
+            InboxStatus::Failed,
+        ] {
             let written = s.as_db_str().into_owned();
             assert_eq!(InboxStatus::from_db_str(&written).unwrap(), s);
         }

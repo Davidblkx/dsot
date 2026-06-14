@@ -1,0 +1,57 @@
+@layer component_menu {
+    :root {
+        --menu-item-height: 30px;
+    }
+
+    [data-component="menu"] {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        font-size: var(--font-size-xl);
+
+        [data-component="menu_item"] {
+            flex: 0 0 auto;
+            width: 100%;
+            min-height: var(--menu-item-height);
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+
+            & > .header {
+                display: flex;
+                flex-direction: row;
+                max-height: var(--menu-item-height);
+                height: var(--menu-item-height);
+
+                .icon {
+                    padding: 0 10px;
+                    display: flex;
+                    justify-items: center;
+                    align-items: center;
+                }
+
+                .text {
+                    user-select: none;
+                }
+
+                &:hover {
+                    cursor: pointer;
+                    background-color: var(--color-primary);
+                    color: var(--color-secondary);
+                    border-radius: var(--radius-lg);
+                }
+            }
+
+            &[data-route="active"] > .header:not(:hover) {
+                border-bottom: 1px solid var(--color-primary);
+                .icon {
+                    color: var(--color-primary);
+                }
+            }
+        }
+    }
+}

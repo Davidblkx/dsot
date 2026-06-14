@@ -1,4 +1,10 @@
 @layer frame {
+    [data-window-status="maximized"] {
+        [data-component="desktop_frame"] {
+            display: none;
+        }
+    }
+
     [data-component="desktop_frame"] {
         background-color: var(--color-bg-surface);
         position: fixed;

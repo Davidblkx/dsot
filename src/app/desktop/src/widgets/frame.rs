@@ -57,7 +57,7 @@ fn BaseFrame(props: FrameProps) -> Element {
     }
 }
 
-static CSS: Asset = asset!("/assets/styles/desktop/widgets/frame.css");
+static CSS: Asset = asset!("/assets/styles/widgets/frame.css");
 
 #[component]
 pub fn DesktopFrame() -> Element {
