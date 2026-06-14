@@ -16,3 +16,4 @@ dsot_lib = { path = "../../lib" }
 log = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
+uuid = { workspace = true }

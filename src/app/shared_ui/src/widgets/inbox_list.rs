@@ -41,6 +41,7 @@ pub fn InboxList() -> Element {
                     update_items.call();
                 }
             }
+            super::inbox::FormAddInboxItem {}
             ul {
                 for itm in items.iter() {
                     li {

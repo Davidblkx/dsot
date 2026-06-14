@@ -1,6 +1,5 @@
 now:
-    - create the layout for desktop
-        - create side menus
+    - improve inbox screen
     - Add iroh screen
         - show key
         - test db sync

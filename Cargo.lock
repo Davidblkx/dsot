@@ -1953,6 +1953,7 @@ dependencies = [
  "log",
  "serde",
  "tokio",
+ "uuid",
 ]
 
 [[package]]

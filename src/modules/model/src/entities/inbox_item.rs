@@ -97,7 +97,7 @@ impl IntoUpdateValue for InboxStatus {
     }
 }
 
-#[derive(Debug, Clone, Default, Deserialize, Serialize, SyncEntity)]
+#[derive(Debug, Clone, Default, Deserialize, Serialize, SyncEntity, PartialEq)]
 #[table(inbox_items)]
 pub struct InboxItem {
     pub id: Uuid,
