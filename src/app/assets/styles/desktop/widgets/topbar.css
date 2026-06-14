@@ -32,6 +32,7 @@
         }
 
         & > [data-component="button_group"] {
+            --btn-shrink: 10px;
             flex: 0 1 auto;
             display: flex;
             flex-direction: row;
@@ -40,29 +41,36 @@
             padding-right: 5px;
 
             & > button {
-                width: calc(var(--top-bar-height) - 15px);
-                height: calc(var(--top-bar-height) - 15px);
+                width: calc(var(--top-bar-height) - var(--btn-shrink));
+                height: calc(var(--top-bar-height) - var(--btn-shrink));
                 border-radius: 0;
                 cursor: pointer;
                 border: none;
                 margin-left: 5px;
                 opacity: 0.8;
+                background-color: var(--color-bg-surface-elevated);
+                padding: 0;
 
                 &:hover {
                     opacity: 1;
                 }
+
+                & > svg {
+                    width: calc(var(--top-bar-height) - var(--btn-shrink));
+                    height: calc(var(--top-bar-height) - var(--btn-shrink));
+                }
             }
 
             [data-component="button_minimize"] {
-                background-color: var(--color-success);
+                color: var(--color-success);
             }
 
             [data-component="button_maximize"] {
-                background-color: var(--color-warning);
+                color: var(--color-warning);
             }
 
             [data-component="button_close"] {
-                background-color: var(--color-danger);
+                color: var(--color-danger);
             }
         }
     }

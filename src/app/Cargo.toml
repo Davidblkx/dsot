@@ -12,6 +12,7 @@ repository.workspace = true
 anyhow = { workspace = true }
 bakunin_config = { workspace = true }
 dioxus = { workspace = true }
+dioxus-free-icons = { workspace = true }
 dsot_lib = { path = "../lib" }
 log = { workspace = true }
 serde = { workspace = true }
