@@ -20,7 +20,11 @@ pub enum InboxValue {
     /// An artist name to match against metadata provider.
     Artist(String),
     /// An album name to match against metadata provider.
-    Album(String),
+    Album {
+        album: String,
+        artist: String,
+        year: Option<u32>,
+    },
     /// A link to a resource
     Link(String),
     /// Free-form catch-all.

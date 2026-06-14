@@ -70,7 +70,7 @@ impl TryFrom<&InboxItemSql> for DisplayItem {
             text: match value.value()? {
                 InboxValue::File(path) => path,
                 InboxValue::Artist(artist) => artist,
-                InboxValue::Album(album) => album,
+                InboxValue::Album { album, .. } => album,
                 InboxValue::Link(link) => link,
                 InboxValue::Other(text) => text,
             },
