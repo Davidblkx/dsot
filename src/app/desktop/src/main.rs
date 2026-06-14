@@ -7,14 +7,13 @@ use dioxus::{
     prelude::*,
 };
 
-const FAVICON: Asset = asset!("/assets/favicon.ico");
-
 const UI_STYLES: &[Asset] = &[
-    asset!("/assets/styles/root.css"),
+    dsot_shared_ui::assets::ROOT_CSS,
     asset!("/assets/styles/desktop/layout.css"),
 ];
 
-pub async fn init() {
+#[tokio::main]
+async fn main() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
@@ -45,7 +44,7 @@ pub async fn init() {
 #[component]
 fn App() -> Element {
     rsx! {
-        document::Link { rel: "icon", href: FAVICON }
+        document::Link { rel: "icon", href: dsot_shared_ui::assets::FAVICON }
         for style in UI_STYLES {
             document::Link { rel: "stylesheet", href: *style }
         }

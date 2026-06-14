@@ -1,0 +1,22 @@
+[application]
+asset_dir = "assets"
+
+[web.app]
+title = "dsot_desktop_app"
+
+[web.resource]
+style = []
+script = []
+
+[web.resource.dev]
+script = []
+
+[bundle]
+identifier = "com.dpires.dsot"
+publisher = "dpires"
+icon = [
+    "assets/imgs/icon_256.png",
+    "assets/imgs/icon.ico",
+    "assets/imgs/icon_256.icns",
+    "assets/imgs/icon.icns",
+]

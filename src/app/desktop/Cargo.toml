@@ -1,26 +1,23 @@
+
 [package]
-name = "dsot_app"
+name = "dsot_desktop"
 version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 anyhow = { workspace = true }
 bakunin_config = { workspace = true }
 dioxus = { workspace = true }
 dioxus-free-icons = { workspace = true }
-dsot_lib = { path = "../lib" }
+dsot_lib = { path = "../../lib" }
+dsot_shared_ui = { path = "../shared_ui" }
 log = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }
 
-
 [features]
 default = ["desktop"]
-web = ["dioxus/web"]
 desktop = ["dioxus/desktop"]
-mobile = ["dioxus/mobile"]

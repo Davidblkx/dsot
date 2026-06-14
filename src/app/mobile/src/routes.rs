@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use super::layout::Layout;
-use crate::views::{ConfigView, HomeView, InboxView};
+use dsot_shared_ui::views::{ConfigView, HomeView, InboxView};
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]

@@ -2,30 +2,18 @@
 asset_dir = "assets"
 
 [web.app]
+title = "dsot_mobile_app"
 
-# HTML title tag content
-title = "dsot_app"
-
-# include `assets` in web platform
 [web.resource]
-
-# Additional CSS style files
 style = []
-
-# Additional JavaScript files
 script = []
 
 [web.resource.dev]
-
-# Javascript code file
-# serve: [dev-server] only
 script = []
 
 [bundle]
-
 identifier = "com.dpires.dsot"
 publisher = "dpires"
-
 icon = [
     "assets/imgs/icon_256.png",
     "assets/imgs/icon.ico",

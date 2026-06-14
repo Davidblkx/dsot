@@ -3,10 +3,8 @@ mod routes;
 
 use dioxus::{mobile::Config, prelude::*};
 
-const FAVICON: Asset = asset!("/assets/favicon.ico");
-const MAIN_CSS: Asset = asset!("/assets/main.css");
-
-pub async fn init() {
+#[tokio::main]
+async fn main() {
     let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
         debug: true,
         config_file: None,
@@ -29,8 +27,8 @@ pub async fn init() {
 #[component]
 fn App() -> Element {
     rsx! {
-        document::Link { rel: "icon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: MAIN_CSS }
+        document::Link { rel: "icon", href: dsot_shared_ui::assets::FAVICON }
+        document::Link { rel: "stylesheet", href: dsot_shared_ui::assets::ROOT_CSS }
         Router::<routes::Routes> {}
     }
 }

@@ -1,0 +1,18 @@
+
+[package]
+name = "dsot_shared_ui"
+version = "0.1.0"
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+bakunin_config = { workspace = true }
+dioxus = { workspace = true }
+dioxus-free-icons = { workspace = true }
+dsot_lib = { path = "../../lib" }
+log = { workspace = true }
+serde = { workspace = true }
+tokio = { workspace = true }
