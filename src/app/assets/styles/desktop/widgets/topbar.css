@@ -3,5 +3,67 @@
         grid-area: topbar;
         display: flex;
         flex-direction: row;
+        background-color: var(--color-bg-surface);
+        height: var(--top-bar-height);
+
+        & > [data-component="brand"] {
+            flex: 0 1 auto;
+            font-family: var(--font-brand);
+            font-size: var(--font-size-xl);
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding-left: 5px;
+
+            & > img {
+                max-height: calc(var(--top-bar-height) - 5px);
+            }
+
+            & > span {
+                user-select: none;
+                cursor: default;
+                padding-left: 5px;
+            }
+        }
+
+        & > [data-component="favourites"] {
+            flex: 1 1 auto;
+        }
+
+        & > [data-component="button_group"] {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            padding-right: 5px;
+
+            & > button {
+                width: calc(var(--top-bar-height) - 15px);
+                height: calc(var(--top-bar-height) - 15px);
+                border-radius: 0;
+                cursor: pointer;
+                border: none;
+                margin-left: 5px;
+                opacity: 0.8;
+
+                &:hover {
+                    opacity: 1;
+                }
+            }
+
+            [data-component="button_minimize"] {
+                background-color: var(--color-success);
+            }
+
+            [data-component="button_maximize"] {
+                background-color: var(--color-warning);
+            }
+
+            [data-component="button_close"] {
+                background-color: var(--color-danger);
+            }
+        }
     }
 }

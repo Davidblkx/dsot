@@ -2,6 +2,8 @@
     :root {
         --desktop-left-panel-width: 200px;
         --desktop-right-panel-width: 200px;
+        --resize-border-width: 5px;
+        --top-bar-height: 30px;
     }
 
     html {
@@ -52,8 +54,15 @@
         overflow: hidden;
 
         /* Fill screen */
-        width: 100%;
-        height: 100%;
+        width: calc(100% - 2 * var(--resize-border-width));
+        height: calc(100% - 2 * var(--resize-border-width));
+
+        /* Stretch content */
+        display: flex;
+        flex-direction: column;
+
+        /* Resize border */
+        margin: var(--resize-border-width);
     }
 
     #main {
@@ -61,16 +70,15 @@
         overflow: hidden;
 
         /* Fill screen */
-        width: 100%;
-        height: 100%;
+        flex: 1 1 auto;
 
         /* App default layout */
         display: grid;
         grid-template:
-            "topbar topbar topbar" 30px
+            "topbar topbar topbar" var(--top-bar-height)
             "left main right" auto
             "footer footer footer" 30px / var(--desktop-left-panel-width)
-            auto var(--desktop-right-panel-width);
+            1fr var(--desktop-right-panel-width);
     }
 
     [data-component="desktop_left_panel"] {

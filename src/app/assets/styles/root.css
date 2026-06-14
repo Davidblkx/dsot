@@ -22,9 +22,9 @@
         --color-accent: #e1a195;
 
         /* --- Surface & Backgrounds (Derived from inputs) --- */
-        --color-bg-main: #2d2c32; /* Base canvas background */
-        --color-bg-surface: #38363d; /* Cards, containers, sidebars */
-        --color-bg-surface-elevated: #514e55; /* Hover states, tooltips, dropdowns */
+        --color-bg-main: #282c33; /* Base canvas background */
+        --color-bg-surface: #2f343e; /* Cards, containers, sidebars */
+        --color-bg-surface-elevated: #3b414d; /* Hover states, tooltips, dropdowns */
 
         /* --- Borders & Dividers --- */
         --color-border: #f9cd6e33; /* Primary color with 20% opacity for subtle, modern separation */

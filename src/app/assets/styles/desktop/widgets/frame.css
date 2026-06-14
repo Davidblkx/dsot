@@ -1,0 +1,71 @@
+@layer frame {
+    [data-component="desktop_frame"] {
+        background-color: var(--color-bg-surface);
+        position: fixed;
+        z-index: 1000;
+
+        &[data-position="top_right"] {
+            width: var(--resize-border-width);
+            height: var(--resize-border-width);
+            top: 0;
+            right: 0;
+            cursor: nesw-resize;
+        }
+
+        &[data-position="top_left"] {
+            width: var(--resize-border-width);
+            height: var(--resize-border-width);
+            top: 0;
+            left: 0;
+            cursor: nwse-resize;
+        }
+
+        &[data-position="bottom_right"] {
+            width: var(--resize-border-width);
+            height: var(--resize-border-width);
+            bottom: 0;
+            right: 0;
+            cursor: nwse-resize;
+        }
+
+        &[data-position="bottom_left"] {
+            width: var(--resize-border-width);
+            height: var(--resize-border-width);
+            bottom: 0;
+            left: 0;
+            cursor: nesw-resize;
+        }
+
+        &[data-position="top"] {
+            width: calc(100vw - 2 * var(--resize-border-width));
+            height: var(--resize-border-width);
+            top: 0;
+            left: var(--resize-border-width);
+            cursor: ns-resize;
+        }
+
+        &[data-position="bottom"] {
+            width: calc(100vw - 2 * var(--resize-border-width));
+            height: var(--resize-border-width);
+            bottom: 0;
+            left: var(--resize-border-width);
+            cursor: ns-resize;
+        }
+
+        &[data-position="left"] {
+            width: var(--resize-border-width);
+            height: calc(100vh - 2 * var(--resize-border-width));
+            top: var(--resize-border-width);
+            left: 0;
+            cursor: ew-resize;
+        }
+
+        &[data-position="right"] {
+            width: var(--resize-border-width);
+            height: calc(100vh - 2 * var(--resize-border-width));
+            top: var(--resize-border-width);
+            right: 0;
+            cursor: ew-resize;
+        }
+    }
+}

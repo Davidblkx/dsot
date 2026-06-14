@@ -2,12 +2,14 @@ use dioxus::prelude::*;
 
 use super::routes::Routes;
 use super::widgets::{
-    DesktopFooter, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar, ResizeBox,
+    DesktopFooter, DesktopFrame, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar,
 };
 
 #[component]
 pub fn Layout() -> Element {
     rsx! {
+        DesktopFrame {  }
+
         DesktopTopBar {  }
 
         DesktopLeftPanel {  }
@@ -32,7 +34,5 @@ pub fn Layout() -> Element {
         DesktopRightPanel {  }
 
         DesktopFooter {  }
-
-        ResizeBox {  }
     }
 }

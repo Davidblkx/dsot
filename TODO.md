@@ -1,6 +1,11 @@
 now:
-    - create sync between devices: in progress
-        - integrate iroh into lib and apps
+    - create the layout for desktop
+        - when maxmimized, remove outer borders
+        - add icons
+        - create side menus
+    - Add iroh screen
+        - show key
+        - test db sync
 maybe later:
     - Develop and document local files
     - Design a way to cache a full db and clean journal
