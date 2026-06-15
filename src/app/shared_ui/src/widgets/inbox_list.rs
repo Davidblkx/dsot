@@ -6,7 +6,7 @@ use dsot_lib::{
     uuid::Uuid,
 };
 
-use super::inbox_add::InboxAdd;
+static FORM_CSS: Asset = asset!("/assets/styles/widgets/inbox.css");
 
 #[component]
 pub fn InboxList() -> Element {
@@ -35,13 +35,16 @@ pub fn InboxList() -> Element {
     });
 
     rsx! {
+        document::Link { rel: "stylesheet", href: FORM_CSS }
         div {
-            InboxAdd {
-                on_add: move |_| {
-                    update_items.call();
+            div {
+                style: "max-width: 400px",
+                super::inbox::FormAddInboxItem {
+                    on_save: move |_| {
+                        update_items.call();
+                    }
                 }
             }
-            super::inbox::FormAddInboxItem {}
             ul {
                 for itm in items.iter() {
                     li {

@@ -17,5 +17,6 @@ pub static FONT_TANKER: Asset = asset!(
 pub const FAVICON: Asset = asset!("/assets/favicon.ico");
 
 pub const ROOT_CSS: Asset = asset!("/assets/styles/root.css");
+pub const PRIMITIVES_CSS: Asset = asset!("/assets/styles/primitives.css");
 
 pub const LOGO_IMG: Asset = asset!("/assets/imgs/logo.png");

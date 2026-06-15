@@ -1,0 +1,48 @@
+@layer inbox {
+    [data-component="form_add_inbox_item"] {
+        padding: 5px;
+    }
+
+    [data-component="select_inbox_type"] {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+
+        & > li {
+            margin: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            padding: 0 3px;
+            cursor: pointer;
+            border-bottom: 1px solid transparent;
+
+            &:not(:first-child) {
+                margin-left: 3px;
+            }
+
+            .icon {
+                cursor: pointer;
+            }
+
+            .text {
+                margin-left: 2px;
+                user-select: none;
+                cursor: pointer;
+            }
+
+            &:hover {
+                border-bottom: 1px solid var(--color-primary);
+            }
+
+            &[data-selected="true"] {
+                color: var(--color-primary);
+                padding-bottom: 2px;
+            }
+        }
+    }
+}

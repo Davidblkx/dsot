@@ -11,6 +11,7 @@ use dioxus::{
 const UI_STYLES: &[Asset] = &[
     dsot_shared_ui::assets::ROOT_CSS,
     asset!("/assets/styles/layout.css"),
+    dsot_shared_ui::assets::PRIMITIVES_CSS,
 ];
 
 #[tokio::main]
