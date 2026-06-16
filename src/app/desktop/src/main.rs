@@ -7,6 +7,7 @@ use dioxus::{
     desktop::{Config, WindowBuilder, muda::Menu},
     prelude::*,
 };
+use dsot_shared_ui::components::PortalHost;
 
 const UI_STYLES: &[Asset] = &[
     dsot_shared_ui::assets::ROOT_CSS,
@@ -46,12 +47,16 @@ async fn main() {
 #[component]
 fn App() -> Element {
     helpers::max_state::track_state();
+    dsot_shared_ui::components::use_portals();
 
     rsx! {
         document::Link { rel: "icon", href: dsot_shared_ui::assets::FAVICON }
         for style in UI_STYLES {
             document::Link { rel: "stylesheet", href: *style }
         }
+
+        PortalHost {  }
+
         Router::<routes::Routes> {}
     }
 }

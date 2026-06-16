@@ -34,13 +34,16 @@ pub fn InboxList() -> Element {
         });
     });
 
+    let mut is_open = use_signal(|| false);
+
     rsx! {
         document::Link { rel: "stylesheet", href: FORM_CSS }
         div {
-            div {
-                style: "max-width: 400px",
+            crate::components::Modal {
+                is_open: is_open,
                 super::inbox::FormAddInboxItem {
                     on_save: move |_| {
+                        is_open.set(false);
                         update_items.call();
                     }
                 }

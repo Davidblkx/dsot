@@ -1,0 +1,22 @@
+@layer modal {
+    [data-component="modal"] {
+        position: fixed;
+        z-index: var(--z-overlay);
+        top: var(--top-bar-height);
+        left: 0;
+        width: 100%;
+        height: calc(100vh - var(--top-bar-height));
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        & > [data-component="modal_content"] {
+            background-color: var(--color-bg-surface);
+            flex: 0 1 auto;
+            z-index: var(--z-modal);
+            padding: 10px;
+        }
+    }
+}

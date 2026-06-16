@@ -84,5 +84,10 @@
         --letter-spacing-tight: -0.02em; /* Use on large Tanker headers */
         --letter-spacing-normal: 0em; /* Default for Satoshi */
         --letter-spacing-wide: 0.05em; /* Use on all-caps sub-labels/badges */
+
+        /* --- Z Index --- */
+        --z-modal: 1000;
+        --z-overlay: 999;
+        --z-base: 0;
     }
 }

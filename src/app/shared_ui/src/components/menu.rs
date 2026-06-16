@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 use dioxus_free_icons::Icon;
 use dioxus_free_icons::icons::ld_icons::{LdChevronDown, LdChevronRight};
 
-static MENU_CSS: Asset = asset!("/assets/styles/menu.css");
+static MENU_CSS: Asset = asset!("/assets/styles/components/menu.css");
 
 #[derive(Debug, Props, Clone, PartialEq)]
 pub struct MenuItemProps {
