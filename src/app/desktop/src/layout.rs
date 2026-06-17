@@ -24,3 +24,18 @@ pub fn Layout() -> Element {
         DesktopFooter {  }
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct LayoutState {
+    pub left_panel: Signal<bool>,
+    pub right_panel: Signal<bool>,
+}
+
+impl Default for LayoutState {
+    fn default() -> Self {
+        Self {
+            left_panel: Signal::new(true),
+            right_panel: Signal::new(true),
+        }
+    }
+}

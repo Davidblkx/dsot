@@ -9,6 +9,8 @@ use dioxus::{
 };
 use dsot_shared_ui::components::PortalHost;
 
+use crate::layout::LayoutState;
+
 const UI_STYLES: &[Asset] = &[
     dsot_shared_ui::assets::ROOT_CSS,
     asset!("/assets/styles/layout.css"),
@@ -48,6 +50,26 @@ async fn main() {
 fn App() -> Element {
     helpers::max_state::track_state();
     dsot_shared_ui::components::use_portals();
+
+    let state = use_context_provider::<LayoutState>(|| LayoutState::default());
+
+    let left_panel = use_memo(move || {
+        if *state.left_panel.read() {
+            "true"
+        } else {
+            "false"
+        }
+    });
+    set_attribute!("data-layout-left-panel", left_panel);
+
+    let right_panel = use_memo(move || {
+        if *state.right_panel.read() {
+            "true"
+        } else {
+            "false"
+        }
+    });
+    set_attribute!("data-layout-right-panel", right_panel);
 
     rsx! {
         document::Link { rel: "icon", href: dsot_shared_ui::assets::FAVICON }
