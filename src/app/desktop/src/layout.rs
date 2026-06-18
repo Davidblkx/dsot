@@ -35,7 +35,7 @@ impl Default for LayoutState {
     fn default() -> Self {
         Self {
             left_panel: Signal::new(true),
-            right_panel: Signal::new(true),
+            right_panel: Signal::new(false),
         }
     }
 }
