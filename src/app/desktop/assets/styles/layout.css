@@ -4,6 +4,7 @@
         --desktop-right-panel-width: 200px;
         --resize-border-width: 5px;
         --top-bar-height: 30px;
+        --footer-height: 30px;
     }
 
     html {
@@ -74,6 +75,9 @@
 
         /* App default layout */
         display: grid;
+
+        transition: grid-template-columns 0.3s ease-in-out;
+
         grid-template:
             "topbar topbar topbar" var(--top-bar-height)
             "left main right" auto
@@ -89,13 +93,10 @@
 
     [data-component="desktop_main"] {
         grid-area: main;
+        padding: 10px;
     }
 
     [data-component="desktop_right_panel"] {
         grid-area: right;
-    }
-
-    [data-component="desktop_footer"] {
-        grid-area: footer;
     }
 }

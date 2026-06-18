@@ -1,6 +1,7 @@
 mod helpers;
 mod layout;
 mod routes;
+mod views;
 mod widgets;
 
 use dioxus::{

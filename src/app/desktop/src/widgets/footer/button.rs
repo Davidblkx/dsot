@@ -5,7 +5,7 @@ pub struct ButtonFooterProps {
     pub name: Option<String>,
     #[props(default = "".to_string())]
     pub tooltip: String,
-    pub on_click: EventHandler,
+    pub click: EventHandler,
     pub icon: Option<Element>,
     #[props(default = Signal::new(false))]
     pub active: Signal<bool>,
@@ -37,6 +37,9 @@ pub fn ButtonFooter(props: ButtonFooterProps) -> Element {
             "data-component": "button_footer",
             "data-status": "{status}",
             "title": props.tooltip,
+            onclick: move |_| {
+                props.click.call(());
+            },
             {icon}
             {name}
         }

@@ -1,3 +1,4 @@
+use super::inbox_add::InboxAdd;
 use dioxus::prelude::*;
 use dsot_lib::{
     DsotState,
@@ -39,6 +40,9 @@ pub fn InboxList() -> Element {
     rsx! {
         document::Link { rel: "stylesheet", href: FORM_CSS }
         div {
+            InboxAdd {
+                on_add: |_| {}
+            }
             crate::components::Modal {
                 is_open: is_open,
                 super::inbox::FormAddInboxItem {

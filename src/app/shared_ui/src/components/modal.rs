@@ -7,6 +7,7 @@ static MODAL_CSS: Asset = asset!("/assets/styles/components/modal.css");
 pub struct ModalProps {
     #[props(default = "Open".to_string())]
     pub text: String,
+    pub button_content: Option<Element>,
     #[props(default)]
     pub is_open: Signal<bool>,
     pub children: Element,
@@ -32,12 +33,18 @@ pub fn Modal(mut props: ModalProps) -> Element {
         rsx! {}
     };
 
+    let content = if let Some(ctn) = props.button_content {
+        ctn
+    } else {
+        rsx! { "{props.text}" }
+    };
+
     rsx! {
         document::Link { rel: "stylesheet", href: MODAL_CSS }
 
         button {
             onclick: move |_| props.is_open.toggle(),
-            "{props.text}"
+            {content}
         }
 
         {value}

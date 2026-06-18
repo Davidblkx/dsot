@@ -5,6 +5,8 @@ use dioxus_free_icons::{
 };
 use dsot_lib::dsot_model::{InboxItem, InboxValue};
 
+static FORM_CSS: Asset = asset!("/assets/styles/widgets/inbox.css");
+
 #[derive(Debug, Clone, PartialEq, Props)]
 pub struct FormAddInboxItemProps {
     on_save: Option<EventHandler<InboxItem>>,
@@ -157,6 +159,7 @@ pub fn FormAddInboxItem(props: FormAddInboxItemProps) -> Element {
     };
 
     rsx! {
+        document::Link { rel: "stylesheet", href: FORM_CSS }
         form {
             "data-component": "form_add_inbox_item",
             onsubmit: |e| {

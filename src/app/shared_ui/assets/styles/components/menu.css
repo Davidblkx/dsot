@@ -12,6 +12,7 @@
         padding: 0;
         margin: 0;
         font-size: var(--font-size-xl);
+        overflow-x: hidden;
 
         [data-component="menu_item"] {
             flex: 0 0 auto;
