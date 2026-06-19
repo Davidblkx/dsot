@@ -51,6 +51,7 @@ async fn main() {
 fn App() -> Element {
     helpers::max_state::track_state();
     dsot_shared_ui::components::use_portals();
+    helpers::view_context::provide_view_context();
 
     let state = use_context_provider::<LayoutState>(|| LayoutState::default());
 
