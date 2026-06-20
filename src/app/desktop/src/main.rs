@@ -1,6 +1,7 @@
 mod helpers;
 mod layout;
 mod routes;
+mod state;
 mod views;
 mod widgets;
 
@@ -9,6 +10,7 @@ use dioxus::{
     prelude::*,
 };
 use dsot_shared_ui::components::PortalHost;
+use state::AppStateProvier;
 
 use crate::layout::LayoutState;
 
@@ -51,7 +53,6 @@ async fn main() {
 fn App() -> Element {
     helpers::max_state::track_state();
     dsot_shared_ui::components::use_portals();
-    helpers::view_context::provide_view_context();
 
     let state = use_context_provider::<LayoutState>(|| LayoutState::default());
 
@@ -81,6 +82,9 @@ fn App() -> Element {
 
         PortalHost {  }
 
-        Router::<routes::Routes> {}
+        AppStateProvier {
+            Router::<routes::Routes> {}
+        }
+
     }
 }
