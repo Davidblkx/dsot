@@ -6,7 +6,7 @@ use dsot_lib::{
     uuid::Uuid,
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct InboxViewItem {
     pub id: Uuid,
     pub value: InboxValue,
