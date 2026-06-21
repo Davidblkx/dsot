@@ -5,6 +5,8 @@ use crate::state::inbox::{InboxStateStoreExt, InboxStore, use_sync_inbox};
 mod header;
 mod item;
 
+static CSS: Asset = asset!("/assets/styles/view/inbox.css");
+
 #[component]
 pub fn InboxView() -> Element {
     let refresh = use_sync_inbox();
@@ -12,6 +14,11 @@ pub fn InboxView() -> Element {
     let state = use_context::<InboxStore>();
 
     rsx! {
+        document::Link {
+            rel: "stylesheet",
+            href: CSS,
+        }
+
         div {
             "data-component": "view",
             "data-view": "inbox",
@@ -19,13 +26,13 @@ pub fn InboxView() -> Element {
             header::InboxHeader {
                 refresh: refresh
             }
-        }
 
-        div {
-            class: "items",
-            for i in state.items().read().iter() {
-                item::InboxItem {
-                    item: i.clone()
+            div {
+                class: "items",
+                for i in state.items().read().iter() {
+                    item::InboxItem {
+                        item: i.clone()
+                    }
                 }
             }
         }

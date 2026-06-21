@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::{Icon, icons::ld_icons::LdPlus};
+use dioxus_free_icons::{
+    Icon,
+    icons::ld_icons::{LdInbox, LdPlus},
+};
 use dsot_shared_ui::{components::Modal, widgets::inbox::FormAddInboxItem};
 
 use crate::state::inbox::use_insert_inbox;
@@ -16,6 +19,12 @@ pub fn InboxHeader(props: HeaderProps) -> Element {
 
     rsx! {
         header {
+            span {
+                class: "icon",
+                Icon {
+                    icon: LdInbox
+                }
+            }
             h1 {
                 "Inbox"
             }
