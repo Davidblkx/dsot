@@ -1,9 +1,9 @@
-mod confirm_modal;
+mod dialog;
 mod menu;
 mod modal;
 mod portal;
 
-pub use confirm_modal::*;
+pub use dialog::*;
 pub use menu::*;
 pub use modal::*;
 pub use portal::*;
