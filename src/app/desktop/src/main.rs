@@ -16,8 +16,9 @@ use crate::layout::LayoutState;
 
 const UI_STYLES: &[Asset] = &[
     dsot_shared_ui::assets::ROOT_CSS,
-    asset!("/assets/styles/layout.css"),
     dsot_shared_ui::assets::PRIMITIVES_CSS,
+    asset!("/assets/styles/layout.css"),
+    asset!("/assets/styles/view/view.css"),
 ];
 
 #[tokio::main]

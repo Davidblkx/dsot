@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use super::routes::Routes;
-use super::widgets::{
+use super::widgets::layout::{
     DesktopFooter, DesktopFrame, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar,
 };
 

@@ -16,7 +16,7 @@ pub struct IrohSyncBridge {
 }
 
 impl IrohSyncBridge {
-    /// Creates an Iroh sync bridge, that awits for the remote server to be the one starting the handshake
+    /// Creates an Iroh sync bridge, that awaits for the remote server to be the one starting the handshake
     pub async fn create_active(conn: Connection) -> Result<Self, AcceptError> {
         let mut bridge = IrohSyncBridge::create_passive(conn).await?;
 

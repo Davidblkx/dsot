@@ -6,6 +6,7 @@ use dioxus_free_icons::{
 use dsot_shared_ui::{components::Modal, widgets::inbox::FormAddInboxItem};
 
 use crate::state::inbox::use_insert_inbox;
+use crate::widgets::views::Header;
 
 #[derive(Debug, Clone, PartialEq, Props)]
 pub struct HeaderProps {
@@ -17,17 +18,16 @@ pub fn InboxHeader(props: HeaderProps) -> Element {
     let insert_inbox = use_insert_inbox(props.refresh);
     let mut form_is_open = use_signal(|| false);
 
+    let icon = rsx! {
+        Icon {
+            icon: LdInbox
+        }
+    };
+
     rsx! {
-        header {
-            span {
-                class: "icon",
-                Icon {
-                    icon: LdInbox
-                }
-            }
-            h1 {
-                "Inbox"
-            }
+        Header {
+            title: "Inbox",
+            icon: icon,
             Modal {
                 button_content: rsx! {
                     Icon {

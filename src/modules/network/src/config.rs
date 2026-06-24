@@ -9,6 +9,8 @@ pub struct NetworkConfig {
     pub use_db_sync: bool,
     pub key_file: Option<String>,
     pub address_book: Option<String>,
+    pub public_name: Option<String>,
+    pub public_desc: Option<String>,
 }
 
 impl Default for NetworkConfig {
@@ -18,6 +20,8 @@ impl Default for NetworkConfig {
             use_db_sync: true,
             key_file: None,
             address_book: None,
+            public_name: None,
+            public_desc: None,
         }
     }
 }

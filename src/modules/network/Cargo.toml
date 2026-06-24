@@ -9,6 +9,8 @@ repository.workspace = true
 
 [dependencies]
 chrono = { workspace = true }
+dsot_db_sync = { path = "../db_sync" }
+dsot_serde = { path = "../serde" }
 futures-util = { workspace = true }
 iroh = { workspace = true }
 log = { workspace = true }
@@ -16,5 +18,5 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-util = { workspace = true }
+toml = { workspace = true }
 uuid = { workspace = true }
-dsot_db_sync = { path = "../db_sync" }

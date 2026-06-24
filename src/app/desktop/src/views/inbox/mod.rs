@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::state::inbox::{InboxStateStoreExt, InboxStore, use_sync_inbox};
+use crate::widgets::views::View;
 
 mod header;
 mod item;
@@ -14,14 +15,9 @@ pub fn InboxView() -> Element {
     let state = use_context::<InboxStore>();
 
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: CSS,
-        }
-
-        div {
-            "data-component": "view",
-            "data-view": "inbox",
+        View {
+            name: "inbox",
+            css: CSS,
 
             header::InboxHeader {
                 refresh: refresh

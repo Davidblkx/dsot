@@ -2,6 +2,9 @@ use dsot_db_sync::sync::iroh_protocol::{DBSyncProtocol, DSOT_DB_SYNC_ALPN_V1};
 use iroh::{Endpoint, SecretKey, protocol::Router};
 use std::path::PathBuf;
 
+use crate::NetworkCapability;
+
+use super::protocols::info::{DSOT_INFO_ALPN_V1, InfoProtocol};
 use super::{DsotNetwork, NetworkInitOptions, Result};
 
 const KEY_NAME: &'static str = "dsot_network.key";
@@ -10,12 +13,17 @@ impl DsotNetwork {
     pub async fn init(options: NetworkInitOptions) -> Result<DsotNetwork> {
         let key = Self::load_key(&options).await?;
 
+        let capabilities = NetworkCapability {
+            db_sync: options.config.use_db_sync,
+        };
+
         let endpoint = Endpoint::builder(iroh::endpoint::presets::N0)
             .secret_key(key)
             .bind()
             .await?;
 
-        let mut router_builder = Router::builder(endpoint.clone());
+        let mut router_builder = Router::builder(endpoint.clone())
+            .accept(DSOT_INFO_ALPN_V1, InfoProtocol::new(&options));
 
         if options.config.use_db_sync {
             router_builder =
@@ -24,7 +32,15 @@ impl DsotNetwork {
 
         let router = router_builder.spawn();
 
-        Ok(DsotNetwork { endpoint, router })
+        let address_book =
+            super::AddressBook::init(&options.data_folder, &options.config.address_book);
+
+        Ok(DsotNetwork {
+            endpoint,
+            router,
+            address_book,
+            capabilities,
+        })
     }
 
     async fn load_key(o: &NetworkInitOptions) -> Result<SecretKey> {
