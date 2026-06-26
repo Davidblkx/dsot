@@ -26,6 +26,7 @@ impl InfoProtocol {
     }
 
     pub async fn read_info(endpoint: &Endpoint, id: EndpointId) -> Result<MachineInfo> {
+        ::log::debug!("Reading info from endpoint: {}", id);
         let conn = endpoint.connect(id, DSOT_INFO_ALPN_V1).await?;
         let stream_reader = conn
             .accept_uni()
@@ -34,8 +35,10 @@ impl InfoProtocol {
         let mut reader = FramedRead::new(stream_reader, LengthDelimitedCodec::new());
 
         if let Some(bytes) = reader.next().await {
+            ::log::debug!("Read info: {:?}", bytes);
             Ok(MachineInfo::from_binary(bytes?.iter().as_slice())?)
         } else {
+            ::log::warn!("No info received from endpoint: {}", id);
             Err(DsotNetworkError::EmptyMessage)
         }
     }
@@ -43,6 +46,7 @@ impl InfoProtocol {
 
 impl ProtocolHandler for InfoProtocol {
     async fn accept(&self, connection: Connection) -> std::result::Result<(), AcceptError> {
+        ::log::debug!("Accepting info from connection");
         let stream_writer = connection.open_uni().await?;
         let mut writer = FramedWrite::new(stream_writer, LengthDelimitedCodec::new());
 
@@ -51,6 +55,7 @@ impl ProtocolHandler for InfoProtocol {
             Err(e) => return Err(AcceptError::from_err(e)),
         };
 
+        ::log::debug!("Sending info: {:?}", bytes);
         writer.send(bytes).await?;
 
         Ok(())

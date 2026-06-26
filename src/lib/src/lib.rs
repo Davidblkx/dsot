@@ -69,7 +69,7 @@ impl DsotState {
             } else {
                 None
             };
-            logger::init_log(logger::LogLevel::Trace, file)?;
+            logger::init_log(logger::LogLevel::Debug, file)?;
         }
 
         let config = if options.is_mobile {
