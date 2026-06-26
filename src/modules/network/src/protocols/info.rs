@@ -60,6 +60,8 @@ impl ProtocolHandler for InfoProtocol {
         writer.into_inner().finish()?;
         ::log::debug!("Info sent");
 
+        let _ = connection.closed().await;
+
         Ok(())
     }
 }
