@@ -57,6 +57,7 @@ impl ProtocolHandler for InfoProtocol {
 
         ::log::debug!("Sending info: {:?}", bytes);
         writer.send(bytes).await?;
+        ::log::debug!("Info sent");
 
         Ok(())
     }
