@@ -1,2 +1,17 @@
 @layer view_remote {
+    :root {
+        --desktop-left-panel-width: 200px;
+    }
+
+    [data-component="remote_machines"] {
+        display: grid;
+        grid-template: "side content" / var(--desktop-left-panel-width) minmax(
+                0,
+                1fr
+            );
+
+        [data-component="node_list"] {
+            grid-area: "side";
+        }
+    }
 }

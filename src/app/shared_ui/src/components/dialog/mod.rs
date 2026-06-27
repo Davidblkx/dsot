@@ -10,7 +10,7 @@ pub use content::*;
 
 #[derive(Debug, Props, PartialEq, Clone)]
 pub struct DialogProps {
-    pub title: Signal<String>,
+    pub title: String,
     #[props(default)]
     pub is_open: Signal<bool>,
     pub content: DialogContentType,
@@ -27,7 +27,18 @@ pub fn Dialog(props: DialogProps) -> Element {
     let content = props.content.get_content();
     let content_type = props.content.get_content_type();
 
-    let buttons = props.buttons.get_buttons_element();
+    let buttons = props.buttons.get_buttons_element(
+        EventHandler::new(move |_| {
+            if let Some(action) = props.on_cancel {
+                action.call(());
+            }
+        }),
+        EventHandler::new(move |_| {
+            if let Some(action) = props.on_ok {
+                action.call(());
+            }
+        }),
+    );
 
     rsx! {
         document::Link {

@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 use dioxus::prelude::*;
 use dsot_lib::DsotState;
 use dsot_network::{DsotNode, NetworkAddress};
@@ -16,6 +18,13 @@ pub enum SyncStatus {
     Done,
     Syncing,
     Failure,
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct NewNetworkAddress {
+    pub id: String,
+    pub name: String,
+    pub desc: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -74,5 +83,27 @@ impl From<NetworkAddress> for RemoteMachine {
             status: MachineStatus::Offline,
             sync: SyncStatus::Disabled,
         }
+    }
+}
+
+impl Into<NetworkAddress> for RemoteMachine {
+    fn into(self) -> NetworkAddress {
+        NetworkAddress {
+            address: self.id,
+            name: self.name,
+            desc: self.desc,
+        }
+    }
+}
+
+pub fn use_node_insert(trigger: &Signal<i32>) -> impl Fn(RemoteMachine) {
+    let state = use_context::<RemoteStore>();
+
+    move |item: RemoteMachine| {
+        let mut state = state.clone();
+        let mut trigger = trigger.clone();
+
+        state.write().items.push(item);
+        *trigger.write() += 1;
     }
 }
