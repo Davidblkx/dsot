@@ -80,9 +80,11 @@
 
         grid-template:
             "topbar topbar topbar" var(--top-bar-height)
-            "left main right" auto
-            "footer footer footer" 30px / var(--desktop-left-panel-width)
-            1fr var(--desktop-right-panel-width);
+            "left main right" minmax(0, 1fr)
+            "footer footer footer" var(--footer-height) / var(
+                --desktop-left-panel-width
+            )
+            minmax(0, 1fr) var(--desktop-right-panel-width);
     }
 
     [data-window-status="maximized"] body {
@@ -94,9 +96,19 @@
     [data-component="desktop_main"] {
         grid-area: main;
         padding: 10px;
+        overflow: auto;
+        min-width: 0;
+        min-height: 0;
     }
 
     [data-component="desktop_right_panel"] {
         grid-area: right;
+    }
+
+    [data-layout-right-panel="false"] {
+        --desktop-right-panel-width: 0px;
+        [data-component="desktop_right_panel"] {
+            border: none;
+        }
     }
 }
