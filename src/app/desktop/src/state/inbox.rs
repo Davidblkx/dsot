@@ -69,6 +69,7 @@ async fn fetch_items(
     Ok(items)
 }
 
+/// Syncs the inbox state with the database, updating the store with the fetched items.
 pub fn use_sync_inbox() -> Signal<i32> {
     let db = use_context::<DsotState>().db;
     let state = use_context::<InboxStore>();
@@ -97,6 +98,7 @@ pub fn use_sync_inbox() -> Signal<i32> {
     manual_refresh
 }
 
+/// Inserts a single inbox item into the database.
 async fn insert_item(db: &DatabaseManager, item: InboxItem) -> anyhow::Result<()> {
     let db = db.open_database().await?;
     db.insert::<InboxItemSqlRepository>(&item.into()).await?;
@@ -104,6 +106,7 @@ async fn insert_item(db: &DatabaseManager, item: InboxItem) -> anyhow::Result<()
     Ok(())
 }
 
+/// Inserts a single inbox item into the database and refreshes the inbox state.
 pub fn use_insert_inbox(mut refresh: Signal<i32>) -> impl Fn(InboxItem) {
     let db = use_context::<DsotState>().db;
 

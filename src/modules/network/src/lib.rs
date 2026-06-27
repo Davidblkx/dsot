@@ -9,6 +9,7 @@ mod protocols;
 pub use address_book::*;
 pub use config::*;
 pub use error::*;
+pub use machine_info::*;
 pub use node::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]

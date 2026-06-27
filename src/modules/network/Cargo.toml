@@ -15,6 +15,7 @@ futures-util = { workspace = true }
 iroh = { workspace = true }
 log = { workspace = true }
 serde = { workspace = true }
+sys-info = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-util = { workspace = true }

@@ -2,7 +2,7 @@ use iroh::EndpointId;
 
 use crate::{DsotNetwork, Result, machine_info::MachineInfo, protocols::info::InfoProtocol};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DsotNode {
     pub id: EndpointId,
     pub info: MachineInfo,
