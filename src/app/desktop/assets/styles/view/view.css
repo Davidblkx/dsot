@@ -1,5 +1,11 @@
 @layer view {
     [data-component="view"] {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+
         & > header {
             display: flex;
             flex-direction: row;

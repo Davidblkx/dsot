@@ -15,13 +15,25 @@ pub fn AddressEditor(mut address: Signal<NewNetworkAddress>) -> Element {
                     "for": "device_id",
                     "Endpoint ID (Iroh Address)*"
                 }
-                input {
-                    id: "device_id",
-                    placeholder: "Enter the cryptographically secure endpoint public key",
-                    required: true,
-                    value: address.read().id.clone(),
-                    oninput: move |evt| {
-                        address.write().id = evt.value();
+                div {
+                    class: "input-group-row",
+                    input {
+                        id: "device_id",
+                        placeholder: "Enter the cryptographically secure endpoint public key",
+                        required: true,
+                        value: address.read().id.clone(),
+                        oninput: move |evt| {
+                            address.write().id = evt.value();
+                        }
+                    }
+                    button {
+                        class: "btn-fetch-info",
+                        r#type: "button",
+                        disabled: address.read().id.trim().is_empty(),
+                        onclick: move |_| {
+                            log::info!("Fetching info for Endpoint ID: {}", address.read().id);
+                        },
+                        "Fetch Info"
                     }
                 }
             }
