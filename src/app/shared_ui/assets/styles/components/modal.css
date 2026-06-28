@@ -19,4 +19,18 @@
             padding: 10px;
         }
     }
+
+    @media (max-width: 1023px) {
+        [data-component="modal"] {
+            top: var(--top-bar-height);
+            height: calc(100vh - var(--top-bar-height) - var(--footer-height));
+
+            & > [data-component="modal_content"] {
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                display: flex;
+            }
+        }
+    }
 }

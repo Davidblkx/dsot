@@ -7,12 +7,57 @@ pub fn AddressEditor(mut address: Signal<NewNetworkAddress>) -> Element {
     rsx! {
         form {
             "data-component": "address_editor",
-            input {
-                value: address.read().id.clone(),
-                oninput: move |evt| {
-                    address.write().id = evt.value()
+            class: "address-editor-form",
+            
+            div {
+                class: "form-group",
+                label {
+                    "for": "device_id",
+                    "Endpoint ID (Iroh Address)*"
                 }
-            },
+                input {
+                    id: "device_id",
+                    placeholder: "Enter the cryptographically secure endpoint public key",
+                    required: true,
+                    value: address.read().id.clone(),
+                    oninput: move |evt| {
+                        address.write().id = evt.value();
+                    }
+                }
+            }
+
+            div {
+                class: "form-group",
+                label {
+                    "for": "device_name",
+                    "Device Name*"
+                }
+                input {
+                    id: "device_name",
+                    placeholder: "e.g. My Laptop, Living Room Pi",
+                    required: true,
+                    value: address.read().name.clone(),
+                    oninput: move |evt| {
+                        address.write().name = evt.value();
+                    }
+                }
+            }
+
+            div {
+                class: "form-group",
+                label {
+                    "for": "device_desc",
+                    "Description"
+                }
+                textarea {
+                    id: "device_desc",
+                    placeholder: "Optional notes about this device...",
+                    value: address.read().desc.clone(),
+                    oninput: move |evt| {
+                        address.write().desc = evt.value();
+                    }
+                }
+            }
         }
     }
 }

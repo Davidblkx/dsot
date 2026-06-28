@@ -26,6 +26,7 @@ pub fn RemoteView() -> Element {
             div {
                 "data-component": "remote_machines",
                 node_list::NodeList { trigger }
+                node_view::NodeView { trigger }
             }
         }
     }

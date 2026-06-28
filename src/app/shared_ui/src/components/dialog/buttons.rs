@@ -17,6 +17,7 @@ impl DialogButtonType {
         match self {
             DialogButtonType::Ok => rsx! {
                 button {
+                    class: "btn-dialog-ok primary",
                     onclick: move |_| {
                         on_ok.call(());
                     },
@@ -25,12 +26,14 @@ impl DialogButtonType {
             },
             DialogButtonType::CancelOk => rsx! {
                 button {
+                    class: "btn-dialog-cancel secondary",
                     onclick: move |_| {
                         on_cancel.call(());
                     },
                     "Cancel"
                 }
                 button {
+                    class: "btn-dialog-ok primary",
                     onclick: move |_| {
                         on_ok.call(());
                     },

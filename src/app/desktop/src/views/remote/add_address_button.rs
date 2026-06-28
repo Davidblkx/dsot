@@ -1,14 +1,16 @@
+use std::str::FromStr;
 use dioxus::prelude::*;
 
 use dsot_shared_ui::components::{Dialog, DialogContentType};
 
 use super::address_editor::AddressEditor;
-use crate::state::remote::NewNetworkAddress;
+use crate::state::remote::{NewNetworkAddress, RemoteStore, RemoteMachine, MachineStatus, SyncStatus};
 
 #[component]
 pub fn AddAddressButton(trigger: Signal<i32>) -> Element {
     let mut is_open = use_signal(|| false);
-    let new_address = use_signal(|| NewNetworkAddress::default());
+    let mut new_address = use_signal(|| NewNetworkAddress::default());
+    let state = use_context::<RemoteStore>();
 
     let content = DialogContentType::Custom(rsx! {
         AddressEditor {
@@ -18,6 +20,7 @@ pub fn AddAddressButton(trigger: Signal<i32>) -> Element {
 
     rsx! {
         button {
+            class: "btn-add-device",
             onclick: move |_| {
                 is_open.set(true);
             },
@@ -29,9 +32,26 @@ pub fn AddAddressButton(trigger: Signal<i32>) -> Element {
             content: content,
             on_cancel: move |_| {
                 is_open.set(false);
+                new_address.set(NewNetworkAddress::default());
             },
-            on_ok: |_| {
-
+            on_ok: move |_| {
+                let addr = new_address.read().clone();
+                if let Ok(endpoint_id) = iroh::EndpointId::from_str(&addr.id) {
+                    let mut state = state.clone();
+                    let mut trigger = trigger.clone();
+                    state.write().items.push(RemoteMachine {
+                        id: endpoint_id,
+                        name: addr.name,
+                        desc: addr.desc,
+                        status: MachineStatus::Offline,
+                        sync: SyncStatus::Disabled,
+                    });
+                    *trigger.write() += 1;
+                    is_open.set(false);
+                    new_address.set(NewNetworkAddress::default());
+                } else {
+                    log::error!("Invalid Iroh Endpoint ID format: {}", addr.id);
+                }
             }
         }
     }

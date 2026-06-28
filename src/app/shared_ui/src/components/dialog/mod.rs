@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use dioxus_free_icons::{Icon, icons::ld_icons::LdX};
 
 use super::modal::*;
 
@@ -54,7 +55,16 @@ pub fn Dialog(props: DialogProps) -> Element {
                 "data-component": "dialog",
                 "data-content-type": "{content_type}",
                 header {
-                    "{props.title}"
+                    span { class: "dialog-title", "{props.title}" }
+                    button {
+                        class: "btn-close",
+                        onclick: move |_| {
+                            if let Some(action) = props.on_cancel {
+                                action.call(());
+                            }
+                        },
+                        Icon { icon: LdX }
+                    }
                 },
                 div {
                     class: "body",
