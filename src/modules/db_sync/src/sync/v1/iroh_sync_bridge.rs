@@ -13,6 +13,7 @@ pub struct IrohSyncBridge {
     pub reader: FramedRead<RecvStream, LengthDelimitedCodec>,
     pub writer: FramedWrite<SendStream, LengthDelimitedCodec>,
     pub id: String,
+    pub connection: Connection,
 }
 
 impl IrohSyncBridge {
@@ -50,6 +51,7 @@ impl IrohSyncBridge {
             reader,
             writer,
             id: "".to_string(),
+            connection: conn,
         })
     }
 
