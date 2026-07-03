@@ -2,9 +2,16 @@ use bakunin_config::Value;
 use dioxus::prelude::*;
 use dsot_lib::DsotState;
 
+use crate::widgets::network::MyAddress;
+
 #[component]
 pub fn ConfigView() -> Element {
     let state = use_context::<DsotState>();
+    let id = if let Some(n) = &state.network {
+        n.endpoint.id().to_string()
+    } else {
+        "No Network".to_string()
+    };
 
     let config_store = use_store(|| ConfigStore::from(&state));
 
@@ -40,6 +47,10 @@ pub fn ConfigView() -> Element {
             onclick: move |_| on_save(),
             "Save"
         }
+
+        input { value: "{id}" }
+
+        MyAddress {  }
     }
 }
 

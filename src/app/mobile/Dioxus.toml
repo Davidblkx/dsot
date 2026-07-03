@@ -1,5 +1,7 @@
 [application]
 asset_dir = "assets"
+default_platform = "mobile"
+name = "dsot_mobile"
 
 [web.app]
 title = "dsot_mobile_app"
