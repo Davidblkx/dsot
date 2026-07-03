@@ -28,7 +28,7 @@ serde_binary!(MachineInfo);
 fn get_machine_name(name: &Option<String>) -> String {
     if let Some(name) = name {
         name.to_owned()
-    } else if let Some(hostname) = sysinfo::System::host_name() {
+    } else if let Some(hostname) = sysinfo::System::name() {
         hostname
     } else if let Some(os) = sysinfo::System::long_os_version() {
         os
@@ -41,15 +41,11 @@ fn get_machine_desc(name: &Option<String>) -> String {
     let mut desc = if let Some(d) = name {
         d.to_owned()
     } else {
-        "%os_name% [%os_version%]".to_string()
+        "%os%".to_string()
     };
 
-    if let Some(os) = sysinfo::System::name() {
-        desc = desc.replace("%os_name%", &os);
-    }
-
-    if let Some(os) = sysinfo::System::os_version() {
-        desc = desc.replace("%os_version%", &os);
+    if let Some(os) = sysinfo::System::long_os_version() {
+        desc = desc.replace("%os%", &os);
     }
 
     desc

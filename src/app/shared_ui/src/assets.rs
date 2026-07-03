@@ -20,3 +20,16 @@ pub const ROOT_CSS: Asset = asset!("/assets/styles/root.css");
 pub const PRIMITIVES_CSS: Asset = asset!("/assets/styles/primitives.css");
 
 pub const LOGO_IMG: Asset = asset!("/assets/imgs/logo.png");
+
+#[component]
+pub fn DsotDefaultLinks(styles: &'static [Asset]) -> Element {
+    rsx! {
+        document::Link { rel: "icon", href: FAVICON }
+        document::Link { rel: "stylesheet", href: ROOT_CSS }
+        document::Link { rel: "stylesheet", href: PRIMITIVES_CSS }
+
+        for asset in styles {
+            document::Link { rel: "stylesheet", href: *asset }
+        }
+    }
+}

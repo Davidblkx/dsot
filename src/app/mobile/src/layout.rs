@@ -7,6 +7,7 @@ pub fn Layout() -> Element {
     rsx! {
         div {
             id: "navbar",
+            style: "grid-area: topbar !important;",
             Link {
                 to: Routes::HomeView,
                 "Home"

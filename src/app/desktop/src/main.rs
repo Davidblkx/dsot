@@ -9,14 +9,12 @@ use dioxus::{
     desktop::{Config, WindowBuilder, muda::Menu},
     prelude::*,
 };
-use dsot_shared_ui::components::PortalHost;
+use dsot_shared_ui::{assets::DsotDefaultLinks, components::PortalHost};
 use state::AppStateProvier;
 
 use crate::layout::LayoutState;
 
 const UI_STYLES: &[Asset] = &[
-    dsot_shared_ui::assets::ROOT_CSS,
-    dsot_shared_ui::assets::PRIMITIVES_CSS,
     asset!("/assets/styles/layout.css"),
     asset!("/assets/styles/view/view.css"),
 ];
@@ -76,10 +74,7 @@ fn App() -> Element {
     set_attribute!("data-layout-right-panel", right_panel);
 
     rsx! {
-        document::Link { rel: "icon", href: dsot_shared_ui::assets::FAVICON }
-        for style in UI_STYLES {
-            document::Link { rel: "stylesheet", href: *style }
-        }
+        DsotDefaultLinks { styles: UI_STYLES }
 
         PortalHost {  }
 
