@@ -65,3 +65,13 @@ impl ProtocolHandler for InfoProtocol {
         Ok(())
     }
 }
+
+pub trait RegisterInfoProtocol {
+    fn register_info_protocol(self, options: &NetworkInitOptions) -> Self;
+}
+
+impl RegisterInfoProtocol for iroh::protocol::RouterBuilder {
+    fn register_info_protocol(self, options: &NetworkInitOptions) -> Self {
+        self.accept(DSOT_INFO_ALPN_V1, InfoProtocol::new(options))
+    }
+}

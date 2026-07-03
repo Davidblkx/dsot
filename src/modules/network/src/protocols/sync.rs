@@ -1,7 +1,9 @@
-use crate::{manager::DatabaseManagerProvider, sync::SyncBridge};
+use std::sync::Arc;
 
-use super::model::*;
-use super::{
+use dsot_db_sync::{manager::DatabaseManagerProvider, sync::SyncBridge};
+
+use dsot_db_sync::sync::model::*;
+use dsot_db_sync::sync::{
     db_sync_bridge::DatabaseSyncBridge, handler::SyncHandler, iroh_sync_bridge::IrohSyncBridge,
 };
 use iroh::{
@@ -9,11 +11,13 @@ use iroh::{
     protocol::{AcceptError, ProtocolHandler},
 };
 
+use crate::NetworkInitOptions;
+
 pub const DSOT_DB_SYNC_ALPN_V1: &[u8] = b"/dsot/db_sync/1";
 
 #[derive(Clone)]
 pub struct DBSyncProtocol {
-    provider: std::sync::Arc<dyn DatabaseManagerProvider + Send + Sync>,
+    provider: Arc<dyn DatabaseManagerProvider + Send + Sync>,
 }
 
 impl std::fmt::Debug for DBSyncProtocol {
@@ -23,7 +27,7 @@ impl std::fmt::Debug for DBSyncProtocol {
 }
 
 impl DBSyncProtocol {
-    pub fn new(provider: std::sync::Arc<dyn DatabaseManagerProvider + Send + Sync>) -> Self {
+    pub fn new(provider: Arc<dyn DatabaseManagerProvider + Send + Sync>) -> Self {
         Self { provider }
     }
 }
@@ -75,6 +79,23 @@ impl ProtocolHandler for DBSyncProtocol {
                     .map_err(|e| AcceptError::from_err(e))?;
                 Err(AcceptError::from_err(e))
             }
+        }
+    }
+}
+
+pub trait RegisterSyncProtocolV1 {
+    fn register_sync_protocol_v1(self, options: &NetworkInitOptions) -> Self;
+}
+
+impl RegisterSyncProtocolV1 for iroh::protocol::RouterBuilder {
+    fn register_sync_protocol_v1(self, options: &NetworkInitOptions) -> Self {
+        if options.config.use_db_sync {
+            self.accept(
+                DSOT_DB_SYNC_ALPN_V1,
+                DBSyncProtocol::new(options.manager.clone()),
+            )
+        } else {
+            self
         }
     }
 }

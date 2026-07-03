@@ -1,11 +1,10 @@
-use dsot_db_sync::sync::iroh_protocol::{DBSyncProtocol, DSOT_DB_SYNC_ALPN_V1};
 use iroh::{Endpoint, SecretKey, protocol::Router};
 use std::path::PathBuf;
 
 use crate::NetworkCapability;
 
-use super::protocols::info::{DSOT_INFO_ALPN_V1, InfoProtocol};
 use super::{DsotNetwork, NetworkInitOptions, Result};
+use crate::protocols::{RegisterInfoProtocol, RegisterSyncProtocolV1};
 
 const KEY_NAME: &'static str = "dsot_network.key";
 
@@ -22,13 +21,9 @@ impl DsotNetwork {
             .bind()
             .await?;
 
-        let mut router_builder = Router::builder(endpoint.clone())
-            .accept(DSOT_INFO_ALPN_V1, InfoProtocol::new(&options));
-
-        if options.config.use_db_sync {
-            router_builder =
-                router_builder.accept(DSOT_DB_SYNC_ALPN_V1, DBSyncProtocol::new(options.manager));
-        }
+        let router_builder = Router::builder(endpoint.clone())
+            .register_info_protocol(&options)
+            .register_sync_protocol_v1(&options);
 
         let router = router_builder.spawn();
 

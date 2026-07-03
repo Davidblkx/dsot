@@ -1,6 +1,5 @@
 pub mod db_sync_bridge;
 pub mod handler;
-pub mod iroh_protocol;
 pub mod iroh_sync_bridge;
 pub mod model;
 
