@@ -1,5 +1,5 @@
+pub mod db_sync;
 pub mod info;
-pub mod sync;
 
+pub use db_sync::sync_protocol::RegisterSyncProtocolV1;
 pub use info::RegisterInfoProtocol;
-pub use sync::RegisterSyncProtocolV1;

@@ -28,6 +28,10 @@ impl<'a> DatabaseSyncBridge<'a> {
         }
     }
 
+    pub fn get_hello_message(&self) -> HandshakeMessage {
+        HandshakeMessage::InProgress(Handshake::Hello(self.db.id.clone()))
+    }
+
     fn gen_ack_message(&self) -> Result<Handshake> {
         Ok(Handshake::Ack(self.trx.generate_sync_hash()?))
     }
@@ -105,7 +109,7 @@ impl<'a> DatabaseSyncBridge<'a> {
 
 impl<'a> SyncBridge for DatabaseSyncBridge<'a> {
     async fn read_handshake(&mut self) -> HandshakeMessage {
-        HandshakeMessage::InProgress(Handshake::Hello(self.db.id.clone()))
+        self.get_hello_message()
     }
 
     async fn send_handshake(&mut self, msg: &HandshakeMessage) -> HandshakeMessage {

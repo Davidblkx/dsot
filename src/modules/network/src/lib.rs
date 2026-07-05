@@ -6,6 +6,8 @@ mod machine_info;
 mod node;
 mod protocols;
 
+pub mod sink;
+
 pub use address_book::*;
 pub use config::*;
 pub use error::*;

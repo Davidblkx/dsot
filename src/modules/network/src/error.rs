@@ -20,6 +20,14 @@ pub enum DsotNetworkError {
     IrohConnectError(#[from] iroh::endpoint::ConnectError),
     #[error("Empty message")]
     EmptyMessage,
+    #[error("Remote error: {0}")]
+    RemoteError(String),
+    #[error("Disconnect")]
+    Disconnect,
+    #[error("Iroh error: {0}")]
+    IrohError(String),
+    #[error("Error sync database: {0}")]
+    DBSyncError(#[from] dsot_db_sync::error::DBSyncError),
 }
 
 pub type Result<T> = std::result::Result<T, DsotNetworkError>;
