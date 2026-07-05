@@ -31,7 +31,7 @@ dioxus-free-icons = { version = "0.10", features = ["lucide"] }
 env_logger = { version = "0.11" }
 fern = { version = "0.7" }
 humantime = { version = "2" }
-iroh = { version = "1.0.0" }
+iroh = { version = "1.0.1" }
 futures-util = { version = "0.3" }
 linkme = "0.3"
 log = { version = "0.4" }

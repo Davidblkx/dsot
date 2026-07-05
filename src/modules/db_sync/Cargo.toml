@@ -24,6 +24,7 @@ thiserror = { workspace = true }
 tokio = { workspace = true }
 tokio-util = { workspace = true }
 uuid = { workspace = true }
+dsot_serde = { path = "../serde" }
 
 [dev-dependencies]
 dsot_derive = { path = "../derive" }
