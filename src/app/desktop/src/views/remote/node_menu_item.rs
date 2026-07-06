@@ -1,9 +1,15 @@
+use crate::state::remote::{
+    MachineStatus, RemoteStateStoreExt, RemoteStore, SelectedMachine, SyncStatus, use_node_connect,
+};
 use dioxus::prelude::*;
-use dioxus_free_icons::{Icon, icons::ld_icons::{LdCheck, LdRefreshCw, LdTriangleAlert}};
-use crate::state::remote::{RemoteStore, SelectedMachine, MachineStatus, SyncStatus, RemoteStateStoreExt};
+use dioxus_free_icons::{
+    Icon,
+    icons::ld_icons::{LdCheck, LdRefreshCw, LdTriangleAlert},
+};
 
 #[component]
 pub fn NodeMenuItem(index: usize, trigger: Signal<i32>) -> Element {
+    use_node_connect(index);
     let state = use_context::<RemoteStore>();
     let items = state.items();
     let item = items.read()[index].clone();

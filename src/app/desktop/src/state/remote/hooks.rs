@@ -1,51 +1,10 @@
+use crate::state::remote::MachineStatus;
+
+use super::machine::RemoteMachine;
+use super::store::{RemoteStateStoreExt, RemoteStore, SelectedMachine};
 use dioxus::prelude::*;
 use dsot_lib::DsotState;
-use dsot_network::{DsotNode, NetworkAddress};
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum MachineStatus {
-    Offline,
-    Online(DsotNode),
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum SyncStatus {
-    Disabled,
-    Pending,
-    InSync,
-    Failure,
-}
-
-#[derive(Debug, Clone, PartialEq, Default)]
-pub struct NewNetworkAddress {
-    pub id: String,
-    pub name: String,
-    pub desc: String,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct RemoteMachine {
-    pub id: iroh::EndpointId,
-    pub name: String,
-    pub desc: String,
-    pub status: MachineStatus,
-    pub sync: SyncStatus,
-}
-
-#[derive(Debug, Clone, PartialEq, Default)]
-pub enum SelectedMachine {
-    Machine(usize),
-    #[default]
-    None,
-}
-
-#[derive(Debug, Clone, PartialEq, Default, Store)]
-pub struct RemoteState {
-    pub items: Vec<RemoteMachine>,
-    pub selected: SelectedMachine,
-}
-
-pub type RemoteStore = Store<RemoteState>;
+use dsot_network::NetworkAddress;
 
 pub fn use_remote_machines() -> Signal<i32> {
     let state = use_context::<DsotState>();
@@ -69,28 +28,6 @@ pub fn use_remote_machines() -> Signal<i32> {
     });
 
     manual_refresh
-}
-
-impl From<NetworkAddress> for RemoteMachine {
-    fn from(value: NetworkAddress) -> Self {
-        Self {
-            id: value.address,
-            name: value.name,
-            desc: value.desc,
-            status: MachineStatus::Offline,
-            sync: SyncStatus::Disabled,
-        }
-    }
-}
-
-impl Into<NetworkAddress> for RemoteMachine {
-    fn into(self) -> NetworkAddress {
-        NetworkAddress {
-            address: self.id,
-            name: self.name,
-            desc: self.desc,
-        }
-    }
 }
 
 pub fn use_node_insert(trigger: Signal<i32>) -> impl Fn(RemoteMachine) {
@@ -153,4 +90,27 @@ pub fn use_remove_selected(trigger: Signal<i32>) -> impl Fn() {
             }
         }
     }
+}
+
+pub fn use_node_connect(index: usize) {
+    let dsot = use_context::<DsotState>();
+    let state = use_context::<RemoteStore>();
+
+    use_future(move || {
+        let network_opt = dsot.network.clone();
+        async move {
+            if let Some(net) = network_opt {
+                let id = state.items().read()[index].id.clone();
+
+                match net.connect_node(id).await {
+                    Ok(node) => {
+                        state.items().write()[index].status = MachineStatus::Online(node);
+                    }
+                    Err(e) => {
+                        ::log::error!("Failed to connect node: {}", e)
+                    }
+                }
+            }
+        }
+    });
 }
