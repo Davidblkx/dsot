@@ -4,7 +4,7 @@ use redb::{Database, backends::InMemoryBackend};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use dsot_db_sync::sync::v1::{db_sync_bridge::*, handler::*};
+use dsot_db_sync::sync::v2::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
 #[table(artists)]
@@ -188,10 +188,10 @@ async fn main() {
 }
 
 pub async fn sync_dbs(db1: &DsotDatabase, db2: &DsotDatabase) {
-    let mut a = DatabaseSyncBridge::create(db1).await.unwrap();
-    let mut b = DatabaseSyncBridge::create(db2).await.unwrap();
+    let mut a = DatabaseSyncNode::create(db1).await.unwrap();
+    let mut b = DatabaseSyncNode::create(db2).await.unwrap();
 
-    SyncHandler::sync(&mut a, &mut b).await.unwrap();
+    SyncNodeHandler::sync(&mut a, &mut b).await.unwrap();
 
     a.close().await.unwrap();
     b.close().await.unwrap();
@@ -204,10 +204,10 @@ pub async fn sync_dbs(db1: &DsotDatabase, db2: &DsotDatabase) {
     println!("Items in db1: {:?}", db1.generate_sync_hash().unwrap());
     println!("Items in db2: {:?}", db2.generate_sync_hash().unwrap());
     for i in items1 {
-        println!("{:?}", i);
+        println!("db1 {:?}", i);
     }
 
     for i in items2 {
-        println!("{:?}", i);
+        println!("db2 {:?}", i);
     }
 }

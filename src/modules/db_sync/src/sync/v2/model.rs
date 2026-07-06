@@ -2,6 +2,7 @@ use dsot_serde::BinarySerde;
 use serde::{Deserialize, Serialize};
 
 use super::error::SyncError;
+use crate::Result;
 
 pub type SyncHash = [u8; 32];
 pub type SyncKey = [u8; 16];
@@ -31,15 +32,13 @@ pub enum DBSyncMessage {
 }
 
 impl DBSyncMessage {
-    pub fn to_bytes(&self) -> Vec<u8> {
+    pub fn to_bytes(&self) -> Result<Vec<u8>> {
         match BinarySerde::serialize(&self) {
-            Ok(bytes) => bytes,
+            Ok(bytes) => Ok(bytes),
             Err(e) => {
                 ::log::error!("Failed to serialize sync message: {}", e);
-                match BinarySerde::serialize(&DBSyncMessage::Error(SyncError::Serialize)) {
-                    Ok(bytes) => bytes,
-                    Err(e) => panic!("Failed to serialize sync error: {}", e),
-                }
+                let err_msg = DBSyncMessage::Error(SyncError::Serialize);
+                Ok(BinarySerde::serialize(&err_msg)?)
             }
         }
     }

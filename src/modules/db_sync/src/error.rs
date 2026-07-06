@@ -24,6 +24,8 @@ pub enum DBSyncError {
     DeserializeError(#[from] rmp_serde::decode::Error),
     #[error("error serializing: {0}")]
     SerializeError(#[from] rmp_serde::encode::Error),
+    #[error("serialization/deserialization error: {0}")]
+    DsotDeSerError(#[from] dsot_serde::DsotSerdeError),
 
     // io errors
     #[error("IO Error: {0}")]
@@ -44,6 +46,8 @@ pub enum DBSyncError {
     SyncError(String),
     #[error("Path is not a valid directory")]
     PathIsNotAFolder,
+    #[error("Sync node doesn't have an open database connection")]
+    NoOpenConnection,
 }
 
 pub type Result<T> = std::result::Result<T, DBSyncError>;
