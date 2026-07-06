@@ -8,7 +8,6 @@ use dsot_db_sync::{
 use iroh::{Endpoint, EndpointId, endpoint::Connection, protocol::ProtocolHandler};
 
 use super::iroh_sync_node::NetworkDBSyncNode;
-use crate::NetworkInitOptions;
 
 pub const DSOT_DB_SYNC_ALPN_V1: &[u8] = b"/dsot/db_sync/1";
 
@@ -75,23 +74,6 @@ impl ProtocolHandler for DBSyncProtocol {
         match self.wait_sync(connection).await {
             Ok(_) => Ok(()),
             Err(e) => Err(iroh::protocol::AcceptError::from_err(e)),
-        }
-    }
-}
-
-pub trait RegisterSyncProtocolV1 {
-    fn register_sync_protocol_v1(self, options: &NetworkInitOptions) -> Self;
-}
-
-impl RegisterSyncProtocolV1 for iroh::protocol::RouterBuilder {
-    fn register_sync_protocol_v1(self, options: &NetworkInitOptions) -> Self {
-        if options.config.use_db_sync {
-            self.accept(
-                DSOT_DB_SYNC_ALPN_V1,
-                DBSyncProtocol::new(options.manager.clone()),
-            )
-        } else {
-            self
         }
     }
 }

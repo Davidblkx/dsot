@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 use dioxus::prelude::*;
 use dsot_lib::DsotState;
 use dsot_network::{DsotNode, NetworkAddress};
@@ -63,6 +61,7 @@ pub fn use_remote_machines() -> Signal<i32> {
             let items = network
                 .address_book
                 .read_safe()
+                .addresses
                 .into_iter()
                 .map(|i| i.into())
                 .collect::<Vec<RemoteMachine>>();
@@ -96,14 +95,31 @@ impl Into<NetworkAddress> for RemoteMachine {
     }
 }
 
-pub fn use_node_insert(trigger: &Signal<i32>) -> impl Fn(RemoteMachine) {
-    let state = use_context::<RemoteStore>();
+pub fn use_node_insert(trigger: Signal<i32>) -> impl Fn(RemoteMachine) {
+    let dsot = use_context::<DsotState>();
+    let devices = use_context::<RemoteStore>();
 
     move |item: RemoteMachine| {
-        let mut state = state.clone();
+        let dsot = dsot.clone();
+
+        let devices = devices.clone();
+        devices.items().write().push(item);
+
         let mut trigger = trigger.clone();
 
-        state.write().items.push(item);
-        *trigger.write() += 1;
+        if let Some(net) = dsot.network {
+            let addresses: Vec<NetworkAddress> = devices
+                .items()
+                .read()
+                .iter()
+                .map(|e| e.clone().into())
+                .collect();
+            match net.address_book.write_addresses(addresses) {
+                Ok(_) => trigger += 1,
+                Err(e) => {
+                    ::log::error!("Failed to write address book: {}", e)
+                }
+            }
+        }
     }
 }

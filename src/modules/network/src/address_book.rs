@@ -11,15 +11,20 @@ pub struct NetworkAddress {
     pub address: iroh::EndpointId,
 }
 
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct NetworkAddressBook {
+    pub addresses: Vec<NetworkAddress>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct AddressBook {
     pub path: PathBuf,
 }
 
 impl AddressBook {
-    pub fn read(&self) -> Result<Vec<NetworkAddress>> {
+    pub fn read(&self) -> Result<NetworkAddressBook> {
         if !self.path.exists() {
-            return Ok(Vec::new());
+            return Ok(NetworkAddressBook { addresses: vec![] });
         }
 
         ::log::trace!("Reading address book from {}", self.path.display());
@@ -30,20 +35,23 @@ impl AddressBook {
         Ok(toml::from_slice(&file_bytes)?)
     }
 
-    pub fn read_safe(&self) -> Vec<NetworkAddress> {
+    pub fn read_safe(&self) -> NetworkAddressBook {
         match self.read() {
             Ok(addr) => addr,
             Err(e) => {
                 ::log::debug!("Failed to read address book: {}", e);
-                Vec::new()
+                NetworkAddressBook { addresses: vec![] }
             }
         }
     }
 
-    pub fn write(&self, addresses: &[NetworkAddress]) -> Result<()> {
+    pub fn write_addresses(&self, addresses: Vec<NetworkAddress>) -> Result<()> {
+        let mut book = self.read()?;
+        book.addresses = addresses;
+
         ::log::trace!("Writing address book to {}", self.path.display());
 
-        let serialized = toml::to_string(addresses)?;
+        let serialized = toml::to_string(&book)?;
         std::fs::write(&self.path, serialized)?;
         Ok(())
     }

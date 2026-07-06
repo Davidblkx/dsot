@@ -1,9 +1,13 @@
+use dsot_db_sync::sync::SyncHash;
 use iroh::{Endpoint, EndpointId};
 
 use crate::{
     DsotNetwork, Result,
     machine_info::MachineInfo,
-    protocols::{db_sync::DBSyncProtocol, info::InfoProtocol},
+    protocols::{
+        db_sync::{DBSyncProtocol, DBSyncStatusProtocol},
+        info::InfoProtocol,
+    },
 };
 
 #[derive(Debug, Clone)]
@@ -34,5 +38,11 @@ impl DsotNode {
     pub async fn sync_database(&self, db: &dsot_db_sync::DsotDatabase) -> Result<()> {
         DBSyncProtocol::sync_database(&self.host, self.id.clone(), db).await?;
         Ok(())
+    }
+
+    pub async fn get_sync_status(&self, db_id: String) -> Result<Option<SyncHash>> {
+        let hash =
+            DBSyncStatusProtocol::get_sync_status(&self.host, self.id.clone(), db_id).await?;
+        Ok(hash)
     }
 }

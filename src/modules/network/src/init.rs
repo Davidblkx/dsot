@@ -1,10 +1,12 @@
 use iroh::{Endpoint, SecretKey, protocol::Router};
 use std::path::PathBuf;
 
-use crate::NetworkCapability;
+use crate::{
+    NetworkCapability,
+    protocols::{RegisterDBSyncProtocols, RegisterInfoProtocol},
+};
 
 use super::{DsotNetwork, NetworkInitOptions, Result};
-use crate::protocols::{RegisterInfoProtocol, RegisterSyncProtocolV1};
 
 const KEY_NAME: &'static str = "dsot_network.key";
 
@@ -23,7 +25,7 @@ impl DsotNetwork {
 
         let router_builder = Router::builder(endpoint.clone())
             .register_info_protocol(&options)
-            .register_sync_protocol_v1(&options);
+            .register_db_sync_protocol(&options);
 
         let router = router_builder.spawn();
 

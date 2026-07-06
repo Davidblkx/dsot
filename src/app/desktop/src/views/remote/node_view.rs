@@ -1,6 +1,11 @@
+use crate::state::remote::{
+    MachineStatus, RemoteStateStoreExt, RemoteStore, SelectedMachine, SyncStatus,
+};
 use dioxus::prelude::*;
-use dioxus_free_icons::{Icon, icons::ld_icons::{LdRouter, LdCopy, LdRefreshCw, LdSettings, LdTrash2, LdNetwork, LdActivity}};
-use crate::state::remote::{RemoteStore, SelectedMachine, MachineStatus, SyncStatus, RemoteStateStoreExt};
+use dioxus_free_icons::{
+    Icon,
+    icons::ld_icons::{LdActivity, LdCopy, LdNetwork, LdRefreshCw, LdRouter, LdSettings, LdTrash2},
+};
 
 #[component]
 pub fn NodeView(trigger: Signal<i32>) -> Element {
@@ -9,7 +14,7 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
     let items = state.items();
 
     let selected_val = selected.read().clone();
-    
+
     match selected_val {
         SelectedMachine::None => {
             rsx! {
@@ -60,7 +65,7 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
                 div {
                     "data-component": "node_view",
                     class: "node-view-details",
-                    
+
                     div {
                         class: "details-header",
                         div {
@@ -88,12 +93,12 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
 
                     div {
                         class: "details-body",
-                        
+
                         div {
                             class: "card network-card",
-                            h3 { 
+                            h3 {
                                 Icon { icon: LdNetwork }
-                                "Network Properties" 
+                                "Network Properties"
                             }
                             div {
                                 class: "property-row",
@@ -101,24 +106,15 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
                                 div {
                                     class: "address-container",
                                     code { "{endpoint_str}" }
-                                    button {
-                                        class: "btn-copy",
-                                        title: "Copy Address to Clipboard",
-                                        onclick: move |_| {
-                                            let js = format!("navigator.clipboard.writeText('{}')", endpoint_str);
-                                            let _ = document::eval(&js);
-                                        },
-                                        Icon { icon: LdCopy }
-                                    }
                                 }
                             }
                         }
 
                         div {
                             class: "card sync-card",
-                            h3 { 
+                            h3 {
                                 Icon { icon: LdActivity }
-                                "Synchronization" 
+                                "Synchronization"
                             }
                             div {
                                 class: "sync-stats",

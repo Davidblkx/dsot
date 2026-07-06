@@ -1,16 +1,18 @@
-use std::str::FromStr;
 use dioxus::prelude::*;
+use std::str::FromStr;
 
 use dsot_shared_ui::components::{Dialog, DialogContentType};
 
 use super::address_editor::AddressEditor;
-use crate::state::remote::{NewNetworkAddress, RemoteStore, RemoteMachine, MachineStatus, SyncStatus};
+use crate::state::remote::{
+    MachineStatus, NewNetworkAddress, RemoteMachine, SyncStatus, use_node_insert,
+};
 
 #[component]
 pub fn AddAddressButton(trigger: Signal<i32>) -> Element {
+    let insert_machine = use_node_insert(trigger);
     let mut is_open = use_signal(|| false);
     let mut new_address = use_signal(|| NewNetworkAddress::default());
-    let state = use_context::<RemoteStore>();
 
     let content = DialogContentType::Custom(rsx! {
         AddressEditor {
@@ -37,16 +39,14 @@ pub fn AddAddressButton(trigger: Signal<i32>) -> Element {
             on_ok: move |_| {
                 let addr = new_address.read().clone();
                 if let Ok(endpoint_id) = iroh::EndpointId::from_str(&addr.id) {
-                    let mut state = state.clone();
-                    let mut trigger = trigger.clone();
-                    state.write().items.push(RemoteMachine {
+                    let new_machine = RemoteMachine {
                         id: endpoint_id,
                         name: addr.name,
                         desc: addr.desc,
                         status: MachineStatus::Offline,
                         sync: SyncStatus::Disabled,
-                    });
-                    *trigger.write() += 1;
+                    };
+                    insert_machine(new_machine);
                     is_open.set(false);
                     new_address.set(NewNetworkAddress::default());
                 } else {

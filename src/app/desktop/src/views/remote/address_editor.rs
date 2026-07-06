@@ -10,7 +10,7 @@ use crate::state::remote::NewNetworkAddress;
 pub fn AddressEditor(mut address: Signal<NewNetworkAddress>) -> Element {
     let state = use_context::<DsotState>();
 
-    let mut fetch_info = move |mut address: Signal<NewNetworkAddress>| {
+    let fetch_info = move |mut address: Signal<NewNetworkAddress>| {
         if let Some(network) = state.network.clone() {
             if let Ok(id) = PublicKey::from_str(&address.read().id) {
                 spawn(async move {
