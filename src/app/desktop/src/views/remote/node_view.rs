@@ -1,15 +1,17 @@
 use crate::state::remote::{
     MachineStatus, RemoteStateStoreExt, RemoteStore, SelectedMachine, SyncStatus,
+    use_remove_selected,
 };
 use dioxus::prelude::*;
 use dioxus_free_icons::{
     Icon,
-    icons::ld_icons::{LdActivity, LdCopy, LdNetwork, LdRefreshCw, LdRouter, LdSettings, LdTrash2},
+    icons::ld_icons::{LdRefreshCw, LdRouter, LdSettings, LdTrash2},
 };
 
 #[component]
 pub fn NodeView(trigger: Signal<i32>) -> Element {
-    let mut state = use_context::<RemoteStore>();
+    let remove_selected = use_remove_selected(trigger.clone());
+    let state = use_context::<RemoteStore>();
     let selected = state.selected();
     let items = state.items();
 
@@ -54,10 +56,8 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
 
             let (sync_text, sync_badge_class) = match item.sync {
                 SyncStatus::Disabled => ("Disabled", "badge-disabled"),
-                SyncStatus::Waiting => ("Waiting", "badge-waiting"),
                 SyncStatus::Pending => ("Pending", "badge-pending"),
-                SyncStatus::Done => ("Synchronized", "badge-done"),
-                SyncStatus::Syncing => ("Syncing...", "badge-syncing"),
+                SyncStatus::InSync => ("In Sync", "badge-in-sync"),
                 SyncStatus::Failure => ("Failed", "badge-failed"),
             };
 
@@ -89,46 +89,9 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
                                 "{item.desc}"
                             }
                         }
-                    }
-
-                    div {
-                        class: "details-body",
-
                         div {
-                            class: "card network-card",
-                            h3 {
-                                Icon { icon: LdNetwork }
-                                "Network Properties"
-                            }
-                            div {
-                                class: "property-row",
-                                label { "Endpoint ID (Iroh Address)" }
-                                div {
-                                    class: "address-container",
-                                    code { "{endpoint_str}" }
-                                }
-                            }
-                        }
-
-                        div {
-                            class: "card sync-card",
-                            h3 {
-                                Icon { icon: LdActivity }
-                                "Synchronization"
-                            }
-                            div {
-                                class: "sync-stats",
-                                div {
-                                    class: "stat-item",
-                                    span { class: "stat-label", "Status" }
-                                    span { class: "stat-val", "{sync_text}" }
-                                }
-                                div {
-                                    class: "stat-item",
-                                    span { class: "stat-label", "Last Synced" }
-                                    span { class: "stat-val", "Never" }
-                                }
-                            }
+                            class: "description",
+                            code { "{endpoint_str}" }
                         }
                     }
 
@@ -137,7 +100,7 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
                         button {
                             class: "btn-action btn-primary",
                             Icon { icon: LdRefreshCw }
-                            "Sync Now"
+                            "Check status"
                         }
                         button {
                             class: "btn-action btn-secondary",
@@ -148,10 +111,7 @@ pub fn NodeView(trigger: Signal<i32>) -> Element {
                         button {
                             class: "btn-action btn-danger",
                             onclick: move |_| {
-                                // Clear selected and delete item
-                                let mut state_write = state.write();
-                                state_write.items.remove(index);
-                                state_write.selected = SelectedMachine::None;
+                                remove_selected();
                             },
                             Icon { icon: LdTrash2 }
                             "Forget Device"

@@ -11,10 +11,8 @@ pub enum MachineStatus {
 #[derive(Debug, Clone, PartialEq)]
 pub enum SyncStatus {
     Disabled,
-    Waiting,
     Pending,
-    Done,
-    Syncing,
+    InSync,
     Failure,
 }
 
@@ -118,6 +116,39 @@ pub fn use_node_insert(trigger: Signal<i32>) -> impl Fn(RemoteMachine) {
                 Ok(_) => trigger += 1,
                 Err(e) => {
                     ::log::error!("Failed to write address book: {}", e)
+                }
+            }
+        }
+    }
+}
+
+pub fn use_remove_selected(trigger: Signal<i32>) -> impl Fn() {
+    let dsot = use_context::<DsotState>();
+    let devices = use_context::<RemoteStore>();
+
+    move || {
+        let dsot = dsot.clone();
+        let mut trigger = trigger.clone();
+        let index = match *devices.selected().read() {
+            SelectedMachine::Machine(index) => index,
+            SelectedMachine::None => return,
+        };
+
+        if let Some(net) = dsot.network {
+            let mut addresses: Vec<NetworkAddress> = devices
+                .items()
+                .read()
+                .iter()
+                .map(|e| e.clone().into())
+                .collect();
+
+            if index < addresses.len() {
+                addresses.remove(index);
+                match net.address_book.write_addresses(addresses) {
+                    Ok(_) => trigger += 1,
+                    Err(e) => {
+                        ::log::error!("Failed to write address book: {}", e)
+                    }
                 }
             }
         }

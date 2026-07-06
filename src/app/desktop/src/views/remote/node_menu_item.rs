@@ -20,10 +20,9 @@ pub fn NodeMenuItem(index: usize, trigger: Signal<i32>) -> Element {
     };
 
     let sync_icon = match item.sync {
-        SyncStatus::Syncing => rsx! { Icon { class: "sync-icon syncing", icon: LdRefreshCw } },
-        SyncStatus::Done => rsx! { Icon { class: "sync-icon done", icon: LdCheck } },
+        SyncStatus::InSync => rsx! { Icon { class: "sync-icon in-sync", icon: LdCheck } },
         SyncStatus::Failure => rsx! { Icon { class: "sync-icon failure", icon: LdTriangleAlert } },
-        SyncStatus::Pending | SyncStatus::Waiting => rsx! { Icon { class: "sync-icon pending", icon: LdRefreshCw } },
+        SyncStatus::Pending => rsx! { Icon { class: "sync-icon pending", icon: LdRefreshCw } },
         SyncStatus::Disabled => rsx! {},
     };
 
