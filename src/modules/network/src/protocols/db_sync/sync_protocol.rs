@@ -3,11 +3,12 @@ use std::sync::Arc;
 use dsot_db_sync::{
     DsotDatabase,
     manager::DatabaseManagerProvider,
-    sync::{DatabaseSyncBridge, SyncHandler},
+    sync::{DatabaseSyncNode, SyncNode, SyncNodeHandler},
 };
 use iroh::{Endpoint, EndpointId, endpoint::Connection, protocol::ProtocolHandler};
 
-use crate::{NetworkInitOptions, protocols::db_sync::bridge::NetworkSyncBridge};
+use super::iroh_sync_node::NetworkDBSyncNode;
+use crate::NetworkInitOptions;
 
 pub const DSOT_DB_SYNC_ALPN_V1: &[u8] = b"/dsot/db_sync/1";
 
@@ -27,31 +28,33 @@ impl DBSyncProtocol {
         Self { provider }
     }
 
-    async fn sync(&self, connection: Connection) -> crate::error::Result<()> {
-        let mut remote_bridge = NetworkSyncBridge::start_passive_sync(connection).await?;
-        let id = remote_bridge.read_hello_handshake().await?;
+    // Open a connection and wait for database id to be sent
+    async fn wait_sync(&self, connection: Connection) -> crate::error::Result<()> {
+        let mut remote_bridge = NetworkDBSyncNode::start_sync(connection, None).await?;
+        let id = remote_bridge.get_db_id().await.unwrap();
         let db = self.provider.provide(&id)?.open_database().await?;
-        let mut local_bridge = DatabaseSyncBridge::create(&db).await?;
+        let mut local_bridge = DatabaseSyncNode::create(&db).await?;
 
-        SyncHandler::sync(&mut remote_bridge, &mut local_bridge).await?;
+        SyncNodeHandler::sync(&mut remote_bridge, &mut local_bridge).await?;
 
         remote_bridge.channel.force_close().await;
 
         Ok(())
     }
 
+    // Open a connection and send the database id
     pub async fn sync_database(
         endpoint: &Endpoint,
         id: EndpointId,
         db: &DsotDatabase,
     ) -> crate::error::Result<()> {
-        let mut local_bridge = DatabaseSyncBridge::create(&db).await?;
+        let mut local_bridge = DatabaseSyncNode::create(&db).await?;
 
         let conn = endpoint.connect(id, DSOT_DB_SYNC_ALPN_V1).await?;
         let mut remote_bridge =
-            NetworkSyncBridge::start_sync(conn, local_bridge.get_hello_message()).await?;
+            NetworkDBSyncNode::start_sync(conn, local_bridge.get_db_id().await).await?;
 
-        SyncHandler::sync(&mut local_bridge, &mut remote_bridge).await?;
+        SyncNodeHandler::sync(&mut local_bridge, &mut remote_bridge).await?;
 
         remote_bridge.channel.close().await?;
 
@@ -64,7 +67,7 @@ impl ProtocolHandler for DBSyncProtocol {
         &self,
         connection: iroh::endpoint::Connection,
     ) -> Result<(), iroh::protocol::AcceptError> {
-        match self.sync(connection).await {
+        match self.wait_sync(connection).await {
             Ok(_) => Ok(()),
             Err(e) => Err(iroh::protocol::AcceptError::from_err(e)),
         }

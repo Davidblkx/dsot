@@ -1,57 +1,48 @@
-use crate::{DBSyncError, Result};
+use crate::error::*;
 
-use super::model::SyncMessage::{Complete, Error};
-use super::model::*;
+use super::model::DBSyncMessage;
 
-pub trait SyncBridge {
-    fn read_handshake(&mut self) -> impl Future<Output = HandshakeMessage>;
-    fn send_handshake(&mut self, msg: &HandshakeMessage) -> impl Future<Output = HandshakeMessage>;
-    fn complete_handshake(
-        &mut self,
-        msg: &HandshakeMessage,
-    ) -> impl Future<Output = DataExchangeMessage>;
-    fn send_data(&mut self, msg: &DataExchangeMessage)
-    -> impl Future<Output = DataExchangeMessage>;
+/// A trait for a node capable of syncing with a database.
+pub trait SyncNode {
+    /// Return the id of the current database being sync, None if no db is open to sync
+    fn get_db_id(&mut self) -> impl Future<Output = Option<String>>;
+    /// Handle a sync message from the peer, returning a response message.
+    fn handle(&mut self, message: &DBSyncMessage) -> impl Future<Output = Result<DBSyncMessage>>;
 }
 
-pub struct SyncHandler;
+pub struct SyncNodeHandler;
 
-macro_rules! eval_send {
-    ($i:ident to $rcv:ident) => {
-        match &$i {
-            Complete => {
-                $rcv.send_handshake(&HandshakeMessage::Complete).await;
+macro_rules! send {
+    ($msg: ident to $target: ident) => {
+        match $msg {
+            DBSyncMessage::Completed => {
+                let _ = $target.handle(&$msg).await;
                 return Ok(());
             }
-            Error(detail) => {
-                let err_message = detail
-                    .clone()
-                    .unwrap_or("An unknown sync error occur".to_string());
-                ::log::error!("Sync error: {0}", err_message);
-                $rcv.send_handshake(&HandshakeMessage::Error(Some(err_message.clone())))
-                    .await;
-                return Err(DBSyncError::SyncError(err_message));
+            DBSyncMessage::Error(err) => {
+                let _ = $target.handle(&DBSyncMessage::Error(err.clone())).await;
+                return Err(err.to_error());
             }
-            _ => {}
-        };
+            e => $target.handle(&e).await?,
+        }
     };
 }
 
-impl SyncHandler {
-    /// Establishes a sync connection between two sync bridges.
-    /// A handshake is performed first, and then data is exchanged in a loop.
-    pub async fn sync<SA: SyncBridge, SB: SyncBridge>(a: &mut SA, b: &mut SB) -> Result<()> {
-        let mut msg = a.read_handshake().await;
-        eval_send!(msg to b);
-        msg = b.send_handshake(&msg).await;
-        eval_send!(msg to a);
-        let mut data = a.complete_handshake(&msg).await;
+impl SyncNodeHandler {
+    pub async fn sync<NodeA: SyncNode, NodeB: SyncNode>(
+        a: &mut NodeA,
+        b: &mut NodeB,
+    ) -> Result<()> {
+        let db_id = match a.get_db_id().await {
+            Some(id) => id,
+            None => return Err(DBSyncError::NoOpenConnection),
+        };
+
+        let mut msg = DBSyncMessage::Hello(db_id);
 
         loop {
-            eval_send!(data to b);
-            data = b.send_data(&data).await;
-            eval_send!(data to a);
-            data = a.send_data(&data).await;
+            msg = send!(msg to b);
+            msg = send!(msg to a);
         }
     }
 }

@@ -48,6 +48,8 @@ pub enum DBSyncError {
     PathIsNotAFolder,
     #[error("Sync node doesn't have an open database connection")]
     NoOpenConnection,
+    #[error("Communication error: {0}")]
+    CommunicationError(String),
 }
 
 pub type Result<T> = std::result::Result<T, DBSyncError>;

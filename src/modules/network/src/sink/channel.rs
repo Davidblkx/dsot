@@ -28,14 +28,21 @@ impl NetworkChannel {
         }
     }
 
-    /// Opens a new network channel on the given connection ready to receive messages and send replies,
-    /// and sends the initial message.
+    /// Opens a new network channel on the given connection ready to send a message and await for replies
+    /// If `init` is `Some`, the initial message will be sent before returning.
     pub async fn start<T: serde::Serialize + serde::de::DeserializeOwned>(
         connection: Connection,
-        init: &T,
+        init: &Option<T>,
     ) -> Result<Self> {
-        let mut channel = Self::open(connection).await?;
-        channel.write(init).await?;
+        let mut channel = match connection.open_bi().await {
+            Ok((send, read)) => Self::new(read, send, connection),
+            Err(e) => return Err(DsotNetworkError::IrohError(e.to_string())),
+        };
+
+        if let Some(init) = init {
+            channel.write(init).await?;
+        }
+
         Ok(channel)
     }
 

@@ -1,105 +1,59 @@
+use dsot_serde::BinarySerde;
+use serde::{Deserialize, Serialize};
+
+use super::error::SyncError;
 use crate::Result;
-use crate::dser::EntityMessagePack;
 
 pub type SyncHash = [u8; 32];
 pub type SyncKey = [u8; 16];
 pub type SyncEntry = Vec<u8>;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub enum SyncMessage<T> {
-    InProgress(T),
-    Complete,
-    Error(Option<String>),
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub enum Handshake {
+#[derive(Debug, Deserialize, Serialize)]
+pub enum DBSyncMessage {
+    // Always sent by the node starting a sync session.
     Hello(String),
-    Ack(SyncHash),
-}
-
-impl Handshake {
-    pub fn to_message(self) -> HandshakeMessage {
-        HandshakeMessage::InProgress(self)
-    }
-}
-
-pub type HandshakeMessage = SyncMessage<Handshake>;
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub enum DataExchange {
-    Begin(Vec<SyncKey>),
-    Trade {
+    // Used to validate hash of two nodes' databases.
+    Validate(SyncHash),
+    // All the keys that this node contains.
+    BeginExchange(Vec<SyncKey>),
+    // Sent by the node to exchange missing entries and keys.
+    Exchange {
+        // All the keys that this node contains.
         keys: Vec<SyncKey>,
+        // Keys this node is missing.
         request: Vec<SyncKey>,
+        // The entries requested in this exchange.
         entries: Vec<SyncEntry>,
     },
-    Validate(SyncHash),
+    // Sent when the node has finished exchanging keys and entries.
+    Completed,
+    // Sent when the node encounters an error during sync.
+    Error(SyncError),
 }
 
-impl DataExchange {
-    pub fn to_message(self) -> DataExchangeMessage {
-        SyncMessage::InProgress(self)
-    }
-}
-
-pub type DataExchangeMessage = SyncMessage<DataExchange>;
-
-impl<T> SyncMessage<T> {
-    pub fn new(value: T) -> Self {
-        Self::InProgress(value)
-    }
-
-    pub fn error<E: ToString>(e: E) -> Self {
-        Self::Error(Some(e.to_string()))
-    }
-
-    pub fn empty_error() -> Self {
-        Self::Error(None)
-    }
-}
-
-impl<T: serde::Serialize + serde::de::DeserializeOwned> SyncMessage<T> {
-    pub fn to_bytes(&self) -> crate::Result<Vec<u8>> {
-        EntityMessagePack::serialize(self)
-    }
-
-    pub fn from_bytes(bytes: &[u8]) -> SyncMessage<T> {
-        match EntityMessagePack::deserialize::<SyncMessage<T>>(bytes) {
-            Ok(value) => value,
-            Err(e) => SyncMessage::error(e),
-        }
-    }
-}
-
-pub trait ToSyncMessage<T> {
-    fn to_message(self) -> SyncMessage<T>;
-}
-
-pub trait FlatSyncMessage<T> {
-    fn flat(self) -> SyncMessage<T>;
-}
-
-impl<T> ToSyncMessage<T> for Result<T> {
-    fn to_message(self) -> SyncMessage<T> {
-        match self {
-            Ok(h) => SyncMessage::InProgress(h),
+impl DBSyncMessage {
+    pub fn to_bytes(&self) -> Result<Vec<u8>> {
+        match BinarySerde::serialize(&self) {
+            Ok(bytes) => Ok(bytes),
             Err(e) => {
-                ::log::warn!("Sync message error: {0}", e);
-                SyncMessage::error(e)
+                ::log::error!("Failed to serialize sync message: {}", e);
+                let err_msg = DBSyncMessage::Error(SyncError::Serialize);
+                Ok(BinarySerde::serialize(&err_msg)?)
             }
         }
     }
-}
 
-impl<T> FlatSyncMessage<T> for Result<SyncMessage<T>> {
-    fn flat(self) -> SyncMessage<T> {
-        match self {
-            Ok(h) => h,
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        match BinarySerde::deserialize(bytes) {
+            Ok(message) => message,
             Err(e) => {
-                ::log::warn!("Sync message error: {0}", e);
-                SyncMessage::error(e)
+                ::log::error!("Failed to deserialize sync message: {}", e);
+                DBSyncMessage::Error(SyncError::Deserialize)
             }
         }
+    }
+
+    pub fn is_error(&self) -> bool {
+        matches!(self, DBSyncMessage::Error(_))
     }
 }

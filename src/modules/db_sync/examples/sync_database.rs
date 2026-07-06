@@ -4,7 +4,7 @@ use redb::{Database, backends::InMemoryBackend};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use dsot_db_sync::sync::v2::*;
+use dsot_db_sync::sync::v1::*;
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default, SyncEntity)]
 #[table(artists)]
