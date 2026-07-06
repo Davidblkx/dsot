@@ -38,6 +38,7 @@ impl DBSyncProtocol {
         SyncNodeHandler::sync(&mut remote_bridge, &mut local_bridge).await?;
 
         remote_bridge.channel.force_close().await;
+        local_bridge.close().await?;
 
         Ok(())
     }
@@ -56,7 +57,11 @@ impl DBSyncProtocol {
 
         SyncNodeHandler::sync(&mut local_bridge, &mut remote_bridge).await?;
 
-        remote_bridge.channel.close().await?;
+        let db_close = local_bridge.close().await;
+        let remote_close = remote_bridge.channel.close().await;
+
+        db_close?;
+        remote_close?;
 
         Ok(())
     }

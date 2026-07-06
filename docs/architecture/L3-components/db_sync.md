@@ -21,11 +21,11 @@ src/modules/db_sync/src/
 ├── sync/             # Database synchronization protocol & message types (V1)
 │   ├── mod.rs        # Re-exports V1 sync interfaces
 │   └── v1/
-│       ├── db_sync_bridge.rs  # DatabaseSyncBridge wrapping database transitions
-│       ├── handler.rs         # SyncBridge trait + SyncHandler execution loop
-│       ├── iroh_protocol.rs   # DBSyncProtocol implementing Iroh's ProtocolHandler
-│       ├── iroh_sync_bridge.rs # IrohSyncBridge wrapping Iroh endpoints/streams
-│       └── model.rs           # Handshake, DataExchange, and SyncMessage models
+│       ├── db_sync_node.rs    # DatabaseSyncNode wrapping database transactions & state
+│       ├── error.rs           # SyncError enum for protocol errors
+│       ├── handler.rs         # SyncNode trait + SyncNodeHandler execution loop
+│       ├── mod.rs             # V1 module declarations & exports
+│       └── model.rs           # DBSyncMessage models & binary serialization bindings
 ├── dser.rs           # EntityMessagePack — rmp-serde wrapper
 ├── entity.rs         # SyncEntity, IntoSyncEntity traits
 ├── error.rs          # DBSyncError — central error enum for the crate
@@ -143,69 +143,71 @@ DSOT is local-first: each device owns a full SQLite database and a full journal.
 
 ### Protocol Engine (`sync/v1/`)
 
-The crate implements a complete synchronization protocol engine using the Iroh network protocol under the ALPN `b"/dsot/db_sync/1"`. It coordinates state reconciliation between nodes using a modular bridge design built around the `SyncBridge` trait.
+To establish a strict separation of concerns between database state reconciliation and network communication, `dsot_db_sync` contains zero networking dependencies or Iroh transport bindings. Instead, it exposes the core `SyncNode` trait and a unified protocol message enum (`DBSyncMessage`).
 
 #### Core Message Types (`sync/v1/model.rs`)
 
-*   **`SyncMessage<T>`**: Outermost message wrapper. Can be `InProgress(T)`, `Complete`, or `Error(Option<String>)`.
-*   **`HandshakeMessage`** / **`Handshake`**: Message sent during initial session establishment:
-    *   `Hello(String)`: Sent by the initiating node containing its database identifier.
-    *   `Ack(SyncHash)`: Acknowledgment containing the node's current state hash (a `BLAKE3` digest over its sorted journal keys).
-*   **`DataExchangeMessage`** / **`DataExchange`**: Exchanged to reconcile different states:
-    *   `Begin(Vec<SyncKey>)`: Initiates key exchange with a list of all journal keys (`[u8; 16]`) present locally.
-    *   `Trade { keys, request, entries }`: The key exchange workhorse. Contains the sender's current journal keys, the keys requested from the remote node (`request`), and the serialized journal entries (`Vec<u8>`) requested by the remote node in the previous step.
-    *   `Validate(SyncHash)`: Sent when a node believes it is fully synchronized, prompting the receiver to verify hashes.
+All protocol interactions are modeled by the single enum **`DBSyncMessage`**:
+*   `Hello(String)`: Always sent by the initiating node to advertise its database identifier (`db_id`).
+*   `Validate(SyncHash)`: Sent to verify whether both nodes share the identical state hash (a `BLAKE3` digest over sorted journal keys).
+*   `BeginExchange(Vec<SyncKey>)`: Initiates key exchange by sending all local journal keys (`[u8; 16]`).
+*   `Exchange { keys, request, entries }`: The bidirectional reconciliation payload. Carries the sender's current journal keys (`keys`), keys requested from the remote node (`request`), and serialized journal entries (`entries`) requested in the previous turn.
+*   `Completed`: Sent when both nodes confirm identical state hashes or complete their exchange.
+*   `Error(SyncError)`: Sent when a node encounters an error (serialization failure, database ID mismatch, etc.).
 
-#### Modular Bridge Architecture
+#### Decoupled SyncNode Architecture
 
-The sync subsystem decouples network transport from the database state transitions:
+The sync subsystem decouples network transport from database state transitions using the `SyncNode` trait:
 
 ```mermaid
 classDiagram
-    class SyncBridge {
+    class SyncNode {
         <<interface>>
-        +read_handshake() HandshakeMessage
-        +send_handshake(msg) HandshakeMessage
-        +complete_handshake(msg) DataExchangeMessage
-        +send_data(msg) DataExchangeMessage
+        +get_db_id() Option~String~
+        +handle(message) DBSyncMessage
     }
-    class DatabaseSyncBridge {
+    class DatabaseSyncNode {
+        +db DsotDatabase
         +trx DsotDatabaseTransaction
-        +should_commit bool
+        +create(db) DatabaseSyncNode
         +close() bool
     }
-    class IrohSyncBridge {
-        +reader FramedRead
-        +writer FramedWrite
+    class NetworkDBSyncNode {
+        +channel NetworkChannel
+        +db_id Option~String~
+        +start_sync(conn, db_id) NetworkDBSyncNode
     }
-    SyncBridge <|.. DatabaseSyncBridge
-    SyncBridge <|.. IrohSyncBridge
+    SyncNode <|.. DatabaseSyncNode : in dsot_db_sync
+    SyncNode <|.. NetworkDBSyncNode : in dsot_network
 ```
 
-*   **`SyncBridge`**: The trait defining the protocol operations.
-*   **`DatabaseSyncBridge`**: Wraps a local `DsotDatabase` and a transaction. Implements `SyncBridge` to compute state hashes, evaluate differences, apply remote journal entries, and retrieve requested entries from storage.
-*   **`IrohSyncBridge`**: Wraps an `iroh::endpoint::Connection`. Implements `SyncBridge` to send and receive framed MessagePack payloads over the network.
-*   **`SyncHandler`**: Coordinates the protocol execution between any two implementations of `SyncBridge` via the `SyncHandler::sync` function:
+*   **`SyncNode`**: The async interface defining database ID retrieval and message processing.
+*   **`DatabaseSyncNode`**: Resides in `dsot_db_sync`. Wraps a local `DsotDatabase` and an active `DsotDatabaseTransaction`. Implements `SyncNode` to evaluate differences against remote keys, apply incoming journal entries in a transaction, and retrieve requested journal entries from SQLite/redb storage.
+*   **`SyncNodeHandler`**: Coordinates protocol execution between any two implementations of `SyncNode` via the loop function:
     ```rust
-    pub async fn sync<SA: SyncBridge, SB: SyncBridge>(a: &mut SA, b: &mut SB) -> Result<()>
+    pub async fn sync<NodeA: SyncNode, NodeB: SyncNode>(a: &mut NodeA, b: &mut NodeB) -> Result<()>
     ```
-*   **`DBSyncProtocol`**: Implements Iroh's `ProtocolHandler`. When a connection is accepted, it instantiates both an `IrohSyncBridge` (remote) and a `DatabaseSyncBridge` (local), runs `SyncHandler::sync` to reconcile them, and calls `local_bridge.close()` at the end to commit or rollback the transaction based on success or error.
+*   **`NetworkDBSyncNode` & `DBSyncProtocol`**: Reside in `dsot_network`. They implement `SyncNode` over an Iroh network connection (`NetworkChannel`) and register as an Iroh `ProtocolHandler` under ALPN `b"/dsot/db_sync/1"`. When a connection is accepted or initiated, `dsot_network` instantiates both `DatabaseSyncNode` (local) and `NetworkDBSyncNode` (remote) and runs `SyncNodeHandler::sync(&mut local, &mut remote)`.
 
 #### Reconciliation Protocol Flow
 
-When two nodes reconcile via `SyncHandler::sync`, the following flow occurs:
+When two nodes reconcile via `SyncNodeHandler::sync`, the following loop executes:
 
-1.  **State Handshake:** The initiating node sends `Handshake::Hello(db_id)`. The receiver validates the ID and responds with `Handshake::Ack(hash_B)`. If the hash matches the initiating node's local hash, both databases are already in sync and the session completes.
-2.  **Key Exchange Start:** If hashes mismatch, the initiator sends `DataExchange::Begin(keys_A)`.
-3.  **Exchange Trade:** The receiver compares `keys_A` with its local keys, computes the set difference of keys it is missing, and replies with `DataExchange::Trade` containing its own `keys_B`, the list of requested keys, and any entries the remote is missing.
-4.  **Symmetric Merging:** The initiator receives the `Trade` message, applies the incoming entries in a single transaction via `RepositoryRegistry::instance().apply()`, computes the keys it is missing, fetches the journal entries requested by the remote, and sends another `Trade` message.
-5.  **Final Validation:** Once no missing entries or keys are left to request, the nodes send `DataExchange::Validate(hash)` to confirm their state hashes match. Upon successful validation, both nodes transition to `Complete`.
+1.  **Session Handshake:** The initiating node sends `DBSyncMessage::Hello(db_id)`. The receiving node validates the ID against its local database. If IDs match, it computes its local state hash and replies with `DBSyncMessage::Validate(local_hash)`.
+2.  **Hash Verification:** If the received hash matches the initiator's local hash, both databases are in sync and the initiator replies with `DBSyncMessage::Completed`.
+3.  **Key Exchange Start:** If hashes mismatch, the initiator sends `DBSyncMessage::BeginExchange(local_keys)`.
+4.  **Symmetric Merging & Trading:** Upon receiving `BeginExchange` or `Exchange`, the receiving node:
+    *   Applies any incoming `entries` inside its transaction via `RepositoryRegistry::instance().apply()`.
+    *   Computes the keys it is missing from `keys` (`get_keys_not_in_journal`).
+    *   Fetches the journal entries requested by the remote node (`get_journal_entries_in_array`).
+    *   If no entries need to be sent and no keys are missing, it sends `DBSyncMessage::Validate(hash)` to re-check synchronization. Otherwise, it sends `DBSyncMessage::Exchange { keys, request, entries }`.
+5.  **Completion:** Once validation confirms identical state hashes, nodes exchange `DBSyncMessage::Completed` and the transaction is committed via `.close()`.
 
 ### Status
 
-The synchronization state comparison, key exchange, payload exchange, and transaction replay primitives are fully implemented and verified via unit/integration tests in `sync_entity_contract.rs` and the `sync_database` example.
+The database synchronization logic, state comparison, key exchange, payload exchange, and transaction replay primitives are fully implemented and verified in `dsot_db_sync`.
 
-The external **transport coordinator** — the discovery layer, connection management, and transport protocol (e.g. over Iroh, WebSockets, or libp2p) that handles the networking socket calls to drive these protocol methods — is implemented externally to this crate.
+The external **network communication layer** — including Iroh connection management, framing (`NetworkChannel`), and protocol handling (`DBSyncProtocol`) — is cleanly decoupled and implemented in `dsot_network`.
 
 ### `RepositoryRegistry` (`registry.rs`)
 

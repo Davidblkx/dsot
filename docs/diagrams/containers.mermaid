@@ -7,6 +7,8 @@ graph TD
         Derive[dsot_derive]
         MB[dsot_music_brainz]
         Config[dsot_config]
+        Network[dsot_network]
+        Serde[dsot_serde]
     end
 
     subgraph Storage [Local Storage Layer]
@@ -16,18 +18,25 @@ graph TD
 
     subgraph Remote [External API Services]
         MusicBrainzAPI[MusicBrainz API]
+        P2PNodes[Other DSOT Nodes via Iroh]
     end
 
     DesktopApp -->|Uses state & configurations| Lib
     Lib -->|Invokes CRUD & Search| DbSync
+    Lib -->|Manages P2P networking| Network
     Lib -->|Uses models| Model
     Lib -->|Loads configuration| Config
     
     DbSync -->|Serializes/Deserializes| Model
+    DbSync -->|Uses binary serialization| Serde
     Derive -.->|Generates SyncEntity & Repo logic for| Model
     
     DbSync -->|Executes SQLite queries & triggers FTS5| SQLite
     DbSync -->|Logs transactional SyncOperations| Redb
+    
+    Network -->|Coordinates database sync via SyncNode| DbSync
+    Network -->|Uses binary serialization| Serde
+    Network -->|P2P framing & protocol streams| P2PNodes
     
     DesktopApp -->|Fetches metadata| MB
     MB -->|JSON Web Requests| MusicBrainzAPI
