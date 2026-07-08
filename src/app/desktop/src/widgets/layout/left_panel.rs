@@ -21,6 +21,7 @@ pub fn DesktopLeftPanel() -> Element {
     let goto_home = move || nav.push(Routes::HomeView);
     let goto_inbox = move || nav.push(Routes::InboxView);
     let goto_remote = move || nav.push(Routes::RemoteView);
+    let goto_remote_nodes = move || nav.push(Routes::RemoteNodesView);
 
     let is_route = move |r: Routes| if r == current_route { true } else { false };
     let show_remote = dsot.network.is_some();
@@ -65,6 +66,19 @@ pub fn DesktopLeftPanel() -> Element {
                         active: is_route(Routes::RemoteView),
                         click: move |_| {
                             goto_remote();
+                        },
+                        icon: rsx! {
+                            Icon {
+                                icon: LdRouter
+                            }
+                        }
+                    }
+
+                    MenuItem {
+                        title: "Nodes",
+                        active: is_route(Routes::RemoteNodesView),
+                        click: move |_| {
+                            goto_remote_nodes();
                         },
                         icon: rsx! {
                             Icon {
