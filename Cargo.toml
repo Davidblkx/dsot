@@ -31,11 +31,11 @@ dioxus-free-icons = { version = "0.10", features = ["lucide"] }
 env_logger = { version = "0.11" }
 fern = { version = "0.7" }
 humantime = { version = "2" }
-iroh = { version = "1.0.1" }
+iroh = { version = "1.0.2" }
 futures-util = { version = "0.3" }
 linkme = "0.3"
 log = { version = "0.4" }
-paste = { version = "1.0.15" }
+paste = { version = "1" }
 reqwest = { version = "0.13", features = ["blocking"] }
 redb = { version = "4" }
 rmp-serde = "1"

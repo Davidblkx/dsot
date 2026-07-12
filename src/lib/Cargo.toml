@@ -17,6 +17,9 @@ fern = { workspace = true }
 humantime = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
+paste = { workspace = true }
 serde = { workspace = true }
 sysdirs = { workspace = true }
+tokio = { workspace = true }
 uuid = { workspace = true }
+iroh = { workspace = true }

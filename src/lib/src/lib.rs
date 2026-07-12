@@ -2,6 +2,10 @@ pub mod configs;
 pub mod logger;
 pub mod user_manager;
 
+pub mod core;
+pub mod error;
+pub mod state;
+
 pub use dsot_config;
 pub use dsot_db_sync;
 pub use dsot_model;
