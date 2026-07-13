@@ -1,3 +1,4 @@
+mod logger;
 mod model;
 
 pub mod cap;

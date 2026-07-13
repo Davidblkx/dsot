@@ -1,4 +1,5 @@
-use super::cap::Capability;
+use super::{cap::Capability, model::DsotCore};
+use crate::error::Result;
 
 #[derive(Debug, Clone)]
 pub struct DsotCoreInitOptions {
@@ -31,5 +32,20 @@ impl DsotCoreInitOptions {
     pub fn with_cap(mut self, value: Capability) -> Self {
         self.cap = value;
         self
+    }
+
+    pub fn initialize(self) -> Result<DsotCore> {
+        let has_debug_logger = self.init_debug_logger()?;
+
+        let config = self.load_config()?;
+
+        if !has_debug_logger {
+            self.init_logger_from_config(&config)?;
+        }
+
+        Ok(DsotCore {
+            cap: self.cap,
+            config,
+        })
     }
 }
