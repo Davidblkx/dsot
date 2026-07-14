@@ -34,7 +34,7 @@ impl DsotCoreInitOptions {
         self
     }
 
-    pub fn initialize(self) -> Result<DsotCore> {
+    pub async fn initialize(self) -> Result<DsotCore> {
         let has_debug_logger = self.init_debug_logger()?;
 
         let config = self.load_config()?;
@@ -43,9 +43,14 @@ impl DsotCoreInitOptions {
             self.init_logger_from_config(&config)?;
         }
 
+        let repo = self.init_repository(&config).await?;
+        let state = self.init_state(&config, &repo).await?;
+
         Ok(DsotCore {
             cap: self.cap,
             config,
+            repo,
+            state,
         })
     }
 }
