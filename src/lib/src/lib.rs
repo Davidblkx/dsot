@@ -4,6 +4,7 @@ pub mod user_manager;
 
 pub mod core;
 pub mod error;
+pub mod network;
 pub mod repository;
 pub mod state;
 

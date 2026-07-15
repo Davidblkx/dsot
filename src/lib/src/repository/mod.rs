@@ -15,6 +15,7 @@ pub use traits::*;
 #[derive(Debug, Clone)]
 pub struct DsotRepository {
     pub users: Arc<dyn UserRepository>,
+    pub devices: Arc<dyn DeviceRepository>,
 }
 
 impl DsotCoreInitOptions {
@@ -23,6 +24,7 @@ impl DsotCoreInitOptions {
 
         Ok(DsotRepository {
             users: Arc::new(noop::UserNoopRepository::new(user_id)),
+            devices: Arc::new(noop::DevicesNoopRepository {}),
         })
     }
 }

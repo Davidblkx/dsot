@@ -6,6 +6,8 @@ pub enum DsotError {
     LogInitError(#[from] fern::InitError),
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
+    #[error("Network: disconnected")]
+    NetworkDisconnected,
 }
 
 pub type Result<T> = std::result::Result<T, DsotError>;

@@ -1,4 +1,5 @@
 mod address_book;
+mod builder;
 mod config;
 mod error;
 mod init;

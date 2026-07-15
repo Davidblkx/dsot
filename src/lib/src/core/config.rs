@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use dsot_config::{ConfigOptions, DsotConfig};
 
 use super::init::DsotCoreInitOptions;
-use crate::error::Result;
+use crate::{error::Result, network::NetworkConfig};
 
 pub type DsotAppConfig = DsotConfig<ConfigValue>;
 
@@ -14,7 +14,7 @@ pub struct ConfigValue {
     pub log_level: Option<String>,
     pub log_file: Option<PathBuf>,
     pub use_network: bool,
-    pub network_config: dsot_network::NetworkConfig,
+    pub network_config: NetworkConfig,
 }
 
 impl Default for ConfigValue {
@@ -25,7 +25,7 @@ impl Default for ConfigValue {
             log_level: None,
             log_file: None,
             use_network: true,
-            network_config: dsot_network::NetworkConfig::default(),
+            network_config: NetworkConfig::default(),
         }
     }
 }

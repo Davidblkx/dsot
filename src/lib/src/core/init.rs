@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::{cap::Capability, model::DsotCore};
 use crate::error::Result;
 
@@ -48,7 +50,7 @@ impl DsotCoreInitOptions {
 
         Ok(DsotCore {
             cap: self.cap,
-            config,
+            config: Arc::new(config),
             repo,
             state,
         })
