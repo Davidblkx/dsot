@@ -13,8 +13,10 @@ dsot_db_sync = { path = "../modules/db_sync" }
 dsot_config = { path = "../modules/config" }
 dsot_model = { path = "../modules/model" }
 dsot_network = { path = "../modules/network" }
+dsot_serde = { path = "../modules/serde" }
 
 fern = { workspace = true }
+futures-util = { workspace = true }
 humantime = { workspace = true }
 log = { workspace = true }
 thiserror = { workspace = true }
@@ -22,5 +24,6 @@ paste = { workspace = true }
 serde = { workspace = true }
 sysdirs = { workspace = true }
 tokio = { workspace = true }
+tokio-util = { workspace = true }
 uuid = { workspace = true }
 iroh = { workspace = true }

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, model::DsotCore};
-use crate::error::Result;
+use crate::{error::Result, network::NetworkBuilder};
 
 #[derive(Debug, Clone)]
 pub struct DsotCoreInitOptions {
@@ -39,7 +39,7 @@ impl DsotCoreInitOptions {
     pub async fn initialize(self) -> Result<DsotCore> {
         let has_debug_logger = self.init_debug_logger()?;
 
-        let config = self.load_config()?;
+        let config = Arc::new(self.load_config()?);
 
         if !has_debug_logger {
             self.init_logger_from_config(&config)?;
@@ -48,11 +48,27 @@ impl DsotCoreInitOptions {
         let repo = self.init_repository(&config).await?;
         let state = self.init_state(&config, &repo).await?;
 
+        let net = {
+            let builder = NetworkBuilder {
+                cap: self.cap,
+                config: config.clone(),
+                repo: repo.clone(),
+                state: state.clone(),
+            };
+
+            if config.value.network_config.lazy {
+                builder.lazy_connect()
+            } else {
+                builder.connect().await?
+            }
+        };
+
         Ok(DsotCore {
             cap: self.cap,
-            config: Arc::new(config),
+            config,
             repo,
             state,
+            net,
         })
     }
 }

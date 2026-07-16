@@ -4,6 +4,7 @@ pub struct NetworkConfig {
     pub key_file: Option<String>,
     pub public_name: Option<String>,
     pub public_desc: Option<String>,
+    pub lazy: bool,
 }
 
 impl Default for NetworkConfig {
@@ -13,6 +14,7 @@ impl Default for NetworkConfig {
             key_file: None,
             public_name: None,
             public_desc: None,
+            lazy: false,
         }
     }
 }

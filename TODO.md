@@ -1,8 +1,7 @@
 now:
-    - improve inbox screen
-    - Add iroh screen
-        - show key
-        - test db sync
+    - refactor network
+        - split router from endpoint
+        - ignore lazy
 maybe later:
     - refactor inbox
     - Develop and document local files

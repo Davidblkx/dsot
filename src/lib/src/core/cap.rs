@@ -41,7 +41,7 @@ macro_rules! CAP {
 }
 
 CAP! {
-    0 => remote_access "communicate with other dsot instances",
+    0 => network_access "communicate with other dsot instances",
     1 => disk_access "read/write files to disk",
     2 => full_disk_access "read/write files to any path",
 }
@@ -80,22 +80,22 @@ mod tests {
 
     #[test]
     fn test_single_capability() {
-        let cap = Capability::new().with_remote_access().with_disk_access();
+        let cap = Capability::new().with_network_access().with_disk_access();
         assert!(cap.can_disk_access());
         assert!(!cap.can_full_disk_access());
     }
 
     #[test]
     fn test_check_any() {
-        let cap = Capability::new().with_remote_access().with_disk_access();
-        assert!(cap.check_any(Capability::new().with_remote_access()));
+        let cap = Capability::new().with_network_access().with_disk_access();
+        assert!(cap.check_any(Capability::new().with_network_access()));
         assert!(!cap.check_any(Capability::new().with_full_disk_access()));
     }
 
     #[test]
     fn test_check_all() {
-        let cap = Capability::new().with_remote_access().with_disk_access();
-        assert!(cap.check_all(Capability::new().with_remote_access().with_disk_access()));
+        let cap = Capability::new().with_network_access().with_disk_access();
+        assert!(cap.check_all(Capability::new().with_network_access().with_disk_access()));
         assert!(!cap.check_all(Capability::new().with_full_disk_access().with_disk_access()));
     }
 }

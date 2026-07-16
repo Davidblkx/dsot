@@ -1887,7 +1887,9 @@ dependencies = [
  "dsot_db_sync",
  "dsot_model",
  "dsot_network",
+ "dsot_serde",
  "fern",
+ "futures-util",
  "humantime",
  "iroh",
  "log",
@@ -1896,6 +1898,7 @@ dependencies = [
  "sysdirs",
  "thiserror 2.0.18",
  "tokio",
+ "tokio-util",
  "uuid",
 ]
 

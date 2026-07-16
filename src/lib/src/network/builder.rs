@@ -1,42 +1,46 @@
-use iroh::protocol::DynProtocolHandler;
-use std::{
-    collections::BTreeMap,
-    sync::{Arc, RwLock},
-};
+use iroh::Endpoint;
+use std::sync::Arc;
 
-use super::DsotNetwork;
+use super::{DsotNetwork, state::NetworkState};
 use crate::{
     core::{cap::Capability, config::DsotAppConfig},
-    error::{DsotError, Result},
+    error::Result,
     repository::DsotRepository,
+    state::DsotState,
 };
 
 #[derive(Debug, Clone)]
 pub struct NetworkBuilder {
-    config: Arc<DsotAppConfig>,
-    repo: DsotRepository,
-    cap: Capability,
-    protocols: Arc<RwLock<BTreeMap<Vec<u8>, Box<dyn DynProtocolHandler>>>>,
+    pub config: Arc<DsotAppConfig>,
+    pub repo: DsotRepository,
+    pub cap: Capability,
+    pub state: DsotState,
 }
 
 impl NetworkBuilder {
-    pub fn new(config: Arc<DsotAppConfig>, repo: DsotRepository, cap: Capability) -> Self {
-        Self {
-            config,
-            repo,
-            cap,
-            protocols: Arc::new(RwLock::new(BTreeMap::new())),
+    pub fn lazy_connect(self) -> DsotNetwork {
+        self.into()
+    }
+
+    pub async fn connect(self) -> Result<DsotNetwork> {
+        let state = self.connect_router().await?;
+        Ok(DsotNetwork::new(state))
+    }
+
+    pub(crate) async fn connect_router(self) -> Result<NetworkState> {
+        if !self.cap.can_network_access() || !self.config.value.use_network {
+            ::log::debug!("Network access disabled");
+            return Ok(NetworkState::Closed);
         }
-    }
 
-    pub fn accept(&self, alpn: impl AsRef<[u8]>, handler: impl Into<Box<dyn DynProtocolHandler>>) {
-        self.protocols
-            .write()
-            .unwrap()
-            .insert(alpn.as_ref().to_vec(), handler.into());
-    }
+        let key = self.load_network_key()?;
 
-    pub fn connect(self) -> Result<DsotNetwork> {
-        Err(DsotError::NetworkDisconnected)
+        let endpoint = Endpoint::builder(iroh::endpoint::presets::N0)
+            .secret_key(key)
+            .bind()
+            .await?;
+
+        let router = super::router::build_router(self, endpoint).await;
+        Ok(NetworkState::Open(router.spawn()))
     }
 }
