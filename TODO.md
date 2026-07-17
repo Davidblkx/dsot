@@ -1,7 +1,5 @@
 now:
-    - refactor network
-        - split router from endpoint
-        - ignore lazy
+    - network should be able to update a reactive state
 maybe later:
     - refactor inbox
     - Develop and document local files

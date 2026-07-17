@@ -1,16 +1,17 @@
 use iroh::Endpoint;
 use std::sync::Arc;
 
-use super::{DsotNetwork, state::NetworkState};
 use crate::{
     core::{cap::Capability, config::DsotAppConfig},
     error::Result,
+    network::DsotNetwork,
     repository::DsotRepository,
     state::DsotState,
 };
 
 #[derive(Debug, Clone)]
-pub struct NetworkBuilder {
+#[allow(dead_code)]
+pub(crate) struct NetworkBuilder {
     pub config: Arc<DsotAppConfig>,
     pub repo: DsotRepository,
     pub cap: Capability,
@@ -18,19 +19,10 @@ pub struct NetworkBuilder {
 }
 
 impl NetworkBuilder {
-    pub fn lazy_connect(self) -> DsotNetwork {
-        self.into()
-    }
-
-    pub async fn connect(self) -> Result<DsotNetwork> {
-        let state = self.connect_router().await?;
-        Ok(DsotNetwork::new(state))
-    }
-
-    pub(crate) async fn connect_router(self) -> Result<NetworkState> {
+    pub async fn connect(&self) -> Result<Option<Endpoint>> {
         if !self.cap.can_network_access() || !self.config.value.use_network {
             ::log::debug!("Network access disabled");
-            return Ok(NetworkState::Closed);
+            return Ok(None);
         }
 
         let key = self.load_network_key()?;
@@ -40,7 +32,14 @@ impl NetworkBuilder {
             .bind()
             .await?;
 
-        let router = super::router::build_router(self, endpoint).await;
-        Ok(NetworkState::Open(router.spawn()))
+        Ok(Some(endpoint))
+    }
+
+    pub fn into_lazy_connection(self) -> DsotNetwork {
+        DsotNetwork::new_lazy(self)
+    }
+
+    pub async fn into_connection(self) -> Result<DsotNetwork> {
+        DsotNetwork::new_connected(self).await
     }
 }

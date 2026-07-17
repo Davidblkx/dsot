@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, model::DsotCore};
-use crate::{error::Result, network::NetworkBuilder};
+use crate::{error::Result, network::builder::NetworkBuilder};
 
 #[derive(Debug, Clone)]
 pub struct DsotCoreInitOptions {
@@ -57,9 +57,9 @@ impl DsotCoreInitOptions {
             };
 
             if config.value.network_config.lazy {
-                builder.lazy_connect()
+                builder.into_lazy_connection()
             } else {
-                builder.connect().await?
+                builder.into_connection().await?
             }
         };
 

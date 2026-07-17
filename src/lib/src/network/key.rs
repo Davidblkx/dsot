@@ -1,7 +1,7 @@
 use iroh::SecretKey;
 use std::path::PathBuf;
 
-use super::NetworkBuilder;
+use super::builder::NetworkBuilder;
 use crate::error::Result;
 
 const KEY_NAME: &'static str = "dsot_network.key";

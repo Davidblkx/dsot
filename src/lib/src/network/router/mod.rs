@@ -1,5 +1,3 @@
-use iroh::{Endpoint, protocol::RouterBuilder};
+mod router;
 
-pub async fn build_router(_builder: super::NetworkBuilder, endpoint: Endpoint) -> RouterBuilder {
-    RouterBuilder::new(endpoint)
-}
+pub use router::DsotRouter;
