@@ -2,7 +2,7 @@ use iroh::Endpoint;
 use std::sync::Arc;
 
 use crate::{
-    core::{cap::Capability, config::DsotAppConfig},
+    core::{DsotCore, cap::Capability, config::DsotAppConfig},
     error::Result,
     network::DsotNetwork,
     repository::DsotRepository,
@@ -41,5 +41,16 @@ impl NetworkBuilder {
 
     pub async fn into_connection(self) -> Result<DsotNetwork> {
         DsotNetwork::new_connected(self).await
+    }
+}
+
+impl DsotCore {
+    pub(crate) fn into_builder(&self) -> NetworkBuilder {
+        NetworkBuilder {
+            cap: self.cap,
+            config: self.config.clone(),
+            repo: self.repo.clone(),
+            state: self.state.clone(),
+        }
     }
 }

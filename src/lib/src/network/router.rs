@@ -7,24 +7,29 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
 };
 
-use crate::error::Result;
+use super::{builder::NetworkBuilder, protocols::add_routes};
+use crate::{core::DsotCore, error::Result};
 
 #[derive(Debug, Clone)]
 pub struct DsotRouter {
     inner: Arc<Mutex<Option<Router>>>,
     connected: Arc<AtomicBool>,
-}
-
-impl Default for DsotRouter {
-    fn default() -> Self {
-        Self {
-            inner: Arc::new(Mutex::new(None)),
-            connected: Arc::new(AtomicBool::new(false)),
-        }
-    }
+    builder: NetworkBuilder,
 }
 
 impl DsotRouter {
+    pub fn from_core(core: DsotCore) -> Self {
+        DsotRouter::new(core.into_builder())
+    }
+
+    pub(crate) fn new(builder: NetworkBuilder) -> Self {
+        Self {
+            inner: Arc::new(Mutex::new(None)),
+            connected: Arc::new(AtomicBool::new(false)),
+            builder,
+        }
+    }
+
     pub fn is_connected(&self) -> bool {
         self.connected.load(Ordering::Acquire)
     }
@@ -37,11 +42,12 @@ impl DsotRouter {
         let mut guard = self.inner.lock().unwrap();
 
         if guard.is_some() {
-            return Ok(()); // Another thread beat us to it, just return!
+            return Ok(()); // Another thread beat us to it
         }
 
-        let builder = RouterBuilder::new(endpoint);
-        let router = builder.spawn();
+        let router = add_routes(RouterBuilder::new(endpoint), self.builder.clone())
+            .await?
+            .spawn();
 
         *guard = Some(router);
 

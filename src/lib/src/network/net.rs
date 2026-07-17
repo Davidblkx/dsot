@@ -3,7 +3,10 @@ use std::sync::{
     Arc,
     atomic::{AtomicBool, Ordering},
 };
-use tokio::sync::Mutex;
+use tokio::sync::{
+    Mutex,
+    watch::{self, Receiver, Sender},
+};
 
 use super::{DsotRouter, builder::NetworkBuilder};
 use crate::error::{DsotError, Result};
@@ -14,26 +17,36 @@ pub struct DsotNetwork {
     endpoint: Arc<Mutex<Option<Endpoint>>>,
     connected: Arc<AtomicBool>,
     builder: NetworkBuilder,
+    status_sender: Arc<Sender<bool>>,
+    pub status: Receiver<bool>,
 }
 
 impl DsotNetwork {
     pub(crate) async fn new_connected(builder: NetworkBuilder) -> Result<Self> {
         let endpoint = builder.connect().await?;
+        let connected = Arc::new(AtomicBool::new(endpoint.is_some()));
+        let (sender, status) = watch::channel(endpoint.is_some());
 
         Ok(Self {
+            router: DsotRouter::new(builder.clone()),
             builder,
-            router: DsotRouter::default(),
             endpoint: Arc::new(Mutex::new(endpoint)),
-            connected: Arc::new(AtomicBool::new(true)),
+            connected,
+            status,
+            status_sender: Arc::new(sender),
         })
     }
 
     pub(crate) fn new_lazy(builder: NetworkBuilder) -> Self {
+        let (sender, status) = watch::channel(false);
+
         Self {
+            router: DsotRouter::new(builder.clone()),
             builder,
-            router: DsotRouter::default(),
             endpoint: Arc::new(Mutex::new(None)),
             connected: Arc::new(AtomicBool::new(false)),
+            status,
+            status_sender: Arc::new(sender),
         }
     }
 
@@ -58,7 +71,7 @@ impl DsotNetwork {
 
         if let Some(endpoint) = self.builder.connect().await? {
             *guard = Some(endpoint.clone());
-            self.connected.store(true, Ordering::Release);
+            self.set_status(true);
             Ok(endpoint)
         } else {
             Err(DsotError::NetworkDisconnected)
@@ -71,7 +84,7 @@ impl DsotNetwork {
         let endpoint = {
             let mut guard = self.endpoint.lock().await;
             let e = std::mem::replace(&mut *guard, None);
-            self.connected.store(false, Ordering::Release);
+            self.set_status(false);
             e
         };
 
@@ -82,5 +95,18 @@ impl DsotNetwork {
 
             e.close().await;
         }
+    }
+
+    #[inline]
+    fn set_status(&self, value: bool) {
+        self.connected.store(value, Ordering::Release);
+        self.status_sender.send_if_modified(|v| {
+            if v != &value {
+                *v = value;
+                true
+            } else {
+                false
+            }
+        });
     }
 }
