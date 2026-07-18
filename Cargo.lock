@@ -1896,6 +1896,7 @@ dependencies = [
  "paste",
  "serde",
  "sysdirs",
+ "sysinfo",
  "thiserror 2.0.18",
  "tokio",
  "tokio-util",

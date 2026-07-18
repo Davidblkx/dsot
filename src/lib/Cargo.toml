@@ -23,6 +23,7 @@ thiserror = { workspace = true }
 paste = { workspace = true }
 serde = { workspace = true }
 sysdirs = { workspace = true }
+sysinfo = { workspace = true }
 tokio = { workspace = true }
 tokio-util = { workspace = true }
 uuid = { workspace = true }

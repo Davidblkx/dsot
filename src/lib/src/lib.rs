@@ -6,6 +6,7 @@ pub mod core;
 pub mod error;
 pub mod network;
 pub mod repository;
+pub mod sink;
 pub mod state;
 
 pub use dsot_config;

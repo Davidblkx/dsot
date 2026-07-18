@@ -1,5 +1,5 @@
 now:
-    - network should be able to update a reactive state
+    - rethink remote device, where should structs live?
 maybe later:
     - refactor inbox
     - Develop and document local files

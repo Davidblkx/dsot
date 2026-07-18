@@ -57,7 +57,7 @@ impl NetworkWriter {
         let message = InnerNetworkMessage::Disconnect.to_network_bytes()?;
 
         let _ = self.inner_writer.send(message).await;
-        let _ = self.connection.closed();
+        let _ = self.connection.closed().await;
 
         Ok(())
     }

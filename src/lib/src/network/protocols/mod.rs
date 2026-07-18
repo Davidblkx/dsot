@@ -10,8 +10,10 @@ pub mod info;
 pub use traits::DsotProtocolHandler;
 
 pub async fn add_routes(
-    router: RouterBuilder,
-    _net_builder: NetworkBuilder,
+    mut router: RouterBuilder,
+    builder: NetworkBuilder,
 ) -> Result<RouterBuilder> {
+    router = info::InfoProtocol::new(&builder).register_router(router);
+
     Ok(router)
 }

@@ -9,7 +9,7 @@ pub trait DsotProtocolHandler: ProtocolHandler {
 #[macro_export]
 macro_rules! dsot_protocol {
     ($target:ident, $alpn:expr) => {
-        impl ::crate::network::DsotProtocolHandler for $ident {
+        impl $crate::network::DsotProtocolHandler for $target {
             fn register_router(
                 self,
                 router: ::iroh::protocol::RouterBuilder,
