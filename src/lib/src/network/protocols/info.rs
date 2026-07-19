@@ -4,71 +4,19 @@ use iroh::{
 };
 
 use super::NetworkBuilder;
-use crate::network::{RemoteDevice, RemoteDeviceInfo};
-use crate::{bitflag, core::config::DsotAppConfig};
+use crate::network::{NetworkDevice, NetworkDeviceInfoProvider, device_info::NetworkDeviceInfo};
 
 static ALPN: &[u8] = b"/dsot/info/v1";
 
-bitflag!(NetworkCapability {
-    0 => network "Can connect to the network"
-});
-
-impl From<&DsotAppConfig> for NetworkCapability {
-    fn from(value: &DsotAppConfig) -> Self {
-        let mut v = Self::new();
-
-        if value.value.use_network {
-            v.enable_network();
-        }
-
-        v
-    }
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
-pub struct MachineInfo {
-    pub name: String,
-    pub desc: String,
-    pub cap: NetworkCapability,
-}
-
-impl MachineInfo {
-    pub fn new(builder: &NetworkBuilder) -> Self {
-        let cap = NetworkCapability::from(&*builder.config);
-        let (name, desc) = (
-            builder.config.value.network_config.public_name.clone(),
-            builder.config.value.network_config.public_desc.clone(),
-        );
-
-        let name = if let Some(name) = name {
-            name
-        } else if let Some(hostname) = sysinfo::System::name() {
-            hostname
-        } else {
-            "unknown".to_string()
-        };
-
-        let desc = if let Some(desc) = desc {
-            desc
-        } else if let Some(os) = sysinfo::System::long_os_version() {
-            os
-        } else {
-            "No description".to_string()
-        };
-
-        Self { name, desc, cap }
-    }
-}
-
 #[derive(Debug)]
 pub struct InfoProtocol {
-    info: MachineInfo,
+    info: NetworkDeviceInfo,
 }
 
 impl InfoProtocol {
     pub fn new(builder: &NetworkBuilder) -> Self {
         Self {
-            info: MachineInfo::new(builder),
+            info: NetworkDeviceInfo::new(builder),
         }
     }
 
@@ -85,11 +33,11 @@ impl InfoProtocol {
     pub async fn read(
         endpoint: &Endpoint,
         target: impl Into<EndpointAddr>,
-    ) -> crate::error::Result<MachineInfo> {
+    ) -> crate::error::Result<NetworkDeviceInfo> {
         let connection = endpoint.connect(target, ALPN).await?;
         let mut reader = crate::network::sink::NetworkReader::open(connection).await?;
 
-        let value = reader.read::<MachineInfo>().await?.ok()?;
+        let value = reader.read::<NetworkDeviceInfo>().await?.ok()?;
         reader.close().await;
         Ok(value)
     }
@@ -110,9 +58,9 @@ impl ProtocolHandler for InfoProtocol {
 
 crate::dsot_protocol!(InfoProtocol, ALPN);
 
-impl RemoteDeviceInfo for RemoteDevice {
-    async fn get_info(&self) -> crate::error::Result<String> {
+impl NetworkDeviceInfoProvider for NetworkDevice {
+    async fn get_info(&self) -> crate::error::Result<NetworkDeviceInfo> {
         let info = InfoProtocol::read(&self.endpoint, self.id).await?;
-        Ok(info.name)
+        Ok(info)
     }
 }
