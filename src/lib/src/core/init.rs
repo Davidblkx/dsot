@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, model::DsotCore};
-use crate::{error::Result, network::builder::NetworkBuilder};
+use crate::{error::Result, jobs::JobManager, network::builder::NetworkBuilder};
 
 #[derive(Debug, Clone)]
 pub struct DsotCoreInitOptions {
@@ -69,6 +69,7 @@ impl DsotCoreInitOptions {
             repo,
             state,
             net,
+            jobs: JobManager::new(),
         })
     }
 }

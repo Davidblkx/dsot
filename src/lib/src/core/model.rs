@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, config::DsotAppConfig};
-use crate::{network::DsotNetwork, repository::DsotRepository, state::DsotState};
+use crate::{jobs::JobManager, network::DsotNetwork, repository::DsotRepository, state::DsotState};
 
 #[derive(Debug, Clone)]
 pub struct DsotCore {
@@ -10,4 +10,5 @@ pub struct DsotCore {
     pub repo: DsotRepository,
     pub state: DsotState,
     pub net: DsotNetwork,
+    pub jobs: JobManager,
 }
