@@ -22,6 +22,10 @@ pub enum DsotError {
     SerDeError(#[from] dsot_serde::DsotSerdeError),
     #[error("Network: Device communication error: {0}")]
     NetworkDeviceError(String),
+    #[error("Invalid password")]
+    InvalidUserPassword,
+    #[error("Invalid user password file: {0}")]
+    InvalidUserPasswordFile(String),
 }
 
 pub type Result<T> = std::result::Result<T, DsotError>;

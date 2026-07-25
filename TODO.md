@@ -1,5 +1,7 @@
 now:
-    - rethink remote device, where should structs live?
+    - rethink remote device:
+        - simplify protocols/structs
+        - design architeture for remote repository
 maybe later:
     - refactor inbox
     - Develop and document local files

@@ -15,11 +15,11 @@ pub struct DsotState {
 impl DsotCoreInitOptions {
     pub async fn init_state(
         &self,
-        config: &DsotAppConfig,
-        _repo: &DsotRepository,
+        _config: &DsotAppConfig,
+        repo: &DsotRepository,
     ) -> Result<DsotState> {
-        Ok(DsotState {
-            user: user::UserState::new(config.value.user.clone()),
-        })
+        let user = user::UserState::new(repo).await?;
+
+        Ok(DsotState { user })
     }
 }

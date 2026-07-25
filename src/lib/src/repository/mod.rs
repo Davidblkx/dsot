@@ -19,11 +19,20 @@ pub struct DsotRepository {
 }
 
 impl DsotCoreInitOptions {
-    pub async fn init_repository(&self, config: &DsotAppConfig) -> Result<DsotRepository> {
+    pub async fn init_repository(
+        &self,
+        config: &DsotAppConfig,
+        cap: crate::core::cap::Capability,
+    ) -> Result<DsotRepository> {
         let user_id = config.value.user.clone();
+        let users: Arc<dyn UserRepository> = if cap.can_disk_access() {
+            Arc::new(local::user::LocalUser::new(config.data_dir.clone()))
+        } else {
+            Arc::new(noop::UserNoopRepository::new(user_id))
+        };
 
         Ok(DsotRepository {
-            users: Arc::new(noop::UserNoopRepository::new(user_id)),
+            users,
             devices: Arc::new(noop::DevicesNoopRepository {}),
         })
     }

@@ -1,9 +1,10 @@
 use std::sync::Arc;
 use tokio::sync::watch;
 
-use crate::{core::DsotCore, error::Result};
+use crate::{core::DsotCore, error::Result, repository::DsotRepository};
 
 pub type User = String;
+static DEFAULT_USER: &'static str = "root";
 
 #[derive(Debug, Clone)]
 pub struct UserState {
@@ -12,12 +13,20 @@ pub struct UserState {
 }
 
 impl UserState {
-    pub fn new(initial: User) -> Self {
-        let (writer, user) = watch::channel(initial);
-        Self {
+    pub async fn new(repo: &DsotRepository) -> Result<Self> {
+        let id = match repo.users.load_user(DEFAULT_USER, None).await {
+            Ok(id) => id,
+            Err(e) => {
+                ::log::warn!("Failed to load default user: {}", e);
+                DEFAULT_USER.to_string()
+            }
+        };
+
+        let (writer, user) = watch::channel(id);
+        Ok(Self {
             user,
             writer: Arc::new(writer),
-        }
+        })
     }
 
     pub fn id(&self) -> String {

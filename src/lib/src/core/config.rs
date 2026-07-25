@@ -15,6 +15,7 @@ pub struct ConfigValue {
     pub log_file: Option<PathBuf>,
     pub use_network: bool,
     pub network_config: NetworkConfig,
+    pub use_server: bool,
 }
 
 impl Default for ConfigValue {
@@ -26,6 +27,7 @@ impl Default for ConfigValue {
             log_file: None,
             use_network: true,
             network_config: NetworkConfig::default(),
+            use_server: true,
         }
     }
 }

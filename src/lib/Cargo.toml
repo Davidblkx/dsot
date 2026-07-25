@@ -15,6 +15,7 @@ dsot_model = { path = "../modules/model" }
 dsot_network = { path = "../modules/network" }
 dsot_serde = { path = "../modules/serde" }
 
+blake3 = { workspace = true }
 fern = { workspace = true }
 futures-util = { workspace = true }
 humantime = { workspace = true }
