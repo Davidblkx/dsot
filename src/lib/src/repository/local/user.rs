@@ -7,12 +7,12 @@ use crate::{
 };
 
 #[derive(Debug)]
-pub struct LocalUser {
+pub struct LocalUserRepo {
     root: PathBuf,
 }
 
-impl LocalUser {
-    pub fn new<T: Into<PathBuf>>(root: T) -> LocalUser {
+impl LocalUserRepo {
+    pub fn new<T: Into<PathBuf>>(root: T) -> LocalUserRepo {
         Self {
             root: root.into().join("users"),
         }
@@ -20,7 +20,7 @@ impl LocalUser {
 }
 
 #[async_trait]
-impl UserRepository for LocalUser {
+impl UserRepository for LocalUserRepo {
     async fn load_user(&self, user: &str, pass: Option<String>) -> Result<String> {
         let user_path = self.root.join(user);
         if !user_path.exists() {

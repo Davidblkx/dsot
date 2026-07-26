@@ -1,0 +1,58 @@
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
+use super::Repository;
+use crate::{
+    core::{config::DsotAppConfig, init::DsotCoreInitOptions},
+    error::Result,
+    repository::{DeviceRepository, UserRepository},
+    state::devices::RemoteDevice,
+};
+
+#[derive(Debug, Clone)]
+pub struct DsotRepository {
+    repo: Arc<RwLock<Box<dyn Repository>>>,
+}
+
+impl DsotRepository {
+    pub fn new(repo: impl Repository + 'static) -> Self {
+        Self {
+            repo: Arc::new(RwLock::new(Box::new(repo))),
+        }
+    }
+
+    pub async fn init(options: &DsotCoreInitOptions, config: &DsotAppConfig) -> Result<Self> {
+        if options.cap.can_disk_access() {
+            let repo = super::local::LocalRepo::init(config.data_dir.clone());
+            Ok(DsotRepository::new(repo))
+        } else {
+            let repo = super::noop::NoopRepo::init();
+            Ok(DsotRepository::new(repo))
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl DeviceRepository for DsotRepository {
+    async fn list_devices(&self) -> Result<Vec<RemoteDevice>> {
+        self.repo.read().await.list_devices().await
+    }
+    async fn add_device(&self, _device: RemoteDevice) -> Result<()> {
+        self.repo.write().await.add_device(_device).await
+    }
+    async fn remove_device(&self, _id: iroh::EndpointId) -> Result<()> {
+        self.repo.write().await.remove_device(_id).await
+    }
+}
+
+#[async_trait::async_trait]
+impl UserRepository for DsotRepository {
+    async fn load_user(&self, user: &str, pass: Option<String>) -> Result<String> {
+        self.repo.read().await.load_user(user, pass).await
+    }
+    async fn list_users(&self) -> Result<Vec<String>> {
+        self.repo.read().await.list_users().await
+    }
+}
+
+impl super::Repository for DsotRepository {}

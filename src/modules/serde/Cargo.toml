@@ -11,3 +11,4 @@ repository.workspace = true
 rmp-serde = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+toml = { workspace = true }

@@ -45,7 +45,7 @@ impl DsotCoreInitOptions {
             self.init_logger_from_config(&config)?;
         }
 
-        let repo = self.init_repository(&config, self.cap).await?;
+        let repo = self.init_repository(&config).await?;
         let state = self.init_state(&config, &repo).await?;
 
         let net = {

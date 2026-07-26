@@ -1,39 +1,22 @@
+#[macro_use]
+mod macros;
+
 mod local;
 mod noop;
 mod remote;
+mod repo;
 mod traits;
-
-use std::sync::Arc;
 
 use crate::{
     core::{config::DsotAppConfig, init::DsotCoreInitOptions},
     error::Result,
 };
 
+pub use repo::DsotRepository;
 pub use traits::*;
 
-#[derive(Debug, Clone)]
-pub struct DsotRepository {
-    pub users: Arc<dyn UserRepository>,
-    pub devices: Arc<dyn DeviceRepository>,
-}
-
 impl DsotCoreInitOptions {
-    pub async fn init_repository(
-        &self,
-        config: &DsotAppConfig,
-        cap: crate::core::cap::Capability,
-    ) -> Result<DsotRepository> {
-        let user_id = config.value.user.clone();
-        let users: Arc<dyn UserRepository> = if cap.can_disk_access() {
-            Arc::new(local::user::LocalUser::new(config.data_dir.clone()))
-        } else {
-            Arc::new(noop::UserNoopRepository::new(user_id))
-        };
-
-        Ok(DsotRepository {
-            users,
-            devices: Arc::new(noop::DevicesNoopRepository {}),
-        })
+    pub async fn init_repository(&self, config: &DsotAppConfig) -> Result<DsotRepository> {
+        DsotRepository::init(self, config).await
     }
 }

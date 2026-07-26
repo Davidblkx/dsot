@@ -1,7 +1,7 @@
 use std::sync::Arc;
 use tokio::sync::watch;
 
-use crate::{core::DsotCore, error::Result, repository::DsotRepository};
+use crate::{core::DsotCore, error::Result, repository::*};
 
 pub type User = String;
 static DEFAULT_USER: &'static str = "root";
@@ -14,7 +14,7 @@ pub struct UserState {
 
 impl UserState {
     pub async fn new(repo: &DsotRepository) -> Result<Self> {
-        let id = match repo.users.load_user(DEFAULT_USER, None).await {
+        let id = match repo.load_user(DEFAULT_USER, None).await {
             Ok(id) => id,
             Err(e) => {
                 ::log::warn!("Failed to load default user: {}", e);
@@ -36,7 +36,7 @@ impl UserState {
 
 impl DsotCore {
     pub async fn load_user(&self, user: &str, pass: Option<String>) -> Result<()> {
-        let id = self.repo.users.load_user(user, pass).await?;
+        let id = self.repo.load_user(user, pass).await?;
         self.state.user.writer.send_if_modified(|v| {
             if v != &id {
                 *v = id;
