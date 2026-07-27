@@ -1,9 +1,10 @@
+use iroh::EndpointId;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
 use super::Repository;
 use crate::{
-    core::{config::DsotAppConfig, init::DsotCoreInitOptions},
+    core::{DsotCore, config::DsotAppConfig, init::DsotCoreInitOptions},
     error::Result,
     repository::{DeviceRepository, UserRepository},
     state::devices::RemoteDevice,
@@ -29,6 +30,12 @@ impl DsotRepository {
             let repo = super::noop::NoopRepo::init();
             Ok(DsotRepository::new(repo))
         }
+    }
+
+    async fn set_repo(&self, repo: impl Repository + 'static) {
+        let repo = Box::new(repo);
+        let mut writer = self.repo.write().await;
+        *writer = repo;
     }
 }
 
@@ -56,3 +63,12 @@ impl UserRepository for DsotRepository {
 }
 
 impl super::Repository for DsotRepository {}
+
+impl DsotCore {
+    pub async fn connect_remote_repo(&self, id: EndpointId) -> Result<()> {
+        let device = self.net.connect_remote_device(id).await?;
+        let repo = super::remote::RemoteRepo::init(self, &device);
+        self.repo.set_repo(repo).await;
+        Ok(())
+    }
+}

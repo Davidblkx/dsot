@@ -27,20 +27,14 @@ impl NetworkWriter {
         }
     }
 
-    pub async fn send<T: serde::Serialize + serde::de::DeserializeOwned>(
-        connection: Connection,
-        data: &T,
-    ) -> Result<()> {
+    pub async fn send<T: serde::Serialize>(connection: Connection, data: &T) -> Result<()> {
         let mut writer = Self::open(connection).await?;
         writer.write(data).await?;
         writer.close().await?;
         Ok(())
     }
 
-    pub async fn write<T: serde::Serialize + serde::de::DeserializeOwned>(
-        &mut self,
-        data: &T,
-    ) -> Result<()> {
+    pub async fn write<T: serde::Serialize>(&mut self, data: &T) -> Result<()> {
         let data_bytes = BinarySerde::serialize(data)?;
         let message = InnerNetworkMessage::Message(data_bytes).to_network_bytes()?;
         self.inner_writer.send(message).await?;

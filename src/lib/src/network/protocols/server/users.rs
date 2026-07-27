@@ -6,7 +6,7 @@ use iroh::{
 use super::{NetworkValidator, TokenValidator};
 use crate::{
     error::Result,
-    network::builder::NetworkBuilder,
+    network::{NetworkDevice, builder::NetworkBuilder, sink::NetworkChannel},
     repository::{DsotRepository, UserRepository},
 };
 
@@ -64,3 +64,49 @@ impl ProtocolHandler for UsersProtocol {
 }
 
 crate::dsot_protocol!(UsersProtocol, ALPN);
+
+pub struct RemoteUsersProtocol<'a> {
+    device: &'a NetworkDevice,
+    validator: TokenValidator,
+}
+
+impl NetworkDevice {
+    pub fn users(&self, validator: impl NetworkValidator) -> RemoteUsersProtocol<'_> {
+        RemoteUsersProtocol {
+            device: self,
+            validator: validator.get_validator(),
+        }
+    }
+}
+
+impl<'a> RemoteUsersProtocol<'a> {
+    async fn connect(&self) -> Result<NetworkChannel> {
+        let connection = self.device.connect_alpn(ALPN).await?;
+        self.validator.start_handshake(connection).await
+    }
+
+    pub async fn load_user(&self, user: &str, pass: Option<String>) -> Result<String> {
+        let mut channel = self.connect().await?;
+
+        let result = channel
+            .request(UserRequest::LoadUser {
+                user: user.to_string(),
+                pass,
+            })
+            .await;
+
+        channel.force_close().await;
+
+        result
+    }
+
+    pub async fn list_users(&self) -> Result<Vec<String>> {
+        let mut channel = self.connect().await?;
+
+        let result = channel.request(UserRequest::ListUsers).await;
+
+        channel.force_close().await;
+
+        result
+    }
+}

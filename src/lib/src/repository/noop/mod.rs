@@ -1,4 +1,4 @@
-mod devices;
+pub mod devices;
 mod user;
 
 impl_repository_shell!(NoopRepo {

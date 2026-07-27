@@ -1,6 +1,6 @@
 pub mod device_info;
 
-use iroh::{Endpoint, EndpointId};
+use iroh::{Endpoint, EndpointId, endpoint::Connection};
 
 use crate::{error::Result, network::DsotNetwork};
 
@@ -8,6 +8,13 @@ use crate::{error::Result, network::DsotNetwork};
 pub struct NetworkDevice {
     pub(crate) endpoint: Endpoint,
     pub id: EndpointId,
+}
+
+impl NetworkDevice {
+    pub async fn connect_alpn(&self, alpn: &[u8]) -> Result<Connection> {
+        let connection = self.endpoint.connect(self.id, alpn).await?;
+        Ok(connection)
+    }
 }
 
 impl DsotNetwork {

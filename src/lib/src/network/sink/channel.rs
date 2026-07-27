@@ -30,7 +30,7 @@ impl NetworkChannel {
 
     /// Opens a new network channel on the given connection ready to send a message and await for replies
     /// If `init` is `Some`, the initial message will be sent before returning.
-    pub async fn start<T: serde::Serialize + serde::de::DeserializeOwned>(
+    pub async fn start<T: serde::Serialize>(
         connection: Connection,
         init: &Option<T>,
     ) -> Result<Self> {
@@ -46,10 +46,7 @@ impl NetworkChannel {
         Ok(channel)
     }
 
-    pub async fn write<T: serde::Serialize + serde::de::DeserializeOwned>(
-        &mut self,
-        data: &T,
-    ) -> Result<()> {
+    pub async fn write<T: serde::Serialize>(&mut self, data: &T) -> Result<()> {
         self.writer.write(data).await?;
         Ok(())
     }
@@ -63,6 +60,15 @@ impl NetworkChannel {
         &mut self,
     ) -> Result<NetworkMessage<T>> {
         Ok(self.reader.read().await?)
+    }
+
+    pub async fn request<T: serde::Serialize + serde::de::DeserializeOwned>(
+        &mut self,
+        request: impl serde::Serialize,
+    ) -> Result<T> {
+        self.write(&request).await?;
+        let result = self.read::<T>().await?.ok()?;
+        Ok(result)
     }
 
     pub async fn close(self) -> Result<()> {
