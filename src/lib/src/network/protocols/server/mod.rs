@@ -5,7 +5,10 @@ use crate::{
     network::{DsotProtocolHandler, builder::NetworkBuilder},
 };
 
+mod token_validation;
 pub mod users;
+
+pub use token_validation::{NetworkValidator, TokenValidator};
 
 pub async fn add_server_routes(
     mut router: RouterBuilder,

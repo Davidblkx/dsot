@@ -3,9 +3,10 @@ use iroh::{
     protocol::{AcceptError, ProtocolHandler},
 };
 
+use super::{NetworkValidator, TokenValidator};
 use crate::{
     error::Result,
-    network::{builder::NetworkBuilder, sink::NetworkChannel},
+    network::builder::NetworkBuilder,
     repository::{DsotRepository, UserRepository},
 };
 
@@ -20,17 +21,19 @@ enum UserRequest {
 #[derive(Debug)]
 pub struct UsersProtocol {
     repo: DsotRepository,
+    validator: TokenValidator,
 }
 
 impl UsersProtocol {
     pub fn new(builder: &NetworkBuilder) -> Self {
         Self {
             repo: builder.repo.clone(),
+            validator: builder.get_validator(),
         }
     }
 
     pub async fn reply(&self, connection: Connection) -> Result<()> {
-        let mut channel = NetworkChannel::open(connection).await?;
+        let mut channel = self.validator.validate_handshake(connection).await?;
 
         let req = channel.read::<UserRequest>().await?.ok()?;
         match req {
