@@ -1,7 +1,5 @@
 now:
-    - rethink remote device:
-        - simplify protocols/structs
-        - design architeture for remote repository
+    - network/protocol/server validate token
 maybe later:
     - refactor inbox
     - Develop and document local files
