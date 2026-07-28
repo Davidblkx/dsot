@@ -28,6 +28,18 @@ pub enum DsotError {
     InvalidUserPasswordFile(String),
     #[error("Invalid token")]
     InvalidToken,
+    #[error("Database sync error: {0}")]
+    DatabaseSyncError(#[from] dsot_db_sync::DBSyncError),
 }
 
 pub type Result<T> = std::result::Result<T, DsotError>;
+
+pub trait IntoDBSyncResult<T> {
+    fn into_db_sync(self) -> dsot_db_sync::Result<T>;
+}
+
+impl<T> IntoDBSyncResult<T> for Result<T> {
+    fn into_db_sync(self) -> dsot_db_sync::Result<T> {
+        self.map_err(|err| dsot_db_sync::DBSyncError::CommunicationError(err.to_string()))
+    }
+}
