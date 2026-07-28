@@ -5,6 +5,10 @@ use crate::{
     network::{DsotProtocolHandler, builder::NetworkBuilder},
 };
 
+#[macro_use]
+mod macros;
+
+pub mod devices;
 mod token_validation;
 pub mod users;
 
@@ -19,6 +23,7 @@ pub async fn add_server_routes(
     }
 
     router = users::UsersProtocol::new(builder).register_router(router);
+    router = devices::DevicesProtocol::new(builder).register_router(router);
 
     Ok(router)
 }

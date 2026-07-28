@@ -1,5 +1,5 @@
 now:
-    - implement remote device repository
+    - cleanup unused modules
     - document everything
 maybe later:
     - refactor inbox

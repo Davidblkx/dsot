@@ -28,12 +28,9 @@ impl UserRemoteRepo {
 #[async_trait]
 impl UserRepository for UserRemoteRepo {
     async fn load_user(&self, user: &str, pass: Option<String>) -> Result<String> {
-        self.device
-            .users(self.validator)
-            .load_user(user, pass)
-            .await
+        self.device.users(self.validator).load(user, pass).await
     }
     async fn list_users(&self) -> Result<Vec<String>> {
-        self.device.users(self.validator).list_users().await
+        self.device.users(self.validator).list().await
     }
 }
