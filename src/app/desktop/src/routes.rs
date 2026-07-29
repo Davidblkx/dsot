@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use super::layout::Layout;
-use super::views::{InboxView, RemoteNodesView, RemoteView};
+use super::views::InboxView;
 use dsot_shared_ui::views::{ConfigView, HomeView};
 
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -14,8 +14,4 @@ pub enum Routes {
     ConfigView,
     #[route("/inbox")]
     InboxView,
-    #[route("/remote")]
-    RemoteView,
-    #[route("/nodes")]
-    RemoteNodesView,
 }

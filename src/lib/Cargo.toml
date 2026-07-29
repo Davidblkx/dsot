@@ -12,7 +12,6 @@ chrono = { workspace = true }
 dsot_db_sync = { path = "../modules/db_sync" }
 dsot_config = { path = "../modules/config" }
 dsot_model = { path = "../modules/model" }
-dsot_network = { path = "../modules/network" }
 dsot_serde = { path = "../modules/serde" }
 
 blake3 = { workspace = true }

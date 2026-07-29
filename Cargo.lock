@@ -1869,7 +1869,6 @@ dependencies = [
  "dioxus",
  "dioxus-free-icons",
  "dsot_lib",
- "dsot_network",
  "dsot_shared_ui",
  "iroh",
  "log",
@@ -1887,7 +1886,6 @@ dependencies = [
  "dsot_config",
  "dsot_db_sync",
  "dsot_model",
- "dsot_network",
  "dsot_serde",
  "fern",
  "futures-util",
@@ -1933,25 +1931,6 @@ dependencies = [
  "sqlx",
  "thiserror 2.0.18",
  "tokio",
- "uuid",
-]
-
-[[package]]
-name = "dsot_network"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "dsot_db_sync",
- "dsot_serde",
- "futures-util",
- "iroh",
- "log",
- "serde",
- "sysinfo",
- "thiserror 2.0.18",
- "tokio",
- "tokio-util",
- "toml 1.1.2+spec-1.1.0",
  "uuid",
 ]
 

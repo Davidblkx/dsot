@@ -9,7 +9,7 @@ impl DsotCoreInitOptions {
             return Ok(false);
         }
 
-        let file = if self.cap.can_disk_access() {
+        let file = if self.cap.can_full_disk_access() {
             let date_now = chrono::Local::now().format("%Y_%m_%d_%H_%M").to_string();
             match sysdirs::temp_dir() {
                 Some(p) => Some(p.join(format!("dsot_logs.{}.txt", date_now))),

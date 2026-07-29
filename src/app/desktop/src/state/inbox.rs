@@ -1,6 +1,5 @@
 use dioxus::prelude::*;
 use dsot_lib::{
-    DsotState,
     dsot_db_sync::DatabaseManager,
     dsot_model::{InboxItem, InboxItemSqlRepository, InboxStatus, InboxValue},
     uuid::Uuid,
@@ -71,28 +70,28 @@ async fn fetch_items(
 
 /// Syncs the inbox state with the database, updating the store with the fetched items.
 pub fn use_sync_inbox() -> Signal<i32> {
-    let db = use_context::<DsotState>().db;
-    let state = use_context::<InboxStore>();
+    // let db = use_context::<DsotState>().db;
+    // let state = use_context::<InboxStore>();
 
     let manual_refresh = use_signal(|| 0);
 
-    use_effect(move || {
-        let current_offset = *state.offset().read();
-        let current_size = *state.size().read();
-        manual_refresh.read(); // Re-runs when we manually increment it
-        let db = db.clone();
+    // use_effect(move || {
+    //     let current_offset = *state.offset().read();
+    //     let current_size = *state.size().read();
+    //     manual_refresh.read(); // Re-runs when we manually increment it
+    //     let db = db.clone();
 
-        spawn(async move {
-            let inner_state = state.clone();
+    //     spawn(async move {
+    //         let inner_state = state.clone();
 
-            match fetch_items(&db, current_size, current_offset).await {
-                Ok(items) => {
-                    *inner_state.items().write() = items;
-                }
-                Err(e) => ::log::error!("Failed to refresh inbox: {:?}", e),
-            };
-        });
-    });
+    //         match fetch_items(&db, current_size, current_offset).await {
+    //             Ok(items) => {
+    //                 *inner_state.items().write() = items;
+    //             }
+    //             Err(e) => ::log::error!("Failed to refresh inbox: {:?}", e),
+    //         };
+    //     });
+    // });
 
     // Return the trigger handle to the component
     manual_refresh
@@ -108,19 +107,19 @@ async fn insert_item(db: &DatabaseManager, item: InboxItem) -> anyhow::Result<()
 
 /// Inserts a single inbox item into the database and refreshes the inbox state.
 pub fn use_insert_inbox(mut refresh: Signal<i32>) -> impl Fn(InboxItem) {
-    let db = use_context::<DsotState>().db;
+    // let db = use_context::<DsotState>().db;
 
     move |item: InboxItem| {
-        let db = db.clone();
-        spawn(async move {
-            match insert_item(&db, item).await {
-                Ok(_) => {
-                    // 🚀 SUCCESS! Increment the signal.
-                    // This instantly tells `use_sync_inbox` to fetch the new list!
-                    refresh += 1;
-                }
-                Err(e) => ::log::error!("Failed to insert item: {:?}", e),
-            };
-        });
+        // let db = db.clone();
+        // spawn(async move {
+        //     match insert_item(&db, item).await {
+        //         Ok(_) => {
+        //             // 🚀 SUCCESS! Increment the signal.
+        //             // This instantly tells `use_sync_inbox` to fetch the new list!
+        //             refresh += 1;
+        //         }
+        //         Err(e) => ::log::error!("Failed to insert item: {:?}", e),
+        //     };
+        // });
     }
 }

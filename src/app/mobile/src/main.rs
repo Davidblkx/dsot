@@ -3,22 +3,19 @@ mod routes;
 
 use dioxus::{mobile::Config, prelude::*};
 
+use dsot_lib::Capability;
 use dsot_shared_ui::assets::DsotDefaultLinks;
 
 const UI_STYLES: &[Asset] = &[asset!("/assets/styles/layout.css")];
 
 #[tokio::main]
 async fn main() {
-    let state = match dsot_lib::DsotState::init(dsot_lib::DsotStateInitOptions {
-        debug: true,
-        config_file: None,
-        is_mobile: true,
-    })
-    .await
-    {
-        Ok(s) => s,
-        Err(e) => panic!("Failed to initialize state: {}", e),
-    };
+    let state = dsot_lib::DsotCoreInitOptions::new()
+        .with_cap(Capability::new().with_disk_access().with_network_access())
+        .with_debug(true)
+        .initialize()
+        .await
+        .unwrap_or_else(|e| panic!("Failed to initialize state: {}", e));
 
     let config = Config::default();
 

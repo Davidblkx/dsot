@@ -1,4 +1,5 @@
 now:
+    - implement inbox repo
     - cleanup unused modules
     - document everything
 maybe later:
