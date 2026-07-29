@@ -1,7 +1,5 @@
 now:
-    - implement inbox repo
-    - cleanup unused modules
-    - document everything
+    - document lib
 maybe later:
     - refactor inbox
     - Develop and document local files
