@@ -3,10 +3,18 @@ use std::sync::Arc;
 use super::{cap::Capability, model::DsotCore};
 use crate::{error::Result, jobs::JobManager, network::builder::NetworkBuilder};
 
+/// Options to initialize DSOT
 #[derive(Debug, Clone)]
 pub struct DsotCoreInitOptions {
+    /// Enable debug mode
+    ///
+    /// Debug mode always set log level to debug and writes logs to text file
+    ///
+    /// Logger is also initialed before configuration, allowing it to catch problems earlier
     pub debug: bool,
+    /// Path to configuration files, this file overwrites all other configs except for environment
     pub config_file: Option<String>,
+    /// System capability
     pub cap: Capability,
 }
 
@@ -36,6 +44,13 @@ impl DsotCoreInitOptions {
         self
     }
 
+    /// Initialize DSOT core
+    ///
+    /// Initialization order:
+    /// - init debug logger (if debug mode is enabled)
+    /// - load configuration
+    /// - init logger (if debug mode is disabled)
+    /// - initialize repository, state, and network
     pub async fn initialize(self) -> Result<DsotCore> {
         let has_debug_logger = self.init_debug_logger()?;
 

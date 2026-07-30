@@ -3,10 +3,18 @@ use crate::{
     network::{NetworkCapability, builder::NetworkBuilder},
 };
 
+/// Information from a network device
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 pub struct NetworkDeviceInfo {
+    /// Public name of device defined in config
+    ///
+    /// when name is not defined, `sysinfo::System::name()` is used
     pub name: String,
+    /// Public description of device defined in config
+    ///
+    /// when desc is not defined, `sysinfo::System::long_os_version()` is used
     pub desc: String,
+    /// Network capabilities of the device
     pub cap: NetworkCapability,
 }
 
@@ -39,6 +47,7 @@ impl NetworkDeviceInfo {
 }
 
 pub trait NetworkDeviceInfoBuilder {
+    /// Public information for current device
     fn get_current_device_info(&self) -> NetworkDeviceInfo;
 }
 
