@@ -6,6 +6,7 @@ use super::message::NetworkMessage;
 use super::reader::NetworkReader;
 use super::writer::NetworkWriter;
 
+/// Two-way communication helper, ensures messages are fully read/written
 #[derive(Debug)]
 pub struct NetworkChannel {
     pub reader: NetworkReader,
@@ -29,6 +30,7 @@ impl NetworkChannel {
     }
 
     /// Opens a new network channel on the given connection ready to send a message and await for replies
+    ///
     /// If `init` is `Some`, the initial message will be sent before returning.
     pub async fn start<T: serde::Serialize>(
         connection: Connection,
@@ -46,22 +48,26 @@ impl NetworkChannel {
         Ok(channel)
     }
 
+    /// Send message to node
     pub async fn write<T: serde::Serialize>(&mut self, data: &T) -> Result<()> {
         self.writer.write(data).await?;
         Ok(())
     }
 
+    /// Write error message to node
     pub async fn write_error<T: ToString>(&mut self, error: T) -> Result<()> {
         self.writer.write_error(error).await?;
         Ok(())
     }
 
+    /// Read message from node
     pub async fn read<T: serde::Serialize + serde::de::DeserializeOwned>(
         &mut self,
     ) -> Result<NetworkMessage<T>> {
         Ok(self.reader.read().await?)
     }
 
+    /// Sends a message to a node and awaits for its reply
     pub async fn request<T: serde::Serialize + serde::de::DeserializeOwned>(
         &mut self,
         request: impl serde::Serialize,
@@ -71,11 +77,15 @@ impl NetworkChannel {
         Ok(result)
     }
 
+    /// Sends disconnect message and waits for connection to close
     pub async fn close(self) -> Result<()> {
         self.writer.close().await?;
         Ok(())
     }
 
+    /// Sends close request, and close current connection
+    ///
+    /// This does not enusures all messages were delivered
     pub async fn force_close(self) -> () {
         self.reader.close().await;
     }

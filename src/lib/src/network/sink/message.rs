@@ -3,6 +3,10 @@ use tokio_util::bytes::Bytes;
 
 use crate::error::*;
 
+/// This is the actual message sent between nodes.
+///
+/// Functions as an helper that sits between the `Bytes` sent and
+/// the generic `NetworkMessage<T>`.
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub enum InnerNetworkMessage {
     Message(Vec<u8>),
@@ -24,14 +28,19 @@ impl InnerNetworkMessage {
     }
 }
 
+/// Messages sent/received by the primitives `NetworkChannel`, `NetworkReader` and `NetworkWriter`
 #[derive(Debug)]
 pub enum NetworkMessage<T: serde::Serialize + serde::de::DeserializeOwned> {
+    /// Message to send/receive
     Message(T),
+    /// Disconnect signal
     Disconnect,
+    /// Error
     Error(String),
 }
 
 impl<T: serde::Serialize + serde::de::DeserializeOwned> NetworkMessage<T> {
+    /// Map message to `Result<T>` meaning that it his disconnect or error, a new DsotError is returned
     pub fn ok(self) -> Result<T> {
         match self {
             NetworkMessage::Message(value) => Ok(value),
@@ -40,6 +49,7 @@ impl<T: serde::Serialize + serde::de::DeserializeOwned> NetworkMessage<T> {
         }
     }
 
+    /// Serialize message to `Bytes`
     pub fn to_network_bytes(self) -> Result<Bytes> {
         let inner: InnerNetworkMessage = self.try_into()?;
         Ok(Bytes::from(inner.to_bytes()?))
@@ -74,25 +84,6 @@ impl<T: serde::Serialize + serde::de::DeserializeOwned> TryFrom<NetworkMessage<T
             )),
             NetworkMessage::Disconnect => Ok(InnerNetworkMessage::Disconnect),
             NetworkMessage::Error(err) => Ok(InnerNetworkMessage::Error(err)),
-        }
-    }
-}
-
-pub trait NetworkMessageUnwrap {
-    type MessageType: serde::Serialize + serde::de::DeserializeOwned;
-
-    fn unwrap_message(self) -> NetworkMessage<<Self as NetworkMessageUnwrap>::MessageType>;
-}
-
-impl<T: serde::Serialize + serde::de::DeserializeOwned> NetworkMessageUnwrap
-    for Result<NetworkMessage<T>>
-{
-    type MessageType = T;
-
-    fn unwrap_message(self) -> NetworkMessage<T> {
-        match self {
-            Ok(msg) => msg,
-            Err(err) => NetworkMessage::Error(err.to_string()),
         }
     }
 }

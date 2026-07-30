@@ -1,3 +1,5 @@
+//! Contains logic to secure server requests and garantee that two nodes know each other
+
 use std::sync::OnceLock;
 
 use iroh::endpoint::Connection;
@@ -17,6 +19,7 @@ fn get_token() -> Result<&'static str> {
     }
 }
 
+/// Helper to create `NetworkChannel` with token validation
 #[derive(Debug, Clone, Copy)]
 pub struct TokenValidator(());
 
@@ -34,6 +37,7 @@ impl TokenValidator {
         TokenValidator(())
     }
 
+    /// Creates a new `NetworkChannel` from a connection and sends a handshake request to validate token
     pub async fn start_handshake(&self, connection: Connection) -> Result<NetworkChannel> {
         let token = get_token()?.to_string();
         let mut channel =
@@ -45,6 +49,7 @@ impl TokenValidator {
         }
     }
 
+    /// Creates a new `NetworkChannel` from a connection and waits for a valid token before allowing any other call
     pub async fn validate_handshake(&self, connection: Connection) -> Result<NetworkChannel> {
         let token = get_token()?;
         let mut channel = NetworkChannel::open(connection).await?;

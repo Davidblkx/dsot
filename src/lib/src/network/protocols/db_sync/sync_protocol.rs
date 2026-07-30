@@ -13,8 +13,9 @@ use crate::{
     repository::{DsotRepository, UserRepository},
 };
 
-static ALPN: &[u8] = b"/dsot/info/v1";
+static ALPN: &[u8] = b"/dsot/db_sync/v1";
 
+/// Iroh protocol `/dsot/db_sync/v1` used to sync two nodes's database
 #[derive(Debug)]
 pub struct DBSyncProtocol {
     repo: DsotRepository,
@@ -67,6 +68,7 @@ impl ProtocolHandler for DBSyncProtocol {
 crate::dsot_protocol!(DBSyncProtocol, ALPN);
 
 impl NetworkDevice {
+    /// Sync a database with a network device
     pub async fn sync_database(&self, db: &DsotDatabase) -> Result<()> {
         let db_id = db.get_id().to_string();
         let mut local_bridge = DatabaseSyncNode::create(db).await?;

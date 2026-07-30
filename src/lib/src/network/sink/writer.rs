@@ -6,6 +6,7 @@ use tokio_util::codec::{FramedWrite, LengthDelimitedCodec};
 use super::message::InnerNetworkMessage;
 use crate::error::*;
 
+/// One-way communication helper, used to ensure full messages are sent
 #[derive(Debug)]
 pub struct NetworkWriter {
     pub inner_writer: FramedWrite<SendStream, LengthDelimitedCodec>,
@@ -20,6 +21,7 @@ impl NetworkWriter {
         }
     }
 
+    /// Creates a new writer by opening a new unidirectional connection
     pub async fn open(connection: Connection) -> Result<Self> {
         match connection.open_uni().await {
             Ok(stream) => Ok(Self::new(stream, connection)),
@@ -27,6 +29,7 @@ impl NetworkWriter {
         }
     }
 
+    /// Creates a new writer and sends an initial message, same as calling open + write
     pub async fn send<T: serde::Serialize>(connection: Connection, data: &T) -> Result<()> {
         let mut writer = Self::open(connection).await?;
         writer.write(data).await?;
@@ -47,6 +50,7 @@ impl NetworkWriter {
         Ok(())
     }
 
+    /// Sends disconnect message and waits for connection to close
     pub async fn close(mut self) -> Result<()> {
         let message = InnerNetworkMessage::Disconnect.to_network_bytes()?;
 

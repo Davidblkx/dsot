@@ -1,3 +1,9 @@
+//! API to handle node users
+//!
+//! Contains:
+//!   - Implementation for `/dsot/server/users/v1`
+//!   - NetworkDevice extension `fn users(&self)`
+
 use iroh::{
     endpoint::Connection,
     protocol::{AcceptError, ProtocolHandler},
@@ -10,7 +16,7 @@ use crate::{
     repository::{DsotRepository, UserRepository},
 };
 
-static ALPN: &[u8] = b"/dsot/users/v1";
+static ALPN: &[u8] = b"/dsot/server/users/v1";
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 enum UserRequest {
@@ -65,7 +71,7 @@ impl ProtocolHandler for UsersProtocol {
 
 crate::dsot_protocol!(UsersProtocol, ALPN);
 
-dsot_remote_protocol!(RemoteUsersProtocol, users);
+impl_network_device_extension!(RemoteUsersProtocol, users);
 
 impl<'a> RemoteUsersProtocol<'a> {
     pub async fn load(&self, user: &str, pass: Option<String>) -> Result<String> {

@@ -8,6 +8,8 @@ use crate::{
 
 /// Bridge sync messages between two nodes using IROH network
 ///
+/// It implements `dsot_db_sync::sync::v1::handler::SyncNode`
+///
 /// - It can be used as an active bridge by creating an instance with `start_sync` and the database id to sync
 /// - It can be a passive bridge by creating an instance with `await_sync` and waiting for a connection
 #[derive(Debug)]

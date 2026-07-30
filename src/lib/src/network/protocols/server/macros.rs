@@ -1,4 +1,4 @@
-macro_rules! dsot_remote_protocol {
+macro_rules! impl_network_device_extension {
     ($id:ident, $access:ident) => {
         pub struct $id<'a> {
             device: &'a $crate::network::NetworkDevice,

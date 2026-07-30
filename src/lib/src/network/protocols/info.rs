@@ -8,6 +8,7 @@ use crate::network::{NetworkDevice, NetworkDeviceInfoProvider, device_info::Netw
 
 static ALPN: &[u8] = b"/dsot/info/v1";
 
+/// Iroh protocol `/dsot/info/v1` used to provide information about current node
 #[derive(Debug)]
 pub struct InfoProtocol {
     info: NetworkDeviceInfo,

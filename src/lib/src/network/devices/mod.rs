@@ -35,6 +35,7 @@ impl DsotNetwork {
     }
 }
 
+/// Fetch network information from device
 pub trait NetworkDeviceInfoProvider {
     fn get_info(&self) -> impl Future<Output = Result<device_info::NetworkDeviceInfo>>;
 }

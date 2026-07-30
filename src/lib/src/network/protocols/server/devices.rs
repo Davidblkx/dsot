@@ -1,3 +1,9 @@
+//! API to handle node devices
+//!
+//! Contains:
+//!   - Implementation for `/dsot/server/devices/v1`
+//!   - NetworkDevice extension `fn devices(&self)`
+
 use iroh::{
     EndpointId,
     endpoint::Connection,
@@ -14,7 +20,7 @@ use crate::{
     state::devices::RemoteDevice,
 };
 
-static ALPN: &[u8] = b"/dsot/users/v1";
+static ALPN: &[u8] = b"/dsot/server/devices/v1";
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 enum DevicesRequest {
@@ -23,6 +29,7 @@ enum DevicesRequest {
     RemoveDevice(EndpointId),
 }
 
+/// Implements the iroh protocol `/dsot/server/devices/v1`
 #[derive(Debug)]
 pub struct DevicesProtocol {
     repo: DsotRepository,
@@ -74,18 +81,21 @@ impl ProtocolHandler for DevicesProtocol {
 
 crate::dsot_protocol!(DevicesProtocol, ALPN);
 
-dsot_remote_protocol!(RemoteDevicesProtocol, devices);
+impl_network_device_extension!(RemoteDevicesProtocol, devices);
 
 impl<'a> RemoteDevicesProtocol<'a> {
+    /// List remote devices available
     pub async fn list(&self) -> Result<Vec<RemoteDevice>> {
         exec_request!(self, DevicesRequest::ListDevices)
     }
 
+    /// Add a new remote device
     pub async fn add(&self, device: RemoteDevice) -> Result<bool> {
         let req = DevicesRequest::AddDevice(device);
         exec_request!(self, req)
     }
 
+    /// Remove remote devices by their ID
     pub async fn remove(&self, id: EndpointId) -> Result<bool> {
         let req = DevicesRequest::RemoveDevice(id);
         exec_request!(self, req)

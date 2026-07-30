@@ -5,6 +5,7 @@ use tokio_util::codec::{FramedRead, LengthDelimitedCodec};
 use super::message::{InnerNetworkMessage, NetworkMessage};
 use crate::error::*;
 
+/// One-way communication helper, used to ensure full messages are received
 #[derive(Debug)]
 pub struct NetworkReader {
     pub inner_reader: FramedRead<RecvStream, LengthDelimitedCodec>,
@@ -19,6 +20,7 @@ impl NetworkReader {
         }
     }
 
+    /// Creates new reader from a connection
     pub async fn open(connection: Connection) -> Result<Self> {
         match connection.accept_uni().await {
             Ok(stream) => Ok(Self::new(stream, connection)),
@@ -26,6 +28,7 @@ impl NetworkReader {
         }
     }
 
+    /// Read a message
     pub async fn read<T: serde::Serialize + serde::de::DeserializeOwned>(
         &mut self,
     ) -> Result<NetworkMessage<T>> {
@@ -37,6 +40,7 @@ impl NetworkReader {
         }
     }
 
+    /// Sends a close request cancelling and pending message to be sent/received by the connection
     pub async fn close(self) -> () {
         self.inner_connection
             .close(VarInt::from_u32(0), b"read completed")

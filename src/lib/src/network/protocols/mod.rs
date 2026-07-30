@@ -11,6 +11,7 @@ pub mod server;
 
 pub use traits::DsotProtocolHandler;
 
+/// Adds iroh routes based on current configuration
 pub async fn add_routes(
     mut router: RouterBuilder,
     builder: NetworkBuilder,

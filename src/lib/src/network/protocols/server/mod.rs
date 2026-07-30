@@ -1,3 +1,5 @@
+//! Module with server routes that allow nodes to control each other
+
 use iroh::protocol::RouterBuilder;
 
 use crate::{
@@ -14,6 +16,7 @@ pub mod users;
 
 pub use token_validation::{NetworkValidator, TokenValidator};
 
+/// Add server routes if configuration allows it
 pub async fn add_server_routes(
     mut router: RouterBuilder,
     builder: &NetworkBuilder,
