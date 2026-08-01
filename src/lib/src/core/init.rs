@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, model::DsotCore};
-use crate::{error::Result, jobs::JobManager, network::builder::NetworkBuilder};
+use crate::{error::Result, jobs::JobManager, network::builder::NetworkBuilder, user::DsotUser};
 
 /// Options to initialize DSOT
 #[derive(Debug, Clone)]
@@ -85,6 +85,7 @@ impl DsotCoreInitOptions {
             state,
             net,
             jobs: JobManager::new(),
+            user: DsotUser::empty(),
         })
     }
 }

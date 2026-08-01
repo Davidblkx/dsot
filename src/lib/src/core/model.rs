@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, config::DsotAppConfig};
-use crate::{jobs::JobManager, network::DsotNetwork, repository::DsotRepository, state::DsotState};
+use crate::{
+    jobs::JobManager, network::DsotNetwork, repository::DsotRepository, state::DsotState,
+    user::DsotUser,
+};
 
 /// DSOT core model, holding all the state and configuration for the DSOT system.
 #[derive(Debug, Clone)]
@@ -18,4 +21,6 @@ pub struct DsotCore {
     pub net: DsotNetwork,
     /// Job manager for the DSOT system.
     pub jobs: JobManager,
+    /// Current application user, can be empty
+    pub user: DsotUser,
 }

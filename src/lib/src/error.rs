@@ -26,6 +26,8 @@ pub enum DsotError {
     InvalidUserPassword,
     #[error("Invalid user password file: {0}")]
     InvalidUserPasswordFile(String),
+    #[error("User is not login")]
+    InvalidUser,
     #[error("Invalid token")]
     InvalidToken,
     #[error("Database sync error: {0}")]
