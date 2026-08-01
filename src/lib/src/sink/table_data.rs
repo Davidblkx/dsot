@@ -1,24 +1,31 @@
 use std::{fmt::Debug, sync::Arc};
 use tokio::sync::watch;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TableRef<T: Debug + Clone + PartialEq> {
-    pub offset: watch::Receiver<u64>,
-    set_offset: Arc<watch::Sender<u64>>,
-    pub size: watch::Receiver<u64>,
-    set_size: Arc<watch::Sender<u64>>,
-    pub filter: watch::Receiver<T>,
-    set_filter: Arc<watch::Sender<T>>,
-    all: watch::Receiver<(u64, u64, T)>,
-    set_all: Arc<watch::Sender<(u64, u64, T)>>,
+    pub offset: i64,
+    pub size: i64,
+    pub filter: T,
 }
 
-impl<T: Debug + Clone + PartialEq> TableRef<T> {
-    pub fn new(offset: u64, size: u64, filter: T) -> Self {
+#[derive(Debug, Clone)]
+pub struct TableRefWatch<T: Debug + Clone + PartialEq> {
+    pub offset: watch::Receiver<i64>,
+    set_offset: Arc<watch::Sender<i64>>,
+    pub size: watch::Receiver<i64>,
+    set_size: Arc<watch::Sender<i64>>,
+    pub filter: watch::Receiver<T>,
+    set_filter: Arc<watch::Sender<T>>,
+    all: watch::Receiver<TableRef<T>>,
+    set_all: Arc<watch::Sender<TableRef<T>>>,
+}
+
+impl<T: Debug + Clone + PartialEq> TableRefWatch<T> {
+    pub fn new(offset: i64, size: i64, filter: T) -> Self {
         let (offset_tx, offset_rx) = watch::channel(offset);
         let (size_tx, size_rx) = watch::channel(size);
         let (filter_tx, filter_rx) = watch::channel(filter.clone());
-        let (all_tx, all_rx) = watch::channel((offset, size, filter));
+        let (all_tx, all_rx) = watch::channel(TableRef::new(offset, size, filter));
 
         Self {
             offset: offset_rx,
@@ -32,15 +39,15 @@ impl<T: Debug + Clone + PartialEq> TableRef<T> {
         }
     }
 
-    pub fn watch(&self) -> watch::Receiver<(u64, u64, T)> {
+    pub fn watch(&self) -> watch::Receiver<TableRef<T>> {
         self.all.clone()
     }
 
-    pub fn set_offset(&self, offset: u64) {
+    pub fn set_offset(&self, offset: i64) {
         self.set_offset.send_replace(offset);
-        self.set_all.send_if_modified(|(prev, _, _)| {
-            if prev != &offset {
-                *prev = offset;
+        self.set_all.send_if_modified(|prev| {
+            if prev.offset != offset {
+                prev.offset = offset;
                 true
             } else {
                 false
@@ -48,11 +55,11 @@ impl<T: Debug + Clone + PartialEq> TableRef<T> {
         });
     }
 
-    pub fn set_size(&self, size: u64) {
+    pub fn set_size(&self, size: i64) {
         self.set_size.send_replace(size);
-        self.set_all.send_if_modified(|(_, prev, _)| {
-            if prev != &size {
-                *prev = size;
+        self.set_all.send_if_modified(|prev| {
+            if prev.size != size {
+                prev.size = size;
                 true
             } else {
                 false
@@ -62,13 +69,27 @@ impl<T: Debug + Clone + PartialEq> TableRef<T> {
 
     pub fn set_filter(&self, filter: T) {
         self.set_filter.send_replace(filter.clone());
-        self.set_all.send_if_modified(|(_, _, prev)| {
-            if prev != &filter {
-                *prev = filter;
+        self.set_all.send_if_modified(|prev| {
+            if prev.filter != filter {
+                prev.filter = filter;
                 true
             } else {
                 false
             }
         });
+    }
+}
+
+impl<T: Debug + Clone + PartialEq> TableRef<T> {
+    pub fn new(offset: i64, size: i64, filter: T) -> Self {
+        Self {
+            offset,
+            size,
+            filter,
+        }
+    }
+
+    pub fn into_watch(self) -> TableRefWatch<T> {
+        TableRefWatch::new(self.offset, self.size, self.filter)
     }
 }

@@ -138,6 +138,13 @@ impl InboxItem {
     }
 }
 
+impl InboxItemSql {
+    /// Decode the payload into its typed form.
+    pub fn value(&self) -> Result<InboxValue, DBSyncError> {
+        EntityMessagePack::deserialize(&self.value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

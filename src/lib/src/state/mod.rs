@@ -5,12 +5,12 @@ use crate::{
     core::{config::DsotAppConfig, init::DsotCoreInitOptions},
     error::Result,
     repository::DsotRepository,
-    state::devices::RemoteDevices,
 };
 
 #[derive(Debug, Clone)]
 pub struct DsotState {
-    pub devices: RemoteDevices,
+    pub devices: devices::RemoteDevices,
+    pub inbox: inbox::InboxState,
 }
 
 impl DsotCoreInitOptions {
@@ -20,7 +20,8 @@ impl DsotCoreInitOptions {
         repo: &DsotRepository,
     ) -> Result<DsotState> {
         Ok(DsotState {
-            devices: RemoteDevices::from_repository(repo).await?,
+            devices: devices::RemoteDevices::from_repository(repo).await?,
+            inbox: inbox::InboxState::from_repository(repo).await?,
         })
     }
 }

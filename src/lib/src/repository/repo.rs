@@ -6,8 +6,12 @@ use super::Repository;
 use crate::{
     core::{DsotCore, config::DsotAppConfig, init::DsotCoreInitOptions},
     error::Result,
-    repository::{DeviceRepository, UserRepository},
-    state::devices::RemoteDevice,
+    repository::{DeviceRepository, InboxRepository, UserRepository},
+    state::{
+        devices::RemoteDevice,
+        inbox::{InboxFilter, InboxItemValue},
+    },
+    user::DsotUser,
 };
 
 #[derive(Debug, Clone)]
@@ -22,9 +26,13 @@ impl DsotRepository {
         }
     }
 
-    pub async fn init(options: &DsotCoreInitOptions, config: &DsotAppConfig) -> Result<Self> {
+    pub async fn init(
+        options: &DsotCoreInitOptions,
+        config: &DsotAppConfig,
+        user: DsotUser,
+    ) -> Result<Self> {
         if options.cap.can_disk_access() {
-            let repo = super::local::LocalRepo::init(config.data_dir.clone());
+            let repo = super::local::LocalRepo::init(config.data_dir.clone(), user);
             Ok(DsotRepository::new(repo))
         } else {
             let repo = super::noop::NoopRepo::init();
@@ -56,6 +64,13 @@ impl DeviceRepository for DsotRepository {
 impl UserRepository for DsotRepository {
     async fn list_users(&self) -> Result<Vec<String>> {
         self.repo.read().await.list_users().await
+    }
+}
+
+#[async_trait::async_trait]
+impl InboxRepository for DsotRepository {
+    async fn load_inbox(&self, filter: &InboxFilter) -> Result<Vec<InboxItemValue>> {
+        self.repo.read().await.load_inbox(filter).await
     }
 }
 
