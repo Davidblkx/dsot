@@ -1,3 +1,5 @@
+mod state;
+
 #[derive(Debug)]
 pub struct InboxState {
     pub size: u32,

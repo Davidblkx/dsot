@@ -27,7 +27,7 @@ macro_rules! impl_repository_shell {
             async fn add_device(
                 &self,
                 device: $crate::state::devices::RemoteDevice,
-            ) -> $crate::error::Result<()> {
+            ) -> $crate::error::Result<bool> {
                 self.devices.add_device(device).await
             }
             async fn remove_device(&self, id: iroh::EndpointId) -> $crate::error::Result<()> {

@@ -1,4 +1,5 @@
 mod devices;
+mod inbox;
 mod user;
 
 pub use devices::*;

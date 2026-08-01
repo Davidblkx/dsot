@@ -10,8 +10,8 @@ impl DeviceRepository for DevicesNoopRepository {
     async fn list_devices(&self) -> Result<Vec<RemoteDevice>> {
         Ok(vec![])
     }
-    async fn add_device(&self, _device: RemoteDevice) -> Result<()> {
-        Ok(())
+    async fn add_device(&self, _device: RemoteDevice) -> Result<bool> {
+        Ok(false)
     }
     async fn remove_device(&self, _id: iroh::EndpointId) -> Result<()> {
         Ok(())

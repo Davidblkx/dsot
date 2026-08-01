@@ -44,7 +44,7 @@ impl DeviceRepository for DsotRepository {
     async fn list_devices(&self) -> Result<Vec<RemoteDevice>> {
         self.repo.read().await.list_devices().await
     }
-    async fn add_device(&self, _device: RemoteDevice) -> Result<()> {
+    async fn add_device(&self, _device: RemoteDevice) -> Result<bool> {
         self.repo.write().await.add_device(_device).await
     }
     async fn remove_device(&self, _id: iroh::EndpointId) -> Result<()> {
