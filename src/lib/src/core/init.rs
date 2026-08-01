@@ -1,7 +1,12 @@
 use std::sync::Arc;
 
 use super::{cap::Capability, model::DsotCore};
-use crate::{error::Result, jobs::JobManager, network::builder::NetworkBuilder, user::DsotUser};
+use crate::{
+    error::Result,
+    jobs::JobManager,
+    network::builder::NetworkBuilder,
+    user::{DsotUser, LocalUserCredentials},
+};
 
 /// Options to initialize DSOT
 #[derive(Debug, Clone)]
@@ -78,6 +83,16 @@ impl DsotCoreInitOptions {
             }
         };
 
+        let user = DsotUser::empty();
+        if let Some(id) = &config.value.user {
+            let user_folder = config.data_dir.join(id);
+            if user_folder.exists() {
+                user.login_local(user_folder, LocalUserCredentials::SkipValidation)?;
+            } else {
+                ::log::warn!("User folder not found: {}", user_folder.display());
+            }
+        }
+
         Ok(DsotCore {
             cap: self.cap,
             config,
@@ -85,7 +100,7 @@ impl DsotCoreInitOptions {
             state,
             net,
             jobs: JobManager::new(),
-            user: DsotUser::empty(),
+            user,
         })
     }
 }

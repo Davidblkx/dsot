@@ -54,9 +54,6 @@ impl DeviceRepository for DsotRepository {
 
 #[async_trait::async_trait]
 impl UserRepository for DsotRepository {
-    async fn load_user(&self, user: &str, pass: Option<String>) -> Result<String> {
-        self.repo.read().await.load_user(user, pass).await
-    }
     async fn list_users(&self) -> Result<Vec<String>> {
         self.repo.read().await.list_users().await
     }

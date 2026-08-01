@@ -11,7 +11,7 @@ pub type DsotAppConfig = DsotConfig<ConfigValue>;
 #[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct ConfigValue {
     /// Name of the user to load at startup
-    pub user: String,
+    pub user: Option<String>,
     /// Token for current node, used to validate external requests
     pub token: String,
     /// Minimun log level to use, possible values are trace, debug, info, warn, error
@@ -31,7 +31,7 @@ pub struct ConfigValue {
 impl Default for ConfigValue {
     fn default() -> Self {
         Self {
-            user: "main".into(),
+            user: None,
             token: uuid::Uuid::now_v7().to_string(),
             log_level: None,
             log_file: None,

@@ -11,14 +11,6 @@ macro_rules! impl_repository_shell {
 
         #[::async_trait::async_trait]
         impl $crate::repository::UserRepository for $target {
-            async fn load_user(
-                &self,
-                user: &str,
-                pass: Option<String>,
-            ) -> $crate::error::Result<String> {
-                self.users.load_user(user, pass).await
-            }
-
             async fn list_users(&self) -> $crate::error::Result<Vec<String>> {
                 self.users.list_users().await
             }

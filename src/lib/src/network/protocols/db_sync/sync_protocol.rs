@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use dsot_db_sync::{
     DatabaseManager, DsotDatabase,
     sync::{DatabaseSyncNode, SyncNode, SyncNodeHandler},
@@ -10,7 +12,6 @@ use iroh::{
 use crate::{
     error::Result,
     network::{NetworkDevice, builder::NetworkBuilder},
-    repository::{DsotRepository, UserRepository},
 };
 
 static ALPN: &[u8] = b"/dsot/db_sync/v1";
@@ -18,13 +19,13 @@ static ALPN: &[u8] = b"/dsot/db_sync/v1";
 /// Iroh protocol `/dsot/db_sync/v1` used to sync two nodes's database
 #[derive(Debug)]
 pub struct DBSyncProtocol {
-    repo: DsotRepository,
+    root_path: PathBuf,
 }
 
 impl DBSyncProtocol {
     pub fn new(builder: &NetworkBuilder) -> Self {
         Self {
-            repo: builder.repo.clone(),
+            root_path: builder.config.data_dir.clone(),
         }
     }
 
@@ -37,8 +38,16 @@ impl DBSyncProtocol {
                 "Database id to sync not defined".to_string(),
             ))?;
 
-        // TODO: Use safe method that doesn't require pass
-        let user_path = self.repo.load_user(id.as_str(), None).await?;
+        let user_path = self.root_path.join(id);
+        if !user_path.exists() {
+            ::log::debug!("User path does not exist: {:?}", user_path);
+            net_bridge
+                .channel
+                .write_error("User path does not exist")
+                .await?;
+            return Ok(());
+        }
+
         let manager = DatabaseManager::open_folder(user_path)?;
         let db = manager.open_database().await?;
         let mut local_bridge = DatabaseSyncNode::create(&db).await?;

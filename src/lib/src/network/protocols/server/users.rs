@@ -20,7 +20,6 @@ static ALPN: &[u8] = b"/dsot/server/users/v1";
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 enum UserRequest {
-    LoadUser { user: String, pass: Option<String> },
     ListUsers,
 }
 
@@ -43,10 +42,6 @@ impl UsersProtocol {
 
         let req = channel.read::<UserRequest>().await?.ok()?;
         match req {
-            UserRequest::LoadUser { user, pass } => {
-                let user = self.repo.load_user(user.as_str(), pass).await?;
-                channel.write(&user).await?;
-            }
             UserRequest::ListUsers => {
                 let users = self.repo.list_users().await?;
                 channel.write(&users).await?;
@@ -74,15 +69,6 @@ crate::dsot_protocol!(UsersProtocol, ALPN);
 impl_network_device_extension!(RemoteUsersProtocol, users);
 
 impl<'a> RemoteUsersProtocol<'a> {
-    pub async fn load(&self, user: &str, pass: Option<String>) -> Result<String> {
-        let req = UserRequest::LoadUser {
-            user: user.to_string(),
-            pass,
-        };
-
-        exec_request!(self, req)
-    }
-
     pub async fn list(&self) -> Result<Vec<String>> {
         exec_request!(self, UserRequest::ListUsers)
     }
