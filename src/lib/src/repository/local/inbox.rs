@@ -1,5 +1,6 @@
 use async_trait::async_trait;
-use dsot_model::InboxItemSqlRepository;
+use dsot_model::{InboxItem, InboxItemSql, InboxItemSqlRepository, InboxValue};
+use uuid::Uuid;
 
 use crate::{
     error::Result,
@@ -38,5 +39,16 @@ impl InboxRepository for InboxLocalRepository {
         }
 
         Ok(res)
+    }
+    async fn add_inbox_item(&self, value: InboxValue) -> Result<()> {
+        let item: InboxItemSql = InboxItem::new(value)?.into();
+        let db = self.user.open_db().await?;
+        db.insert::<InboxItemSqlRepository>(&item).await?;
+        Ok(())
+    }
+    async fn remove_inbox_item(&self, id: Uuid) -> Result<bool> {
+        let db = self.user.open_db().await?;
+        db.delete::<InboxItemSqlRepository>(id).await?;
+        Ok(true)
     }
 }

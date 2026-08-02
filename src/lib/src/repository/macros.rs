@@ -45,6 +45,16 @@ macro_rules! impl_repository_shell {
             ) -> $crate::error::Result<Vec<$crate::state::inbox::InboxItemValue>> {
                 self.inbox.load_inbox(filter).await
             }
+
+            async fn add_inbox_item(
+                &self,
+                value: ::dsot_model::InboxValue,
+            ) -> $crate::error::Result<()> {
+                self.inbox.add_inbox_item(value).await
+            }
+            async fn remove_inbox_item(&self, id: uuid::Uuid) -> $crate::error::Result<bool> {
+                self.inbox.remove_inbox_item(id).await
+            }
         }
 
         impl $crate::repository::Repository for $target {}

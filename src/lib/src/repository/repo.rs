@@ -72,6 +72,14 @@ impl InboxRepository for DsotRepository {
     async fn load_inbox(&self, filter: &InboxFilter) -> Result<Vec<InboxItemValue>> {
         self.repo.read().await.load_inbox(filter).await
     }
+
+    async fn add_inbox_item(&self, value: ::dsot_model::InboxValue) -> Result<()> {
+        self.repo.write().await.add_inbox_item(value).await
+    }
+
+    async fn remove_inbox_item(&self, id: uuid::Uuid) -> Result<bool> {
+        self.repo.write().await.remove_inbox_item(id).await
+    }
 }
 
 impl super::Repository for DsotRepository {}
