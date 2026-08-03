@@ -2,6 +2,7 @@ use std::{
     path::PathBuf,
     sync::{Arc, RwLock},
 };
+use tokio::sync::watch::{self, Receiver, Sender};
 
 use dsot_db_sync::{DatabaseManager, DsotDatabase};
 
@@ -18,26 +19,44 @@ enum User {
 #[derive(Debug, Clone)]
 pub struct DsotUser {
     user: Arc<RwLock<User>>,
+    is_loggin: Receiver<bool>,
+    update_login: Arc<Sender<bool>>,
 }
 
 impl DsotUser {
-    pub fn empty() -> Self {
+    fn new(user: User, is_loggin: bool) -> Self {
+        let (update_login, is_loggin) = watch::channel(is_loggin);
         Self {
-            user: Arc::new(RwLock::new(User::Empty)),
+            user: Arc::new(RwLock::new(user)),
+            is_loggin,
+            update_login: Arc::new(update_login),
         }
+    }
+
+    pub fn empty() -> Self {
+        Self::new(User::Empty, false)
+    }
+
+    fn update_login_status(&self, status: bool) {
+        self.update_login.send_if_modified(|l| {
+            if &status != l {
+                *l = status;
+                true
+            } else {
+                false
+            }
+        });
     }
 
     pub fn local(path: PathBuf, credentials: LocalUserCredentials) -> Result<Self> {
         let user = LocalUser::load(path, credentials)?;
-
-        Ok(Self {
-            user: Arc::new(RwLock::new(User::Local(user))),
-        })
+        Ok(Self::new(User::Local(user), false))
     }
 
     pub fn logout(&self) -> Result<()> {
         let mut lock = self.user.write().unwrap();
         *lock = User::Empty;
+        self.update_login_status(false);
         Ok(())
     }
 
@@ -45,6 +64,7 @@ impl DsotUser {
         let user = LocalUser::load(path, credentials)?;
         let mut lock = self.user.write().unwrap();
         *lock = User::Local(user);
+        self.update_login_status(true);
         Ok(())
     }
 
@@ -70,5 +90,9 @@ impl DsotUser {
             User::Empty => Ok(()),
             User::Local(user) => user.set_password(password),
         }
+    }
+
+    pub fn is_logged_in(&self) -> &'_ Receiver<bool> {
+        &self.is_loggin
     }
 }

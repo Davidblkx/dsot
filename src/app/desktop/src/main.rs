@@ -1,8 +1,6 @@
 mod helpers;
 mod layout;
 mod routes;
-mod state;
-mod views;
 mod widgets;
 
 use dioxus::{
@@ -11,7 +9,6 @@ use dioxus::{
 };
 use dsot_lib::Capability;
 use dsot_shared_ui::{assets::DsotDefaultLinks, components::PortalHost};
-use state::AppStateProvier;
 
 use crate::layout::LayoutState;
 
@@ -80,9 +77,6 @@ fn App() -> Element {
 
         PortalHost {  }
 
-        AppStateProvier {
-            Router::<routes::Routes> {}
-        }
-
+        Router::<routes::Routes> {}
     }
 }

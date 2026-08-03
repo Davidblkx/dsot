@@ -7,12 +7,24 @@ use uuid::Uuid;
 use crate::{
     error::Result,
     repository::{DsotRepository, InboxRepository},
-    sink::{TableRef, TableRefWatch},
+    sink::{TableFilter, TableRef, TableRefWatch},
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct InboxFilterValue {
     pub status: Option<InboxStatus>,
+}
+
+impl TableFilter for InboxFilterValue {
+    type Target = InboxItemValue;
+
+    fn include(&self, target: &Self::Target) -> bool {
+        if let Some(status) = &self.status {
+            &target.status == status
+        } else {
+            true
+        }
+    }
 }
 
 #[derive(Debug, Clone)]

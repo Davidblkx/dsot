@@ -5,6 +5,7 @@ use uuid::Uuid;
 use crate::{
     error::Result,
     repository::InboxRepository,
+    sink::TableFilter,
     state::inbox::{InboxFilter, InboxItemValue},
     user::DsotUser,
 };
@@ -23,6 +24,10 @@ impl InboxLocalRepository {
 #[async_trait]
 impl InboxRepository for InboxLocalRepository {
     async fn load_inbox(&self, filter: &InboxFilter) -> Result<Vec<InboxItemValue>> {
+        if !*self.user.is_logged_in().borrow() {
+            return Ok(vec![]);
+        }
+
         let db = self.user.open_db().await?;
         let mut res = Vec::new();
 
@@ -34,8 +39,11 @@ impl InboxRepository for InboxLocalRepository {
             let id = i.id;
             let value = i.value()?;
             let status = i.status.clone();
+            let item = InboxItemValue { id, value, status };
 
-            res.push(InboxItemValue { id, value, status });
+            if filter.filter.include(&item) {
+                res.push(item);
+            }
         }
 
         Ok(res)

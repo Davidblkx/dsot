@@ -1,15 +1,21 @@
 use std::{fmt::Debug, sync::Arc};
 use tokio::sync::watch;
 
+pub trait TableFilter {
+    type Target;
+
+    fn include(&self, target: &Self::Target) -> bool;
+}
+
 #[derive(Debug, Clone, PartialEq)]
-pub struct TableRef<T: Debug + Clone + PartialEq> {
+pub struct TableRef<T: Debug + Clone + PartialEq + TableFilter> {
     pub offset: i64,
     pub size: i64,
     pub filter: T,
 }
 
 #[derive(Debug, Clone)]
-pub struct TableRefWatch<T: Debug + Clone + PartialEq> {
+pub struct TableRefWatch<T: Debug + Clone + PartialEq + TableFilter> {
     pub offset: watch::Receiver<i64>,
     set_offset: Arc<watch::Sender<i64>>,
     pub size: watch::Receiver<i64>,
@@ -20,7 +26,7 @@ pub struct TableRefWatch<T: Debug + Clone + PartialEq> {
     set_all: Arc<watch::Sender<TableRef<T>>>,
 }
 
-impl<T: Debug + Clone + PartialEq> TableRefWatch<T> {
+impl<T: Debug + Clone + PartialEq + TableFilter> TableRefWatch<T> {
     pub fn new(offset: i64, size: i64, filter: T) -> Self {
         let (offset_tx, offset_rx) = watch::channel(offset);
         let (size_tx, size_rx) = watch::channel(size);
@@ -80,7 +86,7 @@ impl<T: Debug + Clone + PartialEq> TableRefWatch<T> {
     }
 }
 
-impl<T: Debug + Clone + PartialEq> TableRef<T> {
+impl<T: Debug + Clone + PartialEq + TableFilter> TableRef<T> {
     pub fn new(offset: i64, size: i64, filter: T) -> Self {
         Self {
             offset,

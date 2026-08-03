@@ -1,9 +1,6 @@
 use crate::routes::Routes;
 use dioxus::prelude::*;
-use dioxus_free_icons::{
-    Icon,
-    icons::ld_icons::{LdHome, LdInbox},
-};
+use dioxus_free_icons::{Icon, icons::ld_icons::LdHome};
 use dsot_shared_ui::{
     assets::LOGO_IMG,
     components::{Menu, MenuItem},
@@ -17,7 +14,6 @@ pub fn DesktopLeftPanel() -> Element {
     let current_route = use_route::<Routes>();
 
     let goto_home = move || nav.push(Routes::HomeView);
-    let goto_inbox = move || nav.push(Routes::InboxView);
 
     let is_route = move |r: Routes| if r == current_route { true } else { false };
 
@@ -39,18 +35,6 @@ pub fn DesktopLeftPanel() -> Element {
                     icon: rsx! {
                         Icon {
                             icon: LdHome
-                        }
-                    }
-                }
-                MenuItem {
-                    title: "Inbox",
-                    active: is_route(Routes::InboxView),
-                    click: move |_| {
-                        goto_inbox();
-                    },
-                    icon: rsx! {
-                        Icon {
-                            icon: LdInbox
                         }
                     }
                 }
