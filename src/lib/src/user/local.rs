@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use dsot_db_sync::DatabaseManager;
 
-use crate::error::Result;
+use crate::{DsotCore, error::Result};
 
 static CREDENTIALS_FILE: &'static str = "credentials.key";
 
@@ -95,5 +95,15 @@ impl LocalUser {
 
     pub fn db_manager(&self) -> &'_ DatabaseManager {
         &self.manager
+    }
+}
+
+pub trait LocalUserPathProvider {
+    fn get_user_path(&self, user_id: impl AsRef<str>) -> PathBuf;
+}
+
+impl LocalUserPathProvider for DsotCore {
+    fn get_user_path(&self, user_id: impl AsRef<str>) -> PathBuf {
+        self.config.data_dir.join("users").join(user_id.as_ref())
     }
 }

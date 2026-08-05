@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use dsot_shared_ui::views::UserView;
+
 use super::routes::Routes;
 use super::widgets::layout::{
     DesktopFooter, DesktopFrame, DesktopLeftPanel, DesktopRightPanel, DesktopTopBar,
@@ -12,16 +14,18 @@ pub fn Layout() -> Element {
 
         DesktopTopBar {  }
 
-        DesktopLeftPanel {  }
+        UserView {
+            DesktopLeftPanel {  }
 
-        main {
-            "data-component": "desktop_main",
-            Outlet::<Routes> {}
+            main {
+                "data-component": "desktop_main",
+                Outlet::<Routes> {}
+            }
+
+            DesktopRightPanel {  }
+
+            DesktopFooter {  }
         }
-
-        DesktopRightPanel {  }
-
-        DesktopFooter {  }
     }
 }
 

@@ -67,7 +67,7 @@ impl DsotCoreInitOptions {
 
         let user = DsotUser::empty();
         if let Some(id) = &config.value.user {
-            let user_folder = config.data_dir.join(id);
+            let user_folder = config.data_dir.join("users").join(id);
             if user_folder.exists() {
                 user.login_local(user_folder, LocalUserCredentials::SkipValidation)?;
             } else {
