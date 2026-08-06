@@ -1872,6 +1872,7 @@ dependencies = [
  "dsot_shared_ui",
  "iroh",
  "log",
+ "paste",
  "serde",
  "tokio",
 ]
@@ -1954,6 +1955,7 @@ dependencies = [
  "dioxus-free-icons",
  "dsot_lib",
  "log",
+ "paste",
  "serde",
  "tokio",
  "uuid",
