@@ -33,7 +33,7 @@ impl Display for InboxFilterValue {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct InboxItemValue {
     pub id: Uuid,
     pub value: InboxValue,
