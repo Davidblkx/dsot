@@ -1,5 +1,5 @@
 use std::{fmt::Debug, sync::Arc};
-use tokio::sync::watch;
+use tokio::sync::watch::{self, Ref};
 
 pub trait TableFilter {
     type Target;
@@ -83,6 +83,12 @@ impl<T: Debug + Clone + PartialEq + TableFilter> TableRefWatch<T> {
                 false
             }
         });
+    }
+
+    pub fn mod_filter(&self, modifier: impl FnOnce(Ref<'_, T>) -> Option<T>) {
+        if let Some(new_value) = modifier(self.filter.borrow()) {
+            self.set_filter(new_value);
+        }
     }
 }
 

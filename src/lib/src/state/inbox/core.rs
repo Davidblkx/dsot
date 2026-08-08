@@ -1,9 +1,10 @@
 use async_trait::async_trait;
 
-use dsot_model::InboxValue;
+use dsot_model::{InboxStatus, InboxValue};
 use uuid::Uuid;
 
-use crate::{DsotCore, error::Result, repository::InboxRepository};
+use super::InboxFilterValue;
+use crate::{DsotCore, error::Result, repository::InboxRepository, sink::TableRefWatch};
 
 #[async_trait]
 pub trait InboxOperations {
@@ -27,5 +28,23 @@ impl InboxOperations for DsotCore {
     }
     async fn reload_inbox_items(&self) -> Result<()> {
         Ok(())
+    }
+}
+
+pub trait InboxFilterOperations {
+    fn update_status(&self, status: Option<InboxStatus>);
+}
+
+impl InboxFilterOperations for TableRefWatch<InboxFilterValue> {
+    fn update_status(&self, status: Option<InboxStatus>) {
+        self.mod_filter(|f| {
+            if f.status == status {
+                return None;
+            }
+
+            let mut f = f.clone();
+            f.status = status;
+            Some(f)
+        });
     }
 }

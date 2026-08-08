@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt::Display, sync::Arc};
 
 use dsot_model::{InboxStatus, InboxValue};
 use tokio::sync::watch;
@@ -24,6 +24,12 @@ impl TableFilter for InboxFilterValue {
         } else {
             true
         }
+    }
+}
+
+impl Display for InboxFilterValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "InboxFilterValue(status={:?})", self.status)
     }
 }
 
