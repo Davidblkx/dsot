@@ -80,6 +80,17 @@ impl InboxRepository for DsotRepository {
     async fn remove_inbox_item(&self, id: uuid::Uuid) -> Result<bool> {
         self.repo.write().await.remove_inbox_item(id).await
     }
+    async fn update_inbox_status(
+        &self,
+        id: uuid::Uuid,
+        status: ::dsot_model::InboxStatus,
+    ) -> Result<bool> {
+        self.repo
+            .write()
+            .await
+            .update_inbox_status(id, status)
+            .await
+    }
 }
 
 impl super::Repository for DsotRepository {}

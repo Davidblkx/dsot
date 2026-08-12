@@ -1,13 +1,15 @@
 use dioxus::prelude::*;
 use dioxus_free_icons::icons::ld_icons::{LdFile, LdLink, LdMusic, LdNotebook, LdUser};
 use dsot_lib::{
+    DsotCore,
     dsot_model::{InboxStatus, InboxValue},
-    state::inbox::InboxItemValue,
+    state::inbox::{InboxItemValue, InboxOperations},
 };
 use dsot_shared_ui::widgets::icon::*;
 
 #[component]
 pub fn InboxItem(item: InboxItemValue) -> Element {
+    let core = use_context::<DsotCore>();
     let InboxItemValue { id, value, status } = item;
 
     let (icon, content, class_name) = match value {
@@ -28,29 +30,36 @@ pub fn InboxItem(item: InboxItemValue) -> Element {
 
     let status_txt = status.as_db_str();
 
+    let update_status = move |status: InboxStatus| {
+        let core = core.clone();
+        spawn(async move {
+            match core.set_inbox_status(id, status).await {
+                Ok(_) => log::debug!("Inbox status updated"),
+                Err(e) => log::error!("Failed to update inbox status: {}", e),
+            }
+        });
+    };
+
+    let action_button = move |label: &'static str, class: &'static str, status: InboxStatus| {
+        let update_status = update_status.clone();
+        let status = status.clone();
+        rsx! {
+            button {
+                class: "{class}",
+                onclick: move |_| update_status(status),
+                "{label}"
+            }
+        }
+    };
+
     let (action1, action2) = match status {
         InboxStatus::Pending => (
-            rsx! {
-                button {
-                    class: "cancel danger",
-                    "Cancel"
-                }
-            },
-            rsx! {
-                button {
-                    class: "done success",
-                    "Done"
-                }
-            },
+            action_button("Cancel", "cancel danger", InboxStatus::Failed),
+            action_button("Done", "done success", InboxStatus::Resolved),
         ),
         _ => (
             rsx! {},
-            rsx! {
-                button {
-                    class: "reopen info",
-                    "Reopen"
-                }
-            },
+            action_button("Reopen", "reopen info", InboxStatus::Pending),
         ),
     };
 

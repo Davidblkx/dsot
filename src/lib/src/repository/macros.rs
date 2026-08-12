@@ -55,6 +55,13 @@ macro_rules! impl_repository_shell {
             async fn remove_inbox_item(&self, id: uuid::Uuid) -> $crate::error::Result<bool> {
                 self.inbox.remove_inbox_item(id).await
             }
+            async fn update_inbox_status(
+                &self,
+                id: uuid::Uuid,
+                status: ::dsot_model::InboxStatus,
+            ) -> $crate::error::Result<bool> {
+                self.inbox.update_inbox_status(id, status).await
+            }
         }
 
         impl $crate::repository::Repository for $target {}

@@ -90,6 +90,10 @@ impl<T: Debug + Clone + PartialEq + TableFilter> TableRefWatch<T> {
             self.set_filter(new_value);
         }
     }
+
+    pub fn get_table_ref(&self) -> TableRef<T> {
+        self.all.borrow().clone()
+    }
 }
 
 impl<T: Debug + Clone + PartialEq + TableFilter> TableRef<T> {

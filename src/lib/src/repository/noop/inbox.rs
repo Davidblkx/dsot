@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use dsot_model::InboxValue;
+use dsot_model::{InboxStatus, InboxValue};
 use uuid::Uuid;
 
 use crate::{
@@ -20,6 +20,9 @@ impl InboxRepository for NoopInboxRepository {
         Ok(())
     }
     async fn remove_inbox_item(&self, _id: Uuid) -> Result<bool> {
+        Ok(true)
+    }
+    async fn update_inbox_status(&self, _id: Uuid, _status: InboxStatus) -> Result<bool> {
         Ok(true)
     }
 }

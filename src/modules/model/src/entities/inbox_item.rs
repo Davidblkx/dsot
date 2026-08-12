@@ -31,7 +31,7 @@ pub enum InboxValue {
     Other(String),
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize, Serialize, Copy)]
 pub enum InboxStatus {
     #[default]
     Pending,

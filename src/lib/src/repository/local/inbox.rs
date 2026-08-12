@@ -1,5 +1,6 @@
 use async_trait::async_trait;
-use dsot_model::{InboxItem, InboxItemSql, InboxItemSqlRepository, InboxValue};
+use dsot_db_sync::DBSyncError;
+use dsot_model::{InboxItem, InboxItemSql, InboxItemSqlRepository, InboxStatus, InboxValue};
 use uuid::Uuid;
 
 use crate::{
@@ -57,6 +58,25 @@ impl InboxRepository for InboxLocalRepository {
     async fn remove_inbox_item(&self, id: Uuid) -> Result<bool> {
         let db = self.user.open_db().await?;
         db.delete::<InboxItemSqlRepository>(id).await?;
+        Ok(true)
+    }
+    async fn update_inbox_status(&self, id: Uuid, status: InboxStatus) -> Result<bool> {
+        let db = self.user.open_db().await?;
+        let mut item = match db.get::<InboxItemSqlRepository>(id).await {
+            Ok(item) => item,
+            Err(err) => match err {
+                DBSyncError::EntityNotFound(_, _) => return Ok(false),
+                e => return Err(e.into()),
+            },
+        };
+
+        if item.status == status {
+            return Ok(false);
+        }
+
+        item.status = status;
+        db.update::<InboxItemSqlRepository>(&item).await?;
+
         Ok(true)
     }
 }

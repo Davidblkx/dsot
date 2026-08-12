@@ -50,9 +50,15 @@ pub struct InboxState {
 pub type InboxFilter = TableRef<InboxFilterValue>;
 
 impl InboxState {
+    pub fn set_items(&self, items: Vec<InboxItemValue>) {
+        self.writer.send_replace(items);
+    }
+
     pub async fn from_repository(repo: &DsotRepository) -> Result<Self> {
         let filter = TableRef {
-            filter: InboxFilterValue { status: None },
+            filter: InboxFilterValue {
+                status: Some(InboxStatus::Pending),
+            },
             offset: 0,
             size: 10,
         };
