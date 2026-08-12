@@ -2,9 +2,10 @@
     [data-view="inbox"] {
         .item-list {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 8px;
             padding: 8px 0;
+            flex-wrap: wrap;
 
             .item {
                 display: flex;
@@ -14,6 +15,7 @@
                 border-radius: 6px;
                 cursor: pointer;
                 transition: background-color 0.2s ease;
+                flex: 0 1 auto;
 
                 &:hover {
                     background-color: var(--color-bg-hover);
@@ -24,27 +26,6 @@
                     color: var(--color-text-on-accent);
                 }
             }
-        }
-
-        .icon {
-            width: 24px;
-            height: 24px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            & > svg {
-                width: 100%;
-                height: 100%;
-            }
-        }
-
-        .content {
-            flex: 1;
-            font-size: var(--font-size-sm);
-            line-height: var(--line-height-tight);
-            color: var(--color-text-primary);
         }
     }
 }

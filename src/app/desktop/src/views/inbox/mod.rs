@@ -33,12 +33,9 @@ pub fn InboxView() -> Element {
             div {
                 class: "item-list",
                 for i in items.read().iter() {
-                    div {
+                    item::InboxItem {
                         key: "{i.id}",
-                        class: "item",
-                        item::InboxItem {
-                            item: i.clone()
-                        }
+                        item: i.clone()
                     }
                 }
             }
