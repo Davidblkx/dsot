@@ -9,21 +9,125 @@
 
             .item {
                 display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 6px 12px;
-                border-radius: 6px;
+                flex-direction: column;
+                gap: var(--space-sm);
+                padding: var(--space-sm) var(--space-md);
+                min-width: min(220px, 100%);
+                background-color: var(--color-bg-surface);
+                border: 1px solid var(--color-border-muted);
+                border-radius: var(--radius-md);
                 cursor: pointer;
-                transition: background-color 0.2s ease;
-                flex: 0 1 auto;
+                transition:
+                    background-color 0.2s ease,
+                    border-color 0.2s ease;
 
                 &:hover {
-                    background-color: var(--color-bg-hover);
+                    border-color: var(--color-border);
+                    background-color: var(--color-bg-surface-elevated);
                 }
 
                 &.active {
-                    background-color: var(--color-bg-accent);
-                    color: var(--color-text-on-accent);
+                    border-color: var(--color-primary);
+                    background-color: var(--color-bg-surface-elevated);
+                }
+
+                &.status_Pending {
+                    border-left: 3px solid var(--color-warning);
+                }
+
+                &.status_Resolved {
+                    border-left: 3px solid var(--color-success);
+                }
+
+                &.status_Failed {
+                    border-left: 3px solid var(--color-danger);
+                }
+
+                .header {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--space-sm);
+                    min-width: 0;
+
+                    .icon {
+                        flex-shrink: 0;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: var(--color-primary);
+
+                        svg {
+                            width: 32px;
+                            height: 32px;
+                        }
+                    }
+
+                    .content {
+                        flex: 1 1 auto;
+                        min-width: 0;
+                        font-size: var(--font-size-xl);
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+
+                        a {
+                            display: inline-block;
+                            max-width: 100%;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            vertical-align: bottom;
+                        }
+                    }
+                }
+
+                .actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: var(--space-sm);
+
+                    button {
+                        width: auto;
+                        padding: 2px var(--space-sm);
+                        font-size: var(--font-size-xs);
+                        border-radius: var(--radius-sm);
+
+                        &.cancel.danger {
+                            background: transparent;
+                            color: var(--color-danger);
+                            border-color: transparent;
+
+                            &:hover {
+                                background-color: var(--color-danger);
+                                color: var(--color-bg-main);
+                                border-color: var(--color-danger);
+                            }
+                        }
+
+                        &.done.success {
+                            background: transparent;
+                            color: var(--color-success);
+                            border-color: transparent;
+
+                            &:hover {
+                                background-color: var(--color-success);
+                                color: var(--color-bg-main);
+                                border-color: var(--color-success);
+                            }
+                        }
+
+                        &.reopen.info {
+                            background: transparent;
+                            color: var(--color-info);
+                            border-color: transparent;
+
+                            &:hover {
+                                background-color: var(--color-info);
+                                color: var(--color-bg-main);
+                                border-color: var(--color-info);
+                            }
+                        }
+                    }
                 }
             }
         }
