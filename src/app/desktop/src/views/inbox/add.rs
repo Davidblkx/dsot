@@ -1,23 +1,34 @@
 use dioxus::prelude::*;
 use dioxus_free_icons::icons::ld_icons::LdPlus;
 use dsot_shared_ui::{
-    components::Modal,
-    widgets::{icon::icon, inbox::FormAddInboxItem},
+    components::{Dialog, DialogContentType},
+    widgets::icon::icon,
 };
 
-// TODO: redo this, not good enought design
+use super::add_form::AddInboxItemForm;
+
 #[component]
 pub fn AddNewInboxItem() -> Element {
     let btn_icon = icon(LdPlus);
-    let show_add_form = use_signal(|| false);
+    let mut show_add_form = use_signal(|| false);
+
+    let content = DialogContentType::Custom(rsx! {
+        AddInboxItemForm {
+
+        }
+    });
 
     rsx! {
-        Modal {
-            button_content: btn_icon,
+        Dialog {
+            title: "Add new item",
+            content: content,
             is_open: show_add_form,
-            FormAddInboxItem {
+            on_cancel: move |_| show_add_form.set(false),
+        }
 
-            }
+        button {
+            onclick: move |_| show_add_form.set(true),
+            {btn_icon}
         }
     }
 }
