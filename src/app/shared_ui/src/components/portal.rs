@@ -36,8 +36,9 @@ pub fn Portal(props: PortalProps) -> Element {
         let mut ctx = consume_context::<PortalCtx>();
 
         let sig = Signal::new_in_scope(props.children, ScopeId::ROOT);
-        
-        ctx.portals.write()
+
+        ctx.portals
+            .write()
             .entry(host_id_for_hook)
             .or_default()
             .insert(id, sig);
@@ -70,13 +71,17 @@ pub struct PortalHostProps {
 pub fn PortalHost(props: PortalHostProps) -> Element {
     let ctx = use_context::<PortalCtx>();
     let portals_guard = ctx.portals.read();
-    let child_elements: Vec<Signal<Element>> = if let Some(host_portals) = portals_guard.get(&props.id) {
-        let mut elements: Vec<(usize, Signal<Element>)> = host_portals.iter().map(|(id, elem)| (*id, elem.clone())).collect();
-        elements.sort_by_key(|(id, _)| *id);
-        elements.into_iter().map(|(_, elem)| elem).collect()
-    } else {
-        Vec::new()
-    };
+    let child_elements: Vec<Signal<Element>> =
+        if let Some(host_portals) = portals_guard.get(&props.id) {
+            let mut elements: Vec<(usize, Signal<Element>)> = host_portals
+                .iter()
+                .map(|(id, elem)| (*id, elem.clone()))
+                .collect();
+            elements.sort_by_key(|(id, _)| *id);
+            elements.into_iter().map(|(_, elem)| elem).collect()
+        } else {
+            Vec::new()
+        };
 
     rsx! {
         for element in child_elements {
@@ -97,7 +102,7 @@ mod tests {
     fn test_portals_with_multiple_hosts() {
         fn app() -> Element {
             use_portals();
-            
+
             let ctx = consume_context::<PortalCtx>();
             PORTALS.with(|p| *p.borrow_mut() = Some(ctx.portals));
 
@@ -123,7 +128,11 @@ mod tests {
         let mut dom = VirtualDom::new(app);
         dom.rebuild_in_place();
 
-        let portals = PORTALS.with(|p| p.borrow_mut().take().expect("PortalCtx portals signal not found"));
+        let portals = PORTALS.with(|p| {
+            p.borrow_mut()
+                .take()
+                .expect("PortalCtx portals signal not found")
+        });
         let portals_guard = portals.read();
 
         assert!(portals_guard.contains_key("host-a"));

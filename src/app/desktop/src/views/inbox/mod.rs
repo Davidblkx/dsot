@@ -5,6 +5,7 @@ use dsot_shared_ui::sink::*;
 
 use crate::widgets::views::{Header, View};
 
+mod add;
 mod filter;
 mod item;
 
@@ -27,6 +28,7 @@ pub fn InboxView() -> Element {
                     }
                 },
                 filter::InboxFilter {  }
+                add::AddNewInboxItem {  }
             }
 
 
