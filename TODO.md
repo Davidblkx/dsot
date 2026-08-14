@@ -1,5 +1,5 @@
 now:
-    - document lib
+    - finish: src/app/desktop/src/views/inbox/add_form/form_inputs.rs
 maybe later:
     - refactor inbox
     - Develop and document local files

@@ -1,5 +1,14 @@
 @layer inbox {
     [data-view="inbox"] {
+
+        header > .actions {
+            justify-content: space-around;
+
+            .filter {
+                flex: 1 0 auto;
+            }
+        }
+
         .item-list {
             display: flex;
             flex-direction: row;
@@ -202,6 +211,44 @@
                     }
                 }
             }
+        }
+    }
+
+    .view_inbox__add_inbox_value_form {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        & > .type_selector {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: row;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--color-primary);
+
+            & > .item_type {
+                cursor: pointer;
+                padding: 0 5px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+
+                &.selected {
+                    color: var(--color-primary);
+                }
+
+                & > .text {
+                    user-select: none;
+                }
+            }
+        }
+
+        & > .form_input {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
         }
     }
 }

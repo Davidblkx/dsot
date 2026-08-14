@@ -5,7 +5,6 @@ use dsot_shared_ui::sink::*;
 
 use crate::widgets::views::{Header, View};
 
-mod add;
 mod add_form;
 mod filter;
 mod item;
@@ -28,8 +27,11 @@ pub fn InboxView() -> Element {
                         icon: LdInbox
                     }
                 },
-                filter::InboxFilter {  }
-                add::AddNewInboxItem {  }
+                div {
+                    class: "actions",
+                    filter::InboxFilter {  }
+                    add_form::AddInboxValue {  }
+                }
             }
 
 
