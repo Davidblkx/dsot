@@ -1,9 +1,9 @@
-# Multi-Platform UI Client (`dsot_desktop_app`, `dsot_mobile_app`, & `dsot_shared_ui`)
+# Multi-Platform UI Client (`dsot_desktop`, `dsot_mobile`, & `dsot_shared_ui`)
 
 The UI layer is split into distinct projects located under `src/app/` to ensure clear separation of concerns, native bundling config per platform, and a shared presentation library:
 
-- **`dsot_desktop_app`**: Native desktop executable targeting desktop platforms (GTK/WebView via muda/tao).
-- **`dsot_mobile_app`**: Native mobile executable targeting mobile webviews.
+- **`dsot_desktop`**: Native desktop executable targeting desktop platforms (GTK/WebView via muda/tao).
+- **`dsot_mobile`**: Native mobile executable targeting mobile webviews.
 - **`dsot_shared_ui`**: Shared presentation library containing views, widgets, and shared assets (fonts, favicon, root stylesheet) used by both platforms.
 
 ---
@@ -12,7 +12,7 @@ The UI layer is split into distinct projects located under `src/app/` to ensure 
 
 ```
 src/app/
-├── desktop/           # dsot_desktop_app (Executable Crate)
+├── desktop/           # dsot_desktop (Executable Crate)
 │   ├── assets/        # Desktop-specific styling overrides & icons
 │   └── src/
 │       ├── main.rs    # Desktop application entrypoint & window configuration
@@ -20,7 +20,7 @@ src/app/
 │       ├── routes.rs  # Desktop-specific router mapping
 │       └── widgets/   # Desktop-only layout panels (frame, topbar, footer, left/right panels)
 │
-├── mobile/            # dsot_mobile_app (Executable Crate)
+├── mobile/            # dsot_mobile (Executable Crate)
 │   ├── assets/        # Mobile-specific icons
 │   └── src/
 │       ├── main.rs    # Mobile application entrypoint & initialization
@@ -44,25 +44,28 @@ Each platform runs its own entrypoint binary. The application state context is b
 
 ```mermaid
 graph TD
-    A1[dsot_desktop_app: main.rs] --> E1[Initialize DsotState with is_mobile = false]
-    A2[dsot_mobile_app: main.rs] --> E2[Initialize DsotState with is_mobile = true]
+    A1[dsot_desktop: main.rs] --> E1[Init DsotCoreInitOptions with desktop capabilities]
+    A2[dsot_mobile: main.rs] --> E2[Init DsotCoreInitOptions with mobile capabilities]
     
-    E1 --> G[Configure Window Title & Menu]
-    E2 --> H[Configure Mobile Webview Options]
+    E1 --> G[Initialize DsotCore]
+    E2 --> G
     
-    G --> I1[LaunchBuilder::desktop]
-    H --> I2[LaunchBuilder::mobile]
+    G --> H1[Configure Window & Menu]
+    G --> H2[Configure Mobile Webview Options]
     
-    I1 --> J[Inject DsotState into Context]
+    H1 --> I1[LaunchBuilder::desktop]
+    H2 --> I2[LaunchBuilder::mobile]
+    
+    I1 --> J[Inject DsotCore into Context]
     I2 --> J
     
     J --> K[Mount root stylesheet and Router]
 ```
 
 ### Context Injection
-Upon launching, the client application injects the shared `DsotState` (from [dsot_lib](file:///projects/dsot/docs/architecture/L3-components/lib.md)) using Dioxus context injection (`LaunchBuilder::with_context`). This allows any down-tree widget or view in `dsot_shared_ui` to retrieve the database pool or configuration using:
+Upon launching, the client application injects the shared core context (`DsotCore` from `dsot_lib`) using Dioxus context injection (`LaunchBuilder::with_context`). This allows any down-tree widget or view in `dsot_shared_ui` to retrieve the database pool or configuration using:
 ```rust
-let state = use_context::<DsotState>();
+let core = use_context::<DsotCore>();
 ```
 
 ---

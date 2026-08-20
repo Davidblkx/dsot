@@ -1,13 +1,14 @@
 graph TD
     subgraph Cargo Workspace [DSOT Crate Containers]
-        DesktopApp[dsot_app]
+        DesktopApp[dsot_desktop]
+        MobileApp[dsot_mobile]
+        SharedUI[dsot_shared_ui]
         Lib[dsot_lib]
         Model[dsot_model]
         DbSync[dsot_db_sync]
         Derive[dsot_derive]
         MB[dsot_music_brainz]
         Config[dsot_config]
-        Network[dsot_network]
         Serde[dsot_serde]
     end
 
@@ -21,11 +22,15 @@ graph TD
         P2PNodes[Other DSOT Nodes via Iroh]
     end
 
-    DesktopApp -->|Uses state & configurations| Lib
+    DesktopApp -->|Uses| SharedUI
+    MobileApp -->|Uses| SharedUI
+    SharedUI -->|Uses state & configurations| Lib
+    
     Lib -->|Invokes CRUD & Search| DbSync
-    Lib -->|Manages P2P networking| Network
     Lib -->|Uses models| Model
     Lib -->|Loads configuration| Config
+    Lib -->|P2P framing, DB sync, & protocols| P2PNodes
+    Lib -->|Uses binary serialization| Serde
     
     DbSync -->|Serializes/Deserializes| Model
     DbSync -->|Uses binary serialization| Serde
@@ -34,9 +39,5 @@ graph TD
     DbSync -->|Executes SQLite queries & triggers FTS5| SQLite
     DbSync -->|Logs transactional SyncOperations| Redb
     
-    Network -->|Coordinates database sync via SyncNode| DbSync
-    Network -->|Uses binary serialization| Serde
-    Network -->|P2P framing & protocol streams| P2PNodes
-    
-    DesktopApp -->|Fetches metadata| MB
+    SharedUI -->|Fetches metadata| MB
     MB -->|JSON Web Requests| MusicBrainzAPI

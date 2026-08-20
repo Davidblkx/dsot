@@ -1,58 +1,60 @@
 # Core Orchestration Component (`dsot_lib`)
 
-The `dsot_lib` crate serves as the central orchestration and state management engine for the DSOT application. It aggregates configuration parsing, multi-user workspace management, logger routing, and database handles into a unified, shared state container (`DsotState`).
+The `dsot_lib` crate serves as the central orchestration, state management, and network engine for the DSOT application. It aggregates configuration parsing, multi-user workspace management, logger routing, database repository access, and peer-to-peer networking into a unified core container (`DsotCore`).
 
 ---
 
 ## Responsibility
 
-- **Application State Consolidation:** Enforces a clean domain interface by packaging configuration, database handles, and user sessions.
+- **Application Core Consolidation:** Enforces a clean domain interface by packaging configuration, repository interfaces, capabilities, user sessions, and network handlers into `DsotCore`.
+- **Repository Interface:** Abstracts local and remote database access through the `DsotRepository` trait layer, allowing uniform queries whether the data source is a local SQLite/redb database or a remote peer.
+- **P2P Networking (Iroh):** Initializes and manages an Iroh networking endpoint. Maintains the address book, device discovery, connection framing (`NetworkChannel`), and protocol transport (including DB synchronization) within the `network` module.
 - **Global Logger Routing:** Coordinates multi-platform logger routing (sending logs to rolling files, standard error, or temporary system directories).
-- **User Profile Management:** Manages individual user directories to maintain absolute data partitioning (1 database per user).
-- **Initialization Lifecycle:** Orchestrates the sequential startup chain from raw launch arguments to a fully hydrated, migrate-ready application context.
+- **User Profile Management:** Manages individual user directories and credentials (`DsotUser`), maintaining absolute data partitioning (1 database per user).
+- **Initialization Lifecycle:** Orchestrates the sequential startup chain from raw launch arguments to a fully hydrated `DsotCore` via `DsotCoreInitOptions`.
+- **UI State Management:** Provides reactive state structures (`DsotState` containing `RemoteDevices` and `InboxState`) for binding into UI frameworks like Dioxus.
 
 ---
 
 ## Core Structures & Interfaces
 
-### 1. `DsotState`
-The primary application context shared across threads and views.
+### 1. `DsotCore`
+The primary application context holding all services.
 
 ```rust
-#[derive(Clone)]
-pub struct DsotState {
-    /// Resolved layered configuration instance.
-    pub config: dsot_config::DsotConfig<configs::ConfigValue>,
-    /// Manager controlling local user folders and directories.
-    pub user_manager: user_manager::UserManager,
-    /// Active database manager connected to the target user's database.
-    pub db: dsot_db_sync::DatabaseManager,
+#[derive(Debug, Clone)]
+pub struct DsotCore {
+    /// Capabilities of the DSOT system.
+    pub cap: Capability,
+    /// Configuration for the DSOT system.
+    pub config: Arc<DsotAppConfig>,
+    /// Repository for the DSOT system.
+    pub repo: DsotRepository,
+    /// UI State for the DSOT system (devices, inbox).
+    pub state: DsotState,
+    /// Network for the DSOT system.
+    pub net: DsotNetwork,
+    /// Job manager for the DSOT system.
+    pub jobs: JobManager,
+    /// Current application user, can be empty
+    pub user: DsotUser,
 }
 ```
 
-### 2. `UserManager`
-Handles discovery and lifecycle management of isolated user profiles.
+### 2. `DsotRepository`
+Provides an abstraction over the underlying storage, routing requests to `LocalRepo`, `RemoteRepo`, or `NoopRepo` depending on capabilities and connections.
 
-```rust
-#[derive(Clone)]
-pub struct UserManager {
-    /// Absolute path to the root 'users' directory.
-    dir: PathBuf,
-}
-```
+### 3. `DsotState`
+A reactive state container designed for UI consumption, wrapping repository data such as `RemoteDevices` and `InboxState`.
 
-- `UserManager::open(root)`: Creates the user folder structure on disk if it does not already exist.
-- `UserManager::list_users()`: Scans the subdirectories under `users/` and returns resolved user profile names.
-- `UserManager::open_user_db(username)`: Returns an uninitialized `DatabaseManager` targeting `<root>/users/<username>/`.
-
-### 3. `DsotStateInitOptions`
+### 4. `DsotCoreInitOptions`
 A fluent builder configuration passed to the initialization chain.
 
 ```rust
-pub struct DsotStateInitOptions {
+pub struct DsotCoreInitOptions {
     pub debug: bool,
     pub config_file: Option<String>,
-    pub is_mobile: bool,
+    pub cap: Capability,
 }
 ```
 
@@ -60,39 +62,13 @@ pub struct DsotStateInitOptions {
 
 ## Startup Initialization Flow
 
-When the user interface calls `DsotState::init(options)`, the library coordinates the following startup steps:
+When the client interface calls `DsotCoreInitOptions::initialize()`, the library coordinates the following startup steps:
 
-```mermaid
-graph TD
-    A[Start state init] --> B{Debug mode enabled?}
-    B -- Yes --> C[Initialize Trace Logger to temp directory]
-    B -- No --> D[Skip early logger]
-    
-    C --> E[Load Config via dsot_config]
-    D --> E
-    
-    E --> F[Open / Initialize UserManager]
-    F --> G{Debug mode enabled?}
-    
-    G -- No --> H[Initialize final Logger from Config log_file / log_level]
-    G -- Yes --> I[Skip final logger redirection]
-    
-    H --> J[Open active user database via DatabaseManager]
-    I --> J
-    
-    J --> K[Return hydated DsotState]
-```
-
-1. **Early Logging Capture:** If debug is active, it initializes a trace logger (`logger::init_log`) immediately to capture startup warnings.
-2. **Layered Config Retrieval:** Sources configurations using [dsot_config](file:///projects/dsot/docs/architecture/L3-components/config.md). On mobile, it uses presets (`load_mobile_config`); on desktops, it searches standard paths (`load_config`).
-3. **Workspace Preparation:** Spawns a `UserManager` pointing to the resolved `data_dir` configuration root.
-4. **Final Logger Routing:** If not in debug mode, routes logger output to the paths/levels specified in the user's config file.
-5. **Database Handle Binding:** Selects the target user profile and returns the active database connection handle.
-
----
-
-## Technical Details
-
-- **Logging backend:** Implemented via `fern` with structured timestamps, levels, and terminal/file output configurations.
-- **System paths:** Uses the `sysdirs` crate to resolve environment-safe temporary directories across different operating systems.
-- **Dependencies:** Integrates `dsot_config` for configurations, `dsot_db_sync` for storage engines, and `dsot_model` for domain representation.
+1. **Early Logging Capture:** If debug is active, it initializes a trace logger immediately to capture startup warnings.
+2. **Layered Config Retrieval:** Sources configurations using `dsot_config` and system capabilities.
+3. **Final Logger Routing:** If not in debug mode, routes logger output to the paths/levels specified in the configuration.
+4. **User Preparation:** Discovers and logs in the local user profile (`DsotUser`), targeting their isolated directory.
+5. **Repository Binding:** Initializes `DsotRepository` against the user's data directory.
+6. **State Hydration:** Initializes UI `DsotState` using the repository.
+7. **Network Bootstrapping:** Starts the `DsotNetwork` Iroh node, mounting protocols (like database sync) and initiating discovery.
+8. **Return Core:** Yields the fully hydrated `DsotCore`.

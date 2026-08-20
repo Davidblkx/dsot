@@ -1,18 +1,20 @@
 graph TD
-    A[Start state init] --> B{Debug mode enabled?}
+    A[Start DsotCore init] --> B{Debug mode enabled?}
     B -- Yes --> C[Initialize Trace Logger to temp directory]
     B -- No --> D[Skip early logger]
     
     C --> E[Load Config via dsot_config]
     D --> E
     
-    E --> F[Open / Initialize UserManager]
-    F --> G{Debug mode enabled?}
+    E --> F{Debug mode enabled?}
     
-    G -- No --> H[Initialize final Logger from Config log_file / log_level]
-    G -- Yes --> I[Skip final logger redirection]
+    F -- No --> G[Initialize final Logger from Config]
+    F -- Yes --> H[Skip final logger redirection]
     
-    H --> J[Open active user database via DatabaseManager]
-    I --> J
+    G --> I[Discover/Login local User Profile]
+    H --> I
     
-    J --> K[Return hydated DsotState]
+    I --> J[Initialize DsotRepository]
+    J --> K[Hydrate UI DsotState]
+    K --> L[Start DsotNetwork]
+    L --> M[Yield hydrated DsotCore]

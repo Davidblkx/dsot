@@ -178,7 +178,7 @@ classDiagram
         +start_sync(conn, db_id) NetworkDBSyncNode
     }
     SyncNode <|.. DatabaseSyncNode : in dsot_db_sync
-    SyncNode <|.. NetworkDBSyncNode : in dsot_network
+    SyncNode <|.. NetworkDBSyncNode : in dsot_lib::network
 ```
 
 *   **`SyncNode`**: The async interface defining database ID retrieval and message processing.
@@ -187,7 +187,7 @@ classDiagram
     ```rust
     pub async fn sync<NodeA: SyncNode, NodeB: SyncNode>(a: &mut NodeA, b: &mut NodeB) -> Result<()>
     ```
-*   **`NetworkDBSyncNode` & `DBSyncProtocol`**: Reside in `dsot_network`. They implement `SyncNode` over an Iroh network connection (`NetworkChannel`) and register as an Iroh `ProtocolHandler` under ALPN `b"/dsot/db_sync/1"`. When a connection is accepted or initiated, `dsot_network` instantiates both `DatabaseSyncNode` (local) and `NetworkDBSyncNode` (remote) and runs `SyncNodeHandler::sync(&mut local, &mut remote)`.
+*   **`NetworkDBSyncNode` & `DBSyncProtocol`**: Reside in `dsot_lib::network`. They implement `SyncNode` over an Iroh network connection (`NetworkChannel`) and register as an Iroh `ProtocolHandler` under ALPN `b"/dsot/db_sync/1"`. When a connection is accepted or initiated, `dsot_lib::network` instantiates both `DatabaseSyncNode` (local) and `NetworkDBSyncNode` (remote) and runs `SyncNodeHandler::sync(&mut local, &mut remote)`.
 
 #### Reconciliation Protocol Flow
 
@@ -207,7 +207,7 @@ When two nodes reconcile via `SyncNodeHandler::sync`, the following loop execute
 
 The database synchronization logic, state comparison, key exchange, payload exchange, and transaction replay primitives are fully implemented and verified in `dsot_db_sync`.
 
-The external **network communication layer** — including Iroh connection management, framing (`NetworkChannel`), and protocol handling (`DBSyncProtocol`) — is cleanly decoupled and implemented in `dsot_network`.
+The external **network communication layer** — including Iroh connection management, framing (`NetworkChannel`), and protocol handling (`DBSyncProtocol`) — is cleanly decoupled and implemented in `dsot_lib::network`.
 
 ### `RepositoryRegistry` (`registry.rs`)
 

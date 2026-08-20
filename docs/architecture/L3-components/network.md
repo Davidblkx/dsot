@@ -1,6 +1,6 @@
-# P2P Networking & Protocol Transport Component (`dsot_network`)
+# P2P Networking & Protocol Transport Component (`dsot_lib::network`)
 
-The `dsot_network` crate implements the peer-to-peer (P2P) networking layer for the DSOT application using the [Iroh](https://iroh.computer/) protocol. It manages node discovery, address book persistence, connection framing, and network transport protocols—most notably providing the transport bridge for database synchronization without coupling network communication directly into database logic.
+The `dsot_lib::network` crate implements the peer-to-peer (P2P) networking layer for the DSOT application using the [Iroh](https://iroh.computer/) protocol. It manages node discovery, address book persistence, connection framing, and network transport protocols—most notably providing the transport bridge for database synchronization without coupling network communication directly into database logic.
 
 ---
 
@@ -16,10 +16,10 @@ The `dsot_network` crate implements the peer-to-peer (P2P) networking layer for 
 ## Crate Layout
 
 ```
-src/modules/network/src/
+src/lib/src/network/
 ├── address_book.rs    # RemoteMachine repository and persistence
 ├── config.rs          # NetworkConfig options (port, use_db_sync, etc.)
-├── error.rs           # DsotNetworkError enum and result alias
+├── error.rs           # Error handling
 ├── init.rs            # Network initialization options & protocol builder
 ├── lib.rs             # Crate exports
 ├── machine_info.rs    # Local machine metadata and platform identification
@@ -77,12 +77,12 @@ classDiagram
 
 ### 2. Decoupled Database Sync Transport (`protocols/db_sync/`)
 
-A core architectural principle of DSOT is separating domain logic from network communication. The `dsot_db_sync` crate defines database persistence and state reconciliation logic via the abstract `SyncNode` trait, while `dsot_network` provides the concrete networking implementation:
+A core architectural principle of DSOT is separating domain logic from network communication. The `dsot_db_sync` crate defines database persistence and state reconciliation logic via the abstract `SyncNode` trait, while `dsot_lib::network` provides the concrete networking implementation:
 
 ```mermaid
 sequenceDiagram
     participant Peer as Remote Peer
-    participant NetNode as NetworkDBSyncNode (dsot_network)
+    participant NetNode as NetworkDBSyncNode (dsot_lib::network)
     participant Handler as SyncNodeHandler (dsot_db_sync)
     participant DbNode as DatabaseSyncNode (dsot_db_sync)
 
@@ -115,4 +115,4 @@ sequenceDiagram
 
 - **Transport Engine:** Built on `iroh` QUIC endpoints with cryptographic peer identification (`EndpointId`).
 - **Asynchronous Runtime:** Powered by `tokio` and `futures-util` for concurrent stream multiplexing and non-blocking I/O.
-- **Protocol Registration:** Uses an extension trait `RegisterSyncProtocolV1` on `iroh::protocol::RouterBuilder` to conditionally attach handlers based on application configuration (`NetworkInitOptions`).
+- **Protocol Registration:** Uses an extension trait `RegisterSyncProtocolV1` on `iroh::protocol::RouterBuilder` to conditionally attach handlers based on application configuration (`DsotCoreInitOptions`).

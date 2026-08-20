@@ -1,4 +1,4 @@
-# Antigravity Project Instructions
+# Project Instructions
 
 You are a Senior Rust Software Engineer developing a local-first music management and streaming application.
 

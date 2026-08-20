@@ -1,16 +1,17 @@
 graph TD
-    A[main.rs] --> B{Cargo Feature Flag?}
-    B -->|feature = 'desktop'| C[init::init_app -> init_desktop]
-    B -->|feature = 'mobile'| D[init::init_app -> init_mobile]
+    A1[dsot_desktop: main.rs] --> E1[Init DsotCoreInitOptions with desktop capabilities]
+    A2[dsot_mobile: main.rs] --> E2[Init DsotCoreInitOptions with mobile capabilities]
     
-    C --> E[Initialize DsotState with is_mobile = false]
-    D --> F[Initialize DsotState with is_mobile = true]
+    E1 --> G[Initialize DsotCore]
+    E2 --> G
     
-    E --> G[Configure Window Title & Menu]
-    F --> H[Configure Mobile Webview Options]
+    G --> H1[Configure Window & Menu]
+    G --> H2[Configure Mobile Webview Options]
     
-    G --> I[Launch Dioxus App Context]
-    H --> I
+    H1 --> I1[LaunchBuilder::desktop]
+    H2 --> I2[LaunchBuilder::mobile]
     
-    I --> J[Inject DsotState into Context]
-    J --> K[Mount base stylesheet and Router]
+    I1 --> J[Inject DsotCore into Context]
+    I2 --> J
+    
+    J --> K[Mount root stylesheet and Router]

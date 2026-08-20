@@ -54,4 +54,4 @@ macro_rules! serde_binary {
 ## Usage Across Workspace
 
 - **`dsot_db_sync`**: Uses `BinarySerde` to serialize and deserialize entity rows (`SyncOperation::Create`, journal entries, and diff payloads) into compact byte vectors stored in SQLite and redb.
-- **`dsot_network`**: Uses `BinarySerde` within `NetworkReader` and `NetworkWriter` to encode and decode framed QUIC network stream messages (`DBSyncMessage`, machine info payloads).
+- **`dsot_lib::network`**: Uses `BinarySerde` within `NetworkReader` and `NetworkWriter` to encode and decode framed QUIC network stream messages (`DBSyncMessage`, machine info payloads).
