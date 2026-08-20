@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use super::model::{AddInboxValueState, InboxItemType};
+use super::model::{AddInboxValueState, AddInboxValueStateStoreExt, InboxItemType};
 
 #[component]
 pub fn TypeSelector(state: Store<AddInboxValueState>) -> Element {
@@ -18,7 +18,7 @@ pub fn TypeSelector(state: Store<AddInboxValueState>) -> Element {
 
 #[component]
 pub fn TypeEntry(item: InboxItemType, mut state: Store<AddInboxValueState>) -> Element {
-    let is_selected = item.get_name() == state.read().form_type.get_name();
+    let is_selected = item.get_name() == state.form_type()().get_name();
     let class = if is_selected {
         "item_type selected"
     } else {
@@ -33,7 +33,7 @@ pub fn TypeEntry(item: InboxItemType, mut state: Store<AddInboxValueState>) -> E
                 if is_selected {
                     return;
                 }
-                state.write().form_type = item.clone();
+                state.form_type().set(item.clone());
             },
             {icon},
             span {

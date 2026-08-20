@@ -1,10 +1,8 @@
 mod base_form;
 mod form_inputs;
+mod inputs;
 mod model;
 mod type_selector;
-
-#[allow(unused)]
-mod form_ref;
 
 use dioxus::prelude::*;
 use dioxus_free_icons::icons::ld_icons::LdPlus;

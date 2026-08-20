@@ -17,6 +17,7 @@ dsot_shared_ui = { path = "../shared_ui" }
 iroh = { workspace = true }
 log = { workspace = true }
 paste = { workspace = true }
+rfd = "0.17.2"
 serde = { workspace = true }
 tokio = { workspace = true }
 
