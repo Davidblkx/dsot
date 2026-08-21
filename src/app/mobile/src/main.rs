@@ -1,12 +1,17 @@
 mod layout;
 mod routes;
+mod views;
+mod widgets;
 
 use dioxus::{mobile::Config, prelude::*};
 
 use dsot_lib::Capability;
 use dsot_shared_ui::assets::DsotDefaultLinks;
 
-const UI_STYLES: &[Asset] = &[asset!("/assets/styles/layout.css")];
+const UI_STYLES: &[Asset] = &[
+    asset!("/assets/styles/layout.css"),
+    asset!("/assets/styles/view/view.css"),
+];
 
 #[tokio::main]
 async fn main() {
@@ -27,6 +32,8 @@ async fn main() {
 
 #[component]
 fn App() -> Element {
+    crate::views::inbox::add_form::use_provide_add_inbox_state();
+
     rsx! {
         DsotDefaultLinks { styles: UI_STYLES }
         Router::<routes::Routes> {}

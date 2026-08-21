@@ -1930,6 +1930,7 @@ dependencies = [
  "dsot_lib",
  "dsot_shared_ui",
  "log",
+ "rfd",
  "serde",
  "tokio",
 ]
