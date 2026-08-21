@@ -74,14 +74,16 @@
         flex: 1 1 auto;
 
         /* App default layout */
-        display: block;
+        display: grid;
 
         transition: grid-template-columns 0.3s ease-in-out;
 
-        grid-template:
-            "topbar" var(--top-bar-height)
-            "main" minmax(0, 1fr)
-            "footer" var(--footer-height);
+        grid-template-areas:
+            "topbar"
+            "main"
+            "footer";
+        grid-template-rows: var(--top-bar-height) minmax(0, 1fr) var(--footer-height);
+        grid-template-columns: 1fr;
 
         & > * {
             grid-area: main;

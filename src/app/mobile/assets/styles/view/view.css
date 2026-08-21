@@ -30,15 +30,19 @@
             & > h1 {
                 margin: 0;
                 padding: 0 10px;
-                font-size: 2.3rem;
+                font-size: 1.5rem;
+                flex: 1 1 auto;
             }
 
             & > .actions {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                justify-content: flex-start;
-                flex: 0 0 auto;
+                justify-content: flex-end;
+                flex: 0 1 auto;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding-right: 10px;
             }
         }
     }
