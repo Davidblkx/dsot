@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use dioxus_free_icons::{Icon, icons::ld_icons::LdInbox};
+use dioxus_free_icons::{
+    Icon,
+    icons::ld_icons::{LdInbox, LdPlus},
+};
 use dsot_lib::DsotCore;
 use dsot_shared_ui::sink::*;
 
@@ -30,7 +33,11 @@ pub fn InboxView() -> Element {
                 div {
                     class: "actions",
                     filter::InboxFilter {  }
-                    add_form::AddInboxValue {  }
+                    Link {
+                        to: crate::routes::Routes::AddInboxView,
+                        class: "action-btn",
+                        Icon { icon: LdPlus }
+                    }
                 }
             }
 
