@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 use dioxus_free_icons::icons::ld_icons;
+
+use dsot_lib::dsot_model::InboxValue;
 use dsot_shared_ui::widgets::icon::*;
 
 #[derive(Debug, Clone, PartialEq, Default, Store)]
@@ -7,7 +9,7 @@ pub struct AddInboxValueState {
     pub form_type: InboxItemType,
     pub text: String,
     pub album_artist: String,
-    pub album_year: Option<i64>,
+    pub album_year: Option<u32>,
 }
 
 impl AddInboxValueState {
@@ -52,5 +54,21 @@ impl InboxItemType {
 
     pub fn get_icon_name(&self) -> (&'static str, Element) {
         (self.get_name(), self.get_icon())
+    }
+}
+
+impl Into<InboxValue> for AddInboxValueState {
+    fn into(self) -> InboxValue {
+        match self.form_type {
+            InboxItemType::Album => InboxValue::Album {
+                album: self.text,
+                artist: self.album_artist,
+                year: self.album_year,
+            },
+            InboxItemType::Artist => InboxValue::Artist(self.text),
+            InboxItemType::File => InboxValue::File(self.text),
+            InboxItemType::Link => InboxValue::Link(self.text),
+            InboxItemType::Other => InboxValue::Other(self.text),
+        }
     }
 }

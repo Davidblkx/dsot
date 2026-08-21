@@ -91,7 +91,7 @@ pub fn AlbumInput(mut state: Store<AddInboxValueState>) -> Element {
                 placeholder: "Enter year...",
                 value: "{year_val}",
                 onchange: move |evt| {
-                    if let Ok(year) = evt.value().parse::<i64>() {
+                    if let Ok(year) = evt.value().parse::<u32>() {
                         state.album_year().set(Some(year));
                     } else {
                         state.album_year().set(None);
