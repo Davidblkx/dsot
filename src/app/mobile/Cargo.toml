@@ -14,7 +14,6 @@ dioxus = { workspace = true }
 dioxus-free-icons = { workspace = true }
 dsot_lib = { path = "../../lib" }
 dsot_shared_ui = { path = "../shared_ui" }
-rfd = "0.17.2"
 log = { workspace = true }
 serde = { workspace = true }
 tokio = { workspace = true }

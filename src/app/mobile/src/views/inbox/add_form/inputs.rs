@@ -10,30 +10,11 @@ pub fn FileInput(mut state: Store<AddInboxValueState>) -> Element {
             label { "File or Directory" }
             div {
                 class: "file-input-wrapper",
-                div {
-                    class: "file-input-buttons",
-                    button {
-                        class: "btn btn-secondary",
-                        onclick: move |_| {
-                            if let Some(path) = rfd::FileDialog::new().pick_file() {
-                                state.text().set(path.display().to_string());
-                            }
-                        },
-                        "Select File"
+                input {
+                    type: "file",
+                    onchange: move |evt| {
+                        state.text().set(evt.value());
                     }
-                    button {
-                        class: "btn btn-secondary",
-                        onclick: move |_| {
-                            if let Some(path) = rfd::FileDialog::new().pick_folder() {
-                                state.text().set(path.display().to_string());
-                            }
-                        },
-                        "Select Directory"
-                    }
-                }
-                span {
-                    class: "selected_files",
-                    "{state.text()}"
                 }
             }
         }
