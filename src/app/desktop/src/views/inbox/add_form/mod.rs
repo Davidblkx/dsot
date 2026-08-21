@@ -32,13 +32,18 @@ fn use_add_item() -> impl Fn(AddInboxValueState) -> bool {
     }
 }
 
+pub fn use_provide_add_inbox_state() {
+    let state = use_store(|| AddInboxValueState::default());
+    use_context_provider(|| state);
+}
+
 #[component]
 pub fn AddInboxValue() -> Element {
     let add_item = use_add_item();
     let btn_icon = icon(LdPlus);
     let mut show_add_form = use_signal(|| false);
 
-    let mut state = use_store(|| AddInboxValueState::default());
+    let mut state = use_context::<Store<AddInboxValueState>>();
 
     let content = DialogContentType::Custom(rsx! {
         base_form::InboxValueForm {

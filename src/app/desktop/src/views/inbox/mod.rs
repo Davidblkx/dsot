@@ -5,7 +5,7 @@ use dsot_shared_ui::sink::*;
 
 use crate::widgets::views::{Header, View};
 
-mod add_form;
+pub mod add_form;
 mod filter;
 mod item;
 
