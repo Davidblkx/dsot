@@ -3,7 +3,7 @@
         --desktop-left-panel-width: 200px;
         --desktop-right-panel-width: 200px;
         --resize-border-width: 5px;
-        --top-bar-height: 30px;
+        --top-bar-height: 60px;
         --footer-height: 30px;
     }
 
@@ -85,6 +85,26 @@
 
         & > * {
             grid-area: main;
+        }
+        
+        #navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            background-color: var(--color-bg-surface-elevated);
+            border-bottom: 1px solid var(--color-border);
+            
+            a {
+                padding: 10px 20px;
+                font-size: 1.2rem;
+                text-decoration: none;
+                color: var(--color-text-primary);
+                
+                &.active {
+                    color: var(--color-primary);
+                    font-weight: bold;
+                }
+            }
         }
     }
 }

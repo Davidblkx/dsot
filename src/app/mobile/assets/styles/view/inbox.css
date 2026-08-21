@@ -11,17 +11,17 @@
 
         .item-list {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             gap: 8px;
             padding: 8px 0;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
 
             .item {
                 display: flex;
                 flex-direction: column;
                 gap: var(--space-sm);
                 padding: var(--space-sm) var(--space-md);
-                min-width: min(220px, 100%);
+                width: 100%;
                 background-color: var(--color-bg-surface);
                 border: 1px solid var(--color-border-muted);
                 border-radius: var(--radius-md);
