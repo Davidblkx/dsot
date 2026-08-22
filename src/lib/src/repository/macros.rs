@@ -62,6 +62,12 @@ macro_rules! impl_repository_shell {
             ) -> $crate::error::Result<bool> {
                 self.inbox.update_inbox_status(id, status).await
             }
+            async fn get_inbox_item(
+                &self,
+                id: uuid::Uuid,
+            ) -> $crate::error::Result<$crate::state::inbox::InboxItemValue> {
+                self.inbox.get_inbox_item(id).await
+            }
         }
 
         impl $crate::repository::Repository for $target {}

@@ -13,4 +13,5 @@ pub trait InboxRepository {
     async fn add_inbox_item(&self, value: InboxValue) -> Result<()>;
     async fn remove_inbox_item(&self, id: Uuid) -> Result<bool>;
     async fn update_inbox_status(&self, id: Uuid, status: InboxStatus) -> Result<bool>;
+    async fn get_inbox_item(&self, id: Uuid) -> Result<InboxItemValue>;
 }

@@ -91,6 +91,9 @@ impl InboxRepository for DsotRepository {
             .update_inbox_status(id, status)
             .await
     }
+    async fn get_inbox_item(&self, id: uuid::Uuid) -> Result<InboxItemValue> {
+        self.repo.read().await.get_inbox_item(id).await
+    }
 }
 
 impl super::Repository for DsotRepository {}

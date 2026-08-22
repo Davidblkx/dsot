@@ -42,6 +42,7 @@ impl InboxItemType {
 
 #[derive(Debug, Clone, PartialEq, Default, Store)]
 pub struct InboxFormState {
+    pub item: InboxFormItem,
     pub form_type: InboxItemType,
     pub text: String,
     pub album_artist: String,
@@ -49,6 +50,16 @@ pub struct InboxFormState {
 }
 
 impl InboxFormState {
+    pub fn new(item: InboxFormItem) -> Self {
+        Self {
+            item,
+            form_type: InboxItemType::default(),
+            text: String::new(),
+            album_artist: String::new(),
+            album_year: None,
+        }
+    }
+
     pub fn into_inbox_item(&self) -> InboxValue {
         match self.form_type {
             InboxItemType::Album => InboxValue::Album {
@@ -62,10 +73,42 @@ impl InboxFormState {
             InboxItemType::Other => InboxValue::Other(self.text.clone()),
         }
     }
+
+    pub fn from_inbox_item(&mut self, item: InboxValue) {
+        match item {
+            InboxValue::Album {
+                album,
+                artist,
+                year,
+            } => {
+                self.form_type = InboxItemType::Album;
+                self.text = album;
+                self.album_artist = artist;
+                self.album_year = year;
+            }
+            InboxValue::Artist(artist) => {
+                self.form_type = InboxItemType::Artist;
+                self.text = artist;
+            }
+            InboxValue::File(file) => {
+                self.form_type = InboxItemType::File;
+                self.text = file;
+            }
+            InboxValue::Link(link) => {
+                self.form_type = InboxItemType::Link;
+                self.text = link;
+            }
+            InboxValue::Other(other) => {
+                self.form_type = InboxItemType::Other;
+                self.text = other;
+            }
+        }
+    }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub enum InboxFormItem {
+    #[default]
     New,
     Edit(uuid::Uuid),
 }

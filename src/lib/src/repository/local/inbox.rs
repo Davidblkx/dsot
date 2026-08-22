@@ -4,7 +4,7 @@ use dsot_model::{InboxItem, InboxItemSql, InboxItemSqlRepository, InboxStatus, I
 use uuid::Uuid;
 
 use crate::{
-    error::Result,
+    error::{DsotError, Result},
     repository::InboxRepository,
     sink::TableFilter,
     state::inbox::{InboxFilter, InboxItemValue},
@@ -36,11 +36,8 @@ impl InboxRepository for InboxLocalRepository {
             .list::<InboxItemSqlRepository>(filter.size, filter.offset)
             .await?;
 
-        for i in items.iter() {
-            let id = i.id;
-            let value = i.value()?;
-            let status = i.status.clone();
-            let item = InboxItemValue { id, value, status };
+        for i in items.into_iter() {
+            let item = i.try_into()?;
 
             if filter.filter.include(&item) {
                 res.push(item);
@@ -78,5 +75,21 @@ impl InboxRepository for InboxLocalRepository {
         db.update::<InboxItemSqlRepository>(&item).await?;
 
         Ok(true)
+    }
+    async fn get_inbox_item(&self, id: Uuid) -> Result<InboxItemValue> {
+        let db = self.user.open_db().await?;
+        db.get::<InboxItemSqlRepository>(id).await?.try_into()
+    }
+}
+
+impl TryInto<InboxItemValue> for InboxItemSql {
+    type Error = DsotError;
+
+    fn try_into(self) -> std::prelude::v1::Result<InboxItemValue, Self::Error> {
+        Ok(InboxItemValue {
+            id: self.id,
+            status: self.status,
+            value: self.value()?,
+        })
     }
 }

@@ -1,9 +1,10 @@
 use async_trait::async_trait;
+use dsot_db_sync::DBSyncError;
 use dsot_model::{InboxStatus, InboxValue};
 use uuid::Uuid;
 
 use crate::{
-    error::Result,
+    error::{DsotError, Result},
     repository::InboxRepository,
     state::inbox::{InboxFilter, InboxItemValue},
 };
@@ -24,5 +25,8 @@ impl InboxRepository for NoopInboxRepository {
     }
     async fn update_inbox_status(&self, _id: Uuid, _status: InboxStatus) -> Result<bool> {
         Ok(true)
+    }
+    async fn get_inbox_item(&self, _id: Uuid) -> Result<InboxItemValue> {
+        Err(DsotError::DatabaseSyncError(DBSyncError::NoOpenConnection))
     }
 }
