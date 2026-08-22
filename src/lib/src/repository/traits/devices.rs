@@ -1,10 +1,25 @@
-use async_trait::async_trait;
-
 use crate::{error::Result, state::devices::RemoteDevice};
 
-#[async_trait]
-pub trait DeviceRepository: Send + Sync + std::fmt::Debug {
-    async fn list_devices(&self) -> Result<Vec<RemoteDevice>>;
-    async fn add_device(&self, device: RemoteDevice) -> Result<bool>;
-    async fn remove_device(&self, id: iroh::EndpointId) -> Result<()>;
+declare_repository_unit!(Device {
+    async fn list_devices(&self) -> Result<Vec<RemoteDevice>>; Ok(vec![]);
+    async fn add_device(&self, device: RemoteDevice) -> Result<bool>; Ok(false);
+    async fn remove_device(&self, id: iroh::EndpointId) -> Result<()>; Ok(());
+});
+
+pub struct MyRepository {
+    device: DefaultDeviceRepo,
+}
+
+pub trait MyRepositoryTrait {
+    type DeviceImpl: DeviceRepository;
+
+    fn device(&self) -> &Self::DeviceImpl;
+}
+
+impl MyRepositoryTrait for MyRepository {
+    type DeviceImpl = DefaultDeviceRepo;
+
+    fn device(&self) -> &Self::DeviceImpl {
+        &self.device
+    }
 }
