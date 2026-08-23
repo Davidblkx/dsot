@@ -1,0 +1,5 @@
+@layer inbox_form {
+    form[data-component="inbox_form"] {
+        display: grid;
+    }
+}
