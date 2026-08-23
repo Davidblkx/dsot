@@ -6,17 +6,17 @@ mod devices;
 mod inbox;
 mod user;
 
-impl_repository_shell!(LocalRepo {
-    users: user::LocalUserRepo,
-    devices: devices::LocalDeviceRepo,
+impl_repository!(LocalRepo {
+    device: devices::LocalDeviceRepo,
     inbox: inbox::InboxLocalRepository,
+    user: user::LocalUserRepo,
 });
 
 impl LocalRepo {
     pub fn init(root: PathBuf, user: DsotUser) -> Self {
         Self {
-            users: user::LocalUserRepo::new(root.clone()),
-            devices: devices::LocalDeviceRepo::new(root),
+            user: user::LocalUserRepo::new(root.clone()),
+            device: devices::LocalDeviceRepo::new(root),
             inbox: inbox::InboxLocalRepository::new(user),
         }
     }

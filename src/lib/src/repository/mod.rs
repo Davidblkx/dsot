@@ -2,10 +2,10 @@
 mod macros;
 
 mod local;
-mod noop;
 mod remote;
 mod repo;
-mod traits;
+
+mod repos;
 
 use crate::{
     core::{config::DsotAppConfig, init::DsotCoreInitOptions},
@@ -13,8 +13,7 @@ use crate::{
     user::DsotUser,
 };
 
-pub use repo::DsotRepository;
-pub use traits::*;
+pub use repos::{DeviceRepository, DsotRepository, InboxRepository, Repository, UserRepository};
 
 impl DsotCoreInitOptions {
     pub async fn init_repository(

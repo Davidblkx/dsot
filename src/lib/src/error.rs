@@ -32,6 +32,8 @@ pub enum DsotError {
     InvalidToken,
     #[error("Database sync error: {0}")]
     DatabaseSyncError(#[from] dsot_db_sync::DBSyncError),
+    #[error("Feature not enabled")]
+    FeatureNotAvailable,
 }
 
 pub type Result<T> = std::result::Result<T, DsotError>;
