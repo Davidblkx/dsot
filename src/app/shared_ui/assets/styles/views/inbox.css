@@ -1,5 +1,108 @@
 @layer inbox_form {
     form[data-component="inbox_form"] {
-        display: grid;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        gap: var(--space-md);
+        padding: var(--space-md) 0;
+
+        & > .title {
+            margin: 0;
+            font-size: var(--font-size-xl);
+            color: var(--color-text);
+        }
+
+        & > .type_selector {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: row;
+            padding: 5px 0;
+            border-bottom: 1px solid var(--color-primary);
+
+            & > .item_type {
+                cursor: pointer;
+                padding: 0 5px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+
+                &.selected {
+                    color: var(--color-primary);
+                }
+
+                & > .text {
+                    user-select: none;
+                }
+            }
+        }
+
+        & > .form_input {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: var(--space-xs);
+
+                label {
+                    font-size: var(--font-size-sm);
+                    font-weight: 500;
+                    color: var(--color-text-muted);
+                }
+
+                input[type="text"],
+                input[type="number"],
+                input[type="url"],
+                input[type="file"],
+                select,
+                textarea {
+                    padding: var(--space-sm) var(--space-md);
+                    background-color: var(--color-bg-surface);
+                    border: 1px solid var(--color-border);
+                    border-radius: var(--radius-md);
+                    color: var(--color-text);
+                    font-family: inherit;
+                    font-size: var(--font-size-md);
+                    transition:
+                        border-color 0.2s ease,
+                        box-shadow 0.2s ease;
+
+                    &:focus {
+                        outline: none;
+                        border-color: var(--color-primary);
+                        box-shadow: 0 0 0 2px var(--color-primary-muted);
+                    }
+                }
+
+                textarea {
+                    min-height: 100px;
+                    resize: vertical;
+                }
+            }
+        }
+
+        button.save {
+            padding: var(--space-sm) var(--space-lg);
+            background-color: var(--color-primary);
+            color: var(--color-bg-main);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-md);
+            font-weight: 500;
+            cursor: pointer;
+            transition:
+                background-color 0.2s ease,
+                opacity 0.2s ease;
+            margin-top: var(--space-sm);
+            align-self: flex-end;
+
+            &:hover {
+                opacity: 0.9;
+            }
+        }
     }
 }

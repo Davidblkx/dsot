@@ -1,11 +1,13 @@
 use dioxus::prelude::*;
 
 #[component]
-pub fn View(name: String, css: Asset, children: Element) -> Element {
+pub fn View(name: String, css: &'static [Asset], children: Element) -> Element {
     rsx! {
-        document::Link {
-            rel: "stylesheet",
-            href: css,
+        for href in css {
+            document::Link {
+                rel: "stylesheet",
+                href: href.clone(),
+            }
         }
 
         div {

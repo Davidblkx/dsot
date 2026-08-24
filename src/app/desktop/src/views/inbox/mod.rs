@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 use dioxus_free_icons::{Icon, icons::ld_icons::LdInbox};
 use dsot_lib::DsotCore;
 use dsot_shared_ui::sink::*;
+use dsot_shared_ui::views::inbox::INBOX_CSS;
 
 use crate::widgets::views::{Header, View};
 
@@ -9,7 +10,8 @@ pub mod add_form;
 mod filter;
 mod item;
 
-static CSS: Asset = asset!("/assets/styles/view/inbox.css");
+const CSS: Asset = asset!("/assets/styles/view/inbox.css");
+const COMBINED_CSS: &[Asset] = &[CSS, INBOX_CSS];
 
 #[component]
 pub fn InboxView() -> Element {
@@ -19,9 +21,10 @@ pub fn InboxView() -> Element {
     rsx! {
         View {
             name: "inbox",
-            css: CSS,
+            css: COMBINED_CSS,
             Header {
                 title: "Inbox",
+
                 icon: rsx! {
                     Icon {
                         icon: LdInbox
