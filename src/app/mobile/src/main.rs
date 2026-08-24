@@ -32,8 +32,6 @@ async fn main() {
 
 #[component]
 fn App() -> Element {
-    crate::views::inbox::add_form::use_provide_add_inbox_state();
-
     rsx! {
         DsotDefaultLinks { styles: UI_STYLES }
         Router::<routes::Routes> {}
