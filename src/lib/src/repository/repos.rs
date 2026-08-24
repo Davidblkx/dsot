@@ -18,6 +18,7 @@ declare_repository!(
     Inbox {
         async fn load_inbox(&self, filter: &InboxFilter) -> Result<Vec<InboxItemValue>>; Ok(vec![]);
         async fn add_inbox_item(&self, value: InboxValue) -> Result<()>; Ok(());
+        async fn update_inbox_item(&self, id: Uuid, value: InboxValue) -> Result<()>; Ok(());
         async fn remove_inbox_item(&self, id: Uuid) -> Result<bool>; Ok(false);
         async fn update_inbox_status(&self, id: Uuid, status: InboxStatus) -> Result<bool>; Ok(false);
         async fn get_inbox_item(&self, id: Uuid) -> Result<InboxItemValue>; Err(DsotError::FeatureNotAvailable);

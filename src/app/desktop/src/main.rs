@@ -52,8 +52,6 @@ async fn main() {
 fn App() -> Element {
     helpers::max_state::track_state();
     dsot_shared_ui::components::use_portals();
-    // TODO: we need to remove this, it probably isn't possible and we have to pass all state into dsot core
-    crate::views::inbox::add_form::use_provide_add_inbox_state();
 
     let state = use_context_provider::<LayoutState>(|| LayoutState::default());
 

@@ -5,21 +5,22 @@ use crate::views::inbox::form::model::InboxFormStateStoreExt;
 use super::{model::InboxItemType, state::InboxFormStore};
 
 #[component]
-pub fn InboxFormTypeSelector(state: InboxFormStore) -> Element {
+pub fn InboxFormTypeSelector() -> Element {
     rsx! {
         nav {
             class: "type_selector",
-            TypeEntry { item: InboxItemType::File, state }
-            TypeEntry { item: InboxItemType::Artist, state }
-            TypeEntry { item: InboxItemType::Album, state }
-            TypeEntry { item: InboxItemType::Link, state }
-            TypeEntry { item: InboxItemType::Other, state }
+            TypeEntry { item: InboxItemType::File }
+            TypeEntry { item: InboxItemType::Artist }
+            TypeEntry { item: InboxItemType::Album }
+            TypeEntry { item: InboxItemType::Link }
+            TypeEntry { item: InboxItemType::Other }
         }
     }
 }
 
 #[component]
-pub fn TypeEntry(item: InboxItemType, mut state: InboxFormStore) -> Element {
+pub fn TypeEntry(item: InboxItemType) -> Element {
+    let state = use_context::<InboxFormStore>();
     let is_selected = item.get_name() == state.form_type()().get_name();
     let class = if is_selected {
         "item_type selected"

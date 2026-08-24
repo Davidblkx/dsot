@@ -80,6 +80,20 @@ impl InboxRepository for InboxLocalRepository {
         let db = self.user.open_db().await?;
         db.get::<InboxItemSqlRepository>(id).await?.try_into()
     }
+    async fn update_inbox_item(&self, id: Uuid, value: InboxValue) -> Result<()> {
+        let db = self.user.open_db().await?;
+        let mut item = match db.get::<InboxItemSqlRepository>(id).await {
+            Ok(item) => item,
+            Err(err) => match err {
+                e => return Err(e.into()),
+            },
+        };
+
+        item.set_value(value)?;
+        db.update::<InboxItemSqlRepository>(&item).await?;
+
+        Ok(())
+    }
 }
 
 impl TryInto<InboxItemValue> for InboxItemSql {

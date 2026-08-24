@@ -9,6 +9,7 @@ use crate::{DsotCore, error::Result, repository::InboxRepository, sink::TableRef
 #[async_trait]
 pub trait InboxOperations {
     async fn add_inbox_item(&self, value: InboxValue) -> Result<()>;
+    async fn update_inbox_item(&self, id: Uuid, value: InboxValue) -> Result<()>;
     async fn remove_inbox_item(&self, id: Uuid) -> Result<bool>;
     async fn reload_inbox_items(&self) -> Result<()>;
     async fn set_inbox_status(&self, id: Uuid, status: InboxStatus) -> Result<()>;
@@ -38,6 +39,10 @@ impl InboxOperations for DsotCore {
             self.reload_inbox_items().await?;
         }
         Ok(())
+    }
+    async fn update_inbox_item(&self, id: Uuid, value: InboxValue) -> Result<()> {
+        self.repo.update_inbox_item(id, value).await?;
+        self.reload_inbox_items().await
     }
 }
 

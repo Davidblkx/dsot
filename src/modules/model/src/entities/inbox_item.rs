@@ -143,6 +143,11 @@ impl InboxItemSql {
     pub fn value(&self) -> Result<InboxValue, DBSyncError> {
         EntityMessagePack::deserialize(&self.value)
     }
+
+    pub fn set_value(&mut self, value: InboxValue) -> Result<(), DBSyncError> {
+        self.value = EntityMessagePack::serialize(value)?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
