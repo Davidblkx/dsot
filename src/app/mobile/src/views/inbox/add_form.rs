@@ -20,15 +20,15 @@ pub fn AddInboxValue() -> Element {
                         navigator.push(crate::routes::Routes::InboxView);
                     }
                 }
-            button {
-                class: "btn-secondary",
-                style: "padding: 10px 20px; font-size: 1.1rem; margin-top: 10px;",
-                onclick: move |_| {
-                    navigator.push(crate::routes::Routes::InboxView);
-                },
-                "Cancel"
+                button {
+                    class: "btn-secondary",
+                    style: "padding: 10px 20px; font-size: 1.1rem; margin-top: 10px;",
+                    onclick: move |_| {
+                        navigator.push(crate::routes::Routes::InboxView);
+                    },
+                    "Cancel"
+                }
             }
-        }
         }
     }
 }
