@@ -25,8 +25,8 @@ static ALPN: &[u8] = b"/dsot/server/devices/v1";
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 enum DevicesRequest {
     ListDevices,
-    AddDevice(RemoteDevice),
     RemoveDevice(EndpointId),
+    AddOrUpdateDevice(RemoteDevice),
 }
 
 /// Implements the iroh protocol `/dsot/server/devices/v1`
@@ -53,8 +53,8 @@ impl DevicesProtocol {
                 let devices = self.repo.list_devices().await?;
                 channel.write(&devices).await?;
             }
-            DevicesRequest::AddDevice(device) => {
-                self.repo.add_device(device).await?;
+            DevicesRequest::AddOrUpdateDevice(device) => {
+                self.repo.add_or_update_device(device).await?;
                 channel.write(&true).await?;
             }
             DevicesRequest::RemoveDevice(id) => {
@@ -90,8 +90,8 @@ impl<'a> RemoteDevicesProtocol<'a> {
     }
 
     /// Add a new remote device
-    pub async fn add(&self, device: RemoteDevice) -> Result<bool> {
-        let req = DevicesRequest::AddDevice(device);
+    pub async fn add_or_update(&self, device: RemoteDevice) -> Result<bool> {
+        let req = DevicesRequest::AddOrUpdateDevice(device);
         exec_request!(self, req)
     }
 

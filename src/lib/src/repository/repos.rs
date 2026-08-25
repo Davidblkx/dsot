@@ -12,7 +12,7 @@ use crate::{
 declare_repository!(
     Device {
         async fn list_devices(&self) -> Result<Vec<RemoteDevice>>; Ok(vec![]);
-        async fn add_device(&self, device: RemoteDevice) -> Result<bool>; Ok(false);
+        async fn add_or_update_device(&self, device: RemoteDevice) -> Result<()>; Ok(());
         async fn remove_device(&self, id: iroh::EndpointId) -> Result<()>; Ok(());
     },
     Inbox {

@@ -31,8 +31,12 @@ impl DeviceRepository for DevicesRemoteRepo {
     async fn list_devices(&self) -> Result<Vec<RemoteDevice>> {
         self.device.devices(self.validator).list().await
     }
-    async fn add_device(&self, device: RemoteDevice) -> Result<bool> {
-        self.device.devices(self.validator).add(device).await
+    async fn add_or_update_device(&self, device: RemoteDevice) -> Result<()> {
+        self.device
+            .devices(self.validator)
+            .add_or_update(device)
+            .await?;
+        Ok(())
     }
     async fn remove_device(&self, id: iroh::EndpointId) -> Result<()> {
         self.device

@@ -45,18 +45,25 @@ impl DeviceRepository for LocalDeviceRepo {
         Ok(file.devices)
     }
 
-    async fn add_device(&self, device: RemoteDevice) -> Result<bool> {
+    async fn add_or_update_device(&self, device: RemoteDevice) -> Result<()> {
         let mut file = self.load()?;
 
-        for d in file.devices.iter() {
+        let mut index = None;
+        for (i, d) in file.devices.iter().enumerate() {
             if device.id == d.id {
-                return Ok(false);
+                index = Some(i);
+                break;
             }
         }
 
-        file.devices.push(device);
+        if let Some(i) = index {
+            file.devices[i] = device;
+        } else {
+            file.devices.push(device);
+        }
+
         self.save(file)?;
-        Ok(true)
+        Ok(())
     }
     async fn remove_device(&self, id: iroh::EndpointId) -> Result<()> {
         let mut file = self.load()?;
