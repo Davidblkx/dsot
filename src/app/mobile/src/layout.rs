@@ -13,8 +13,8 @@ pub fn Layout() -> Element {
                 "Home"
             }
             Link {
-                to: Routes::ConfigView,
-                "Config"
+                to: Routes::DevicesView,
+                "Devices"
             }
             Link {
                 to: Routes::InboxView,

@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 use super::layout::Layout;
+use crate::views::devices::DevicesView;
 use crate::views::inbox::InboxView;
 use crate::views::inbox::add_form::AddInboxValue as AddInboxView;
 use dsot_shared_ui::views::{ConfigView, HomeView};
@@ -17,4 +18,6 @@ pub enum Routes {
     InboxView,
     #[route("/inbox/add")]
     AddInboxView,
+    #[route("/devices")]
+    DevicesView,
 }
